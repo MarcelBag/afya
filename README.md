@@ -116,7 +116,7 @@ skin_lesions/
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/MarcelBag//skin_lesions.git
-   cd skin-lesion-ai
+   cd skin_lesions
     ```
 2. **Create a Python virtual environment & install dependencies:**
 ```bash
@@ -125,6 +125,8 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 3. **Start the nodejs server:**
+
+Please note that you have to start the server as mentioned, ```**node backend/server.js**```
 ```bash
 cd backend
 node backend/server.js
