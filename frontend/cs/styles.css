@@ -619,11 +619,11 @@ html, body {
   .form-label {
     font-weight: 500;
     color: #2d3748;
-    margin-bottom: 0.2rem;
+    margin-bottom: 0.1rem;
   }
   .form-label span {
     color: #e53e3e;
-    margin-left: 2px;
+    margin-left: 1px;
   }
   
   .form-input {
@@ -719,7 +719,7 @@ html, body {
   }
   .form-label span {
     color: #e53e3e;
-    margin-left: 2px;
+    margin-left: 1px;
   }
   
   .form-input {
