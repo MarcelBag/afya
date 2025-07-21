@@ -115,7 +115,7 @@ skin_lesions/
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-username/skin-lesion-ai.git
+   git clone https://github.com/MarcelBag//skin_lesions.git
    cd skin-lesion-ai
     ```
 2. **Create a Python virtual environment & install dependencies:**
@@ -186,7 +186,7 @@ Fine-tuned convolutional neural network trained on skin lesion datasets ([ISIC](
 
 ## 📚 References
 
-- Marcel Shabani, “Predicting Skin Cancer Using Artificial Intelligence”, Master Thesis  
+- [Marcel Shabani, “Predicting Skin Cancer Using Artificial Intelligence”, Master Thesis] (https://afya.tuunganes.com/)  
 - [ISIC 2019: Skin Lesion Analysis Towards Melanoma Detection](https://challenge.isic-archive.com/)  
 - [TensorFlow documentation](https://www.tensorflow.org/)  
 - [Keras documentation](https://keras.io/)
