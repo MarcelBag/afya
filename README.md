@@ -186,7 +186,7 @@ Fine-tuned convolutional neural network trained on skin lesion datasets ([ISIC](
 
 ## 📚 References
 
-- [Marcel Shabani, “Predicting Skin Cancer Using Artificial Intelligence”, Master Thesis] (https://afya.tuunganes.com/)  
+- [Marcel Shabani, “Predicting Skin Cancer Using Artificial Intelligence”, Master Thesis](https://afya.tuunganes.com/)
 - [ISIC 2019: Skin Lesion Analysis Towards Melanoma Detection](https://challenge.isic-archive.com/)  
 - [TensorFlow documentation](https://www.tensorflow.org/)  
 - [Keras documentation](https://keras.io/)
