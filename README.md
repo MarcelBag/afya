@@ -198,9 +198,21 @@ Fine-tuned convolutional neural network trained on skin lesion datasets ([ISIC](
 **Contributions are welcome!**  
 Please open issues or pull requests for bug reports, improvements, or new features.
 
-## Login Images
+## Training Progress Screenshot**
+This screenshot illustrates the training progress of our model over several epochs, showing both training and validation accuracy and loss metrics. 
+Here, you can see the model’s performance and convergence during training, from the 1st to the 10th epoch. 
+This visualization helps you understand how well the model is learning and generalizing to unseen data.
+
+## Sample metrics from our screenshot:
+
+**Accuracy: 0.7018**
+**Validation Accuracy: 0.7656**
+**Time per step: 49s**
+**Total epoch time: 335ms/step**
 
 ![alt text](image.png)
+
+## Login Images
 
 <img width="1328" height="833" alt="image" src="https://github.com/user-attachments/assets/5ded0f79-f8cd-4e9a-ae99-df80af7fdef7" />
 <img width="1139" height="757" alt="image" src="https://github.com/user-attachments/assets/46848743-c9e1-4309-8380-607f74c3801c" />
