@@ -205,10 +205,10 @@ This visualization helps you understand how well the model is learning and gener
 
 ## Sample metrics from our screenshot:
 
-**Accuracy: 0.7018**
-**Validation Accuracy: 0.7656**
-**Time per step: 49s**
-**Total epoch time: 335ms/step**
+- **Accuracy: 0.7018**
+- **Validation Accuracy: 0.7656**
+- **Time per step: 49s**
+- **Total epoch time: 335ms/step**
 
 ![alt text](image.png)
 
