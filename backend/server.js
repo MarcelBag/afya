@@ -23,10 +23,10 @@ mongoose.connect(process.env.MONGODB_URI)
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, '../frontend')));
+//app.use(express.static(path.join(__dirname, '../frontend')));
 
 const corsOptions = {
-  origin: 'http://localhost:3000',
+  origin: ['http://localhost:4000', 'https://afya.tuunganes.com'],
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 };
@@ -217,7 +217,7 @@ app.delete('/api/users/:id', authMiddleware, async (req, res) => {
 // ----------------------------
 // Serve Frontend Pages
 // ----------------------------
-app.get('/', (req, res) => {
+/**  app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 app.get('/signin', (req, res) => {
@@ -232,7 +232,16 @@ app.get('/home', (req, res) => {
 app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/admin.html'));
 });
+// Serve  under /frontend and auto-append .html when missing
+app.use(express.static(path.join(__dirname, '../frontend'), {
+  extensions: ['html']
+})); */
+// ----------------------------
+// Serve Front-end
+// ----------------------------
+const FRONTEND_DIR = path.join(__dirname, '../frontend');
 
+<<<<<<< HEAD
 app.get('/about', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/about.html'));
 });
@@ -253,6 +262,29 @@ app.get('/signin', (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
+=======
+/* oot URL  → index.html */
+app.get('/', (req, res) =>
+  res.sendFile(path.join(FRONTEND_DIR, 'index.html'))
+);
+
+/* Redirect  /page.html  →  /page   (must come BEFORE static) */
+app.get(/^\/([a-zA-Z0-9_-]+)\.html$/, (req, res) => {
+  res.redirect(301, `/${req.params[0]}`);
+>>>>>>> prod
 });
 
+/*Static handler with .html fallback */
+app.use(
+  express.static(FRONTEND_DIR, {
+    extensions: ['html'],   // /about → about.html
+  })
+);
 
+/* ----------------------------
+   Start server
+---------------------------- */
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () =>
+  console.log(`Server running at http://localhost:${PORT}`)
+);
