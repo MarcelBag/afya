@@ -241,43 +241,20 @@ app.use(express.static(path.join(__dirname, '../frontend'), {
 // ----------------------------
 const FRONTEND_DIR = path.join(__dirname, '../frontend');
 
-<<<<<<< HEAD
-app.get('/about', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/about.html'));
-});
-
-app.get('/contact', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/contact.html'));
-});
-
-app.get('/signup', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/signup.html'));
-});
-
-app.get('/signin', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/signin.html'));
-});
-
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-=======
-/* oot URL  → index.html */
+/* Root URL → index.html */
 app.get('/', (req, res) =>
   res.sendFile(path.join(FRONTEND_DIR, 'index.html'))
 );
 
-/* Redirect  /page.html  →  /page   (must come BEFORE static) */
+/* Redirect /page.html → /page (must come BEFORE static) */
 app.get(/^\/([a-zA-Z0-9_-]+)\.html$/, (req, res) => {
   res.redirect(301, `/${req.params[0]}`);
->>>>>>> prod
 });
 
-/*Static handler with .html fallback */
+/* Static handler with .html fallback */
 app.use(
   express.static(FRONTEND_DIR, {
-    extensions: ['html'],   // /about → about.html
+    extensions: ['html'], // /about → about.html
   })
 );
 
