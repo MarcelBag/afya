@@ -202,7 +202,9 @@ Please open issues or pull requests for bug reports, improvements, or new featur
 
 ![alt text](image.png)
 
-<img width="515" height="537" alt="image" src="https://github.com/user-attachments/assets/6f7c2321-f501-40fe-a23e-0e11ae9e9158" />
-<img width="515" height="537" alt="image" src="https://github.com/user-attachments/assets/9432f3df-c634-4b3d-a6bb-dc2651ff5cf9" />
+<img width="1328" height="833" alt="image" src="https://github.com/user-attachments/assets/5ded0f79-f8cd-4e9a-ae99-df80af7fdef7" />
+<img width="1139" height="757" alt="image" src="https://github.com/user-attachments/assets/46848743-c9e1-4309-8380-607f74c3801c" />
+
+
 
 
