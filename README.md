@@ -183,7 +183,7 @@ Fine-tuned convolutional neural network trained on skin lesion datasets ([ISIC](
     - **Layers:** 3 Conv2D layers, Flatten, Dense(128), Dense(1)
     - **Parameters:** 33,507,269 (all trainable)
 
-![alt text](image-2.png)
+<img width="1536" height="912" alt="image" src="https://github.com/user-attachments/assets/f8033cde-8673-43f1-8014-c9590b64fe7c" />
 
 **Mathematical Foundation:**  
 - Uses supervised deep learning  
