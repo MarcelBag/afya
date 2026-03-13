@@ -5,7 +5,7 @@ COMPOSE_FILES := -f docker/compose.yml
 
 DC := docker compose $(COMPOSE_FILES)
 
-.PHONY: dev build up down logs restart shell-backend shell-gateway ps
+.PHONY: dev build up down logs restart shell-backend shell-gateway ps pull prod stop
 
 # ----------------------------
 # Environments
@@ -29,6 +29,16 @@ logs:
 
 ps:
 	$(DC) ps
+
+pull:
+	git pull origin main
+
+prod:
+	# Ensure production environment variables are used
+	$(DC) build
+	$(DC) up -d
+
+stop: down
 
 # ----------------------------
 # Interactive Shells
