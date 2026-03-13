@@ -1,4 +1,4 @@
-# skin_lesions
+# Afya (Health)
 Artificial intelligence has the potential to revolutionize the way humans solves problem, and I personally thinks this will be possible in a near future and this is the reasoon, I am working on this project.
 The project is not yet complete and open to new ideas.
 
