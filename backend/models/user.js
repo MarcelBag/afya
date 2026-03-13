@@ -23,6 +23,16 @@ const userSchema = new mongoose.Schema({
   },
   twoFactorExpires: {
     type: Date
+  },
+  role: {
+    type: String,
+    enum: ['user', 'admin', 'superuser'],
+    default: 'user'
+  },
+  status: {
+    type: String,
+    enum: ['active', 'inactive'],
+    default: 'active'
   }
 });
 

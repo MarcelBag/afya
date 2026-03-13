@@ -5,7 +5,7 @@ html, body {
     height: 100%;
     margin: 0;
     padding: 0;
-    font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+    font-family: 'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: #f7fafc;
     color: #222;
     min-height: 100vh;
@@ -36,13 +36,19 @@ html, body {
     justify-content: space-between;
     padding: 0 1.6rem;
   }
-  h1 {
-    font-size: 2rem;
+  .header-container h1 {
+    font-size: 1.35rem;
     font-weight: 700;
-    letter-spacing: 1px;
     margin: 0;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
   }
-  
+  header nav {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
   /* ==========================
       Avatar and User Dropdown
   ========================== */
@@ -50,65 +56,136 @@ html, body {
     position: relative;
     display: flex;
     align-items: center;
-    gap: 1rem;
   }
-  
+
   .user-avatar {
-    width: 44px;
-    height: 44px;
-    background: #2497f3;
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, #2497f3, #1771c6);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
-    font-size: 1.25rem;
+    font-weight: 700;
+    font-size: 1rem;
     color: #fff;
-    box-shadow: 0 2px 6px rgba(44, 62, 80, 0.13);
+    box-shadow: 0 2px 8px rgba(36, 151, 243, 0.4);
     cursor: pointer;
     user-select: none;
-    transition: box-shadow 0.12s;
+    transition: box-shadow 0.2s, transform 0.2s;
+    flex-shrink: 0;
   }
-  .user-avatar:hover,
-  .user-avatar:focus {
-    box-shadow: 0 2px 8px #2497f38a;
+  .user-avatar:hover {
+    box-shadow: 0 4px 16px rgba(36, 151, 243, 0.6);
+    transform: scale(1.05);
   }
-  
+
   /* Popover User Menu */
   .user-menu {
     position: absolute;
     right: 0;
-    top: 50px;
-    background: #232a32;
+    top: calc(100% + 10px);
+    background: rgba(22, 28, 36, 0.98);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     color: #fff;
-    border-radius: 10px;
-    min-width: 165px;
-    box-shadow: 0 2px 12px rgba(44, 62, 80, 0.15);
+    border-radius: 14px;
+    min-width: 200px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
     overflow: hidden;
     display: none;
-    z-index: 999;
-    transition: opacity 0.16s;
+    z-index: 2000;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transform-origin: top right;
+    animation: menuScale 0.18s ease;
+    padding: 6px;
+  }
+  @keyframes menuScale {
+    from { transform: scale(0.92) translateY(-4px); opacity: 0; }
+    to   { transform: scale(1) translateY(0); opacity: 1; }
   }
   .user-menu:not(.hidden) {
     display: flex;
     flex-direction: column;
   }
-  .user-menu button {
+
+  /* User info card at top of menu */
+  .user-menu-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px 10px;
+    border-radius: 8px;
+  }
+
+  .menu-item {
     background: none;
     border: none;
-    color: #fff;
-    padding: 14px 22px;
+    color: rgba(255,255,255,0.85);
+    padding: 10px 14px;
     text-align: left;
-    font-size: 1rem;
+    font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
-    transition: background 0.12s, color 0.12s;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    border-radius: 8px;
+    font-family: inherit;
   }
-  .user-menu button:hover {
-    background: #2497f3;
+  .menu-item:hover {
+    background: rgba(255, 255, 255, 0.08);
     color: #fff;
   }
-  
+
+  .user-menu .menu-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 4px 6px;
+  }
+
+  /* Admin link in nav */
+  .nav-admin-link {
+    opacity: 0.7;
+    font-size: 0.8rem !important;
+    font-weight: 500 !important;
+    padding: 3px 8px !important;
+    background: rgba(255,255,255,0.08);
+    border-radius: 6px;
+    letter-spacing: 0.02em;
+    transition: opacity 0.2s, background 0.2s !important;
+  }
+  .nav-admin-link:hover {
+    opacity: 1;
+    background: rgba(36, 151, 243, 0.2) !important;
+  }
+
+  /* Auth buttons */
+  .nav-auth-btn {
+    padding: 6px 14px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+    transition: all 0.2s !important;
+    opacity: 0.9;
+  }
+  .nav-auth-btn:hover {
+    opacity: 1;
+    background: rgba(255,255,255,0.1) !important;
+  }
+  .nav-signup-btn {
+    background: linear-gradient(135deg, #2497f3, #1771c6) !important;
+    color: #fff !important;
+    opacity: 1;
+    box-shadow: 0 2px 8px rgba(36, 151, 243, 0.35);
+  }
+  .nav-signup-btn:hover {
+    box-shadow: 0 4px 16px rgba(36, 151, 243, 0.5) !important;
+    background: rgba(255,255,255,0.1) !important;
+  }
+
   /* ==========================
       Card-Like Content
   ========================== */
@@ -175,33 +252,49 @@ html, body {
       Modal Styles
   ========================== */
   .modal {
-    display: none;               /* Hide by default */
+    display: none;
     position: fixed;
     top: 0; left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(44, 62, 80, 0.13);
+    background: rgba(14, 21, 30, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: 2000;
   }
   .modal:not(.hidden) {
-    display: flex !important;   /* Show when JS toggles .hidden off */
+    display: flex !important;
   }
   .modal-content {
     background: #fff;
-    border-radius: 18px;
-    padding: 2.2rem 1.7rem 1.8rem 1.7rem;
-    min-width: 320px;
-    max-width: 96vw;
-    box-shadow: 0 8px 32px rgba(44, 62, 80, 0.13);
+    border-radius: 20px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     position: relative;
-    text-align: center;
-    animation: popupIn 0.19s;
+    text-align: left;
+    animation: modalSpring 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
-  @keyframes popupIn {
-    from { transform: scale(0.93) translateY(15px); opacity: 0; }
+  @keyframes modalSpring {
+    from { transform: scale(0.8) translateY(30px); opacity: 0; }
     to   { transform: scale(1) translateY(0); opacity: 1; }
+  }
+  .modal-header {
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .modal-header h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1a202c;
+    margin: 0;
+    letter-spacing: -0.02em;
   }
   .close-btn, .close-button {
     position: absolute;
@@ -302,27 +395,28 @@ html, body {
 ========================== */
 .nav-links {
     display: flex;
-    gap: 1.6rem;
+    align-items: center;
+    gap: 1.4rem;
     list-style: none;
     margin: 0;
     padding: 0;
   }
   .nav-links li a {
-    color: #fff;
+    color: rgba(255,255,255,0.85);
     text-decoration: none;
     font-weight: 500;
     letter-spacing: 0.02em;
-    font-size: 1.07rem;
-    padding: 7px 0;
+    font-size: 0.95rem;
+    padding: 6px 0;
     border-bottom: 2px solid transparent;
-    transition: color 0.13s, border-bottom 0.18s;
+    transition: color 0.15s, border-bottom 0.15s;
   }
-  .nav-links li a:hover,
-  .nav-links li a.active {
-    color: #2497f3;
+  .nav-links li a:not(.nav-admin-link):not(.nav-auth-btn):hover,
+  .nav-links li a:not(.nav-admin-link):not(.nav-auth-btn).active {
+    color: #fff;
     border-bottom: 2px solid #2497f3;
   }
-  
+
   /* ==========================
      Hero Section
   ========================== */

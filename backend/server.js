@@ -13,9 +13,30 @@ const jwt = require('jsonwebtoken');
 
 const User = require('./models/User'); // Mongoose User model
 const HeaderHistory = require('./models/HeaderHistory');
+const AnalysisHistory = require('./models/AnalysisHistory');
+const AuditLog = require('./models/AuditLog');
 const nodemailer = require('nodemailer');
 
 const app = express();
+
+// ----------------------------
+// Role-based Middlewares
+// ----------------------------
+const isAdmin = (req, res, next) => {
+  if (req.user && (req.user.role === 'admin' || req.user.role === 'superuser')) {
+    next();
+  } else {
+    res.status(403).json({ message: 'Access denied: Requires Admin privileges' });
+  }
+};
+
+const isSuperuser = (req, res, next) => {
+  if (req.user && req.user.role === 'superuser') {
+    next();
+  } else {
+    res.status(403).json({ message: 'Access denied: Requires Superuser privileges' });
+  }
+};
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
@@ -84,7 +105,58 @@ app.post('/api/signup', async (req, res) => {
 });
 
 // ----------------------------
+// Contact Route
+// ----------------------------
+app.post('/api/contact', async (req, res) => {
+  try {
+    const { name, email, message } = req.body;
+    if (!name || !email || !message) {
+      return res.status(400).json({ message: 'All fields are required.' });
+    }
+
+    const contactEmail = process.env.CONTACT_EMAIL || process.env.EMAIL_HOST_USER;
+
+    await transporter.sendMail({
+      from: `"Afya Contact" <${process.env.EMAIL_HOST_USER}>`,
+      to: contactEmail,
+      replyTo: email,
+      subject: `📬 New Contact Message from ${name}`,
+      html: `
+        <div style="font-family:'DM Sans',Arial,sans-serif;max-width:600px;margin:0 auto;background:#f7fafc;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;">
+          <div style="background:linear-gradient(135deg,#1771c6,#2497f3);padding:32px 40px;color:#fff;">
+            <h2 style="margin:0;font-size:1.6rem;">New Contact Message</h2>
+            <p style="margin:6px 0 0;opacity:0.85;">From the Afya eHealth contact form</p>
+          </div>
+          <div style="padding:32px 40px;background:#fff;">
+            <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
+              <tr>
+                <td style="padding:12px 0;border-bottom:1px solid #e5e7eb;font-weight:700;color:#374151;width:120px;">Name</td>
+                <td style="padding:12px 0;border-bottom:1px solid #e5e7eb;color:#1a202c;">${name}</td>
+              </tr>
+              <tr>
+                <td style="padding:12px 0;font-weight:700;color:#374151;">Email</td>
+                <td style="padding:12px 0;"><a href="mailto:${email}" style="color:#2497f3;">${email}</a></td>
+              </tr>
+            </table>
+            <div style="background:#f9fafb;padding:24px;border-radius:12px;border:1px solid #e5e7eb;">
+              <p style="font-weight:700;color:#374151;margin:0 0 12px;text-transform:uppercase;font-size:0.8rem;letter-spacing:0.05em;">Message Content</p>
+              <p style="color:#4b5563;line-height:1.7;white-space:pre-wrap;margin:0;">${message}</p>
+            </div>
+          </div>
+        </div>
+      `
+    });
+
+    res.status(200).json({ message: 'Message sent successfully!' });
+  } catch (err) {
+    console.error('Contact email error:', err);
+    res.status(500).json({ message: 'Failed to send message.' });
+  }
+});
+
+// ----------------------------
 // Signin Route
+// ----------------------------
 // ----------------------------
 app.post('/api/signin', async (req, res) => {
   try {
@@ -150,15 +222,31 @@ app.post('/api/verify-2fa', async (req, res) => {
     // Clear the code after successful verification
     user.twoFactorCode = undefined;
     user.twoFactorExpires = undefined;
+
+    // Auto-promote EMAIL_HOST_USER to superuser
+    if (user.email === process.env.EMAIL_HOST_USER && user.role !== 'superuser') {
+      user.role = 'superuser';
+      await new AuditLog({
+        action: 'AUTO_PROMOTE_SUPERUSER',
+        performedBy: user._id,
+        details: `Auto-promoted ${user.email} based on EMAIL_HOST_USER env variable.`
+      }).save();
+    }
+    
+    // Check if user is active
+    if (user.status !== 'active') {
+      return res.status(403).json({ message: 'Account deactivated. Please contact support.' });
+    }
+
     await user.save();
 
     const token = jwt.sign(
-      { userId: user._id, email: user.email }, 
+      { userId: user._id, email: user.email, role: user.role }, 
       process.env.JWT_SECRET, 
-      { expiresIn: '1h' }
+      { expiresIn: '12h' }
     );
 
-    res.status(200).json({ message: 'Verification successful!', token });
+    res.status(200).json({ message: 'Verification successful!', token, role: user.role });
   } catch (err) {
     console.error('2FA verification error:', err.message);
     res.status(500).json({ message: 'Server error during 2FA verification.' });
@@ -173,7 +261,7 @@ const authMiddleware = (req, res, next) => {
   if (!token) return res.status(401).json({ message: 'No token, unauthorized.' });
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) return res.status(403).json({ message: 'Invalid or expired token.' });
-    req.user = decoded;
+    req.user = decoded; // { userId, email, role }
     next();
   });
 };
@@ -209,6 +297,16 @@ app.post('/api/upload-image', authMiddleware, upload.single('image'), async (req
       });
       
     const { prediction, confidence, analysisType } = response.data;
+
+    // Save to AnalysisHistory
+    await new AnalysisHistory({
+      userId: req.user.userId,
+      imagePath: req.file.path.replace('/usr/src/app', ''), // Relative path for serving
+      prediction,
+      confidence,
+      analysisType
+    }).save();
+
     res.json({ prediction, confidence, analysisType });
   } catch (error) {
     console.error('Error during image upload or prediction:', error);
@@ -392,3 +490,144 @@ const PORT = process.env.PORT || 4000;
 app.listen(PORT, () =>
   console.log(`Server running at http://localhost:${PORT}`)
 );
+
+// ----------------------------
+// Admin APIs
+// ----------------------------
+
+// Get all users (Admin only)
+app.get('/api/admin/users', authMiddleware, isAdmin, async (req, res) => {
+  try {
+    const users = await User.find({}, '-password -twoFactorCode');
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching users' });
+  }
+});
+
+// Add New User (Superuser only)
+app.post('/api/admin/users', authMiddleware, isSuperuser, async (req, res) => {
+  try {
+    const { name, email, password, role } = req.body;
+    const existingUser = await User.findOne({ email });
+    if (existingUser) return res.status(400).json({ message: 'User already exists' });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({
+      name,
+      email,
+      password: hashedPassword,
+      role: role || 'user',
+      status: 'active'
+    });
+
+    await newUser.save();
+
+    await new AuditLog({
+      action: 'USER_CREATED',
+      performedBy: req.user.userId,
+      targetUser: newUser._id,
+      details: `Manually created user ${email} with role ${role || 'user'}.`
+    }).save();
+
+    res.status(201).json({ message: 'User created successfully', user: { name, email, role: newUser.role } });
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating user' });
+  }
+});
+
+// Update User Role/Status (Superuser only)
+app.patch('/api/admin/users/:id', authMiddleware, isSuperuser, async (req, res) => {
+  try {
+    const { role, status } = req.body;
+    const targetUser = await User.findById(req.params.id);
+    if (!targetUser) return res.status(404).json({ message: 'User not found' });
+
+    const oldRole = targetUser.role;
+    const oldStatus = targetUser.status;
+
+    if (role) targetUser.role = role;
+    if (status) targetUser.status = status;
+    await targetUser.save();
+
+    await new AuditLog({
+      action: 'USER_UPDATE',
+      performedBy: req.user.userId,
+      targetUser: targetUser._id,
+      details: `Changed role from ${oldRole} to ${role || oldRole}, status from ${oldStatus} to ${status || oldStatus}.`
+    }).save();
+
+    res.json(targetUser);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating user' });
+  }
+});
+
+// Get Global AI Creation History (Admin only)
+app.get('/api/admin/history', authMiddleware, isAdmin, async (req, res) => {
+  try {
+    const headers = await HeaderHistory.find().populate('userId', 'name email').sort({ createdAt: -1 });
+    const analysis = await AnalysisHistory.find().populate('userId', 'name email').sort({ createdAt: -1 });
+    
+    // Combine and sort
+    const unifiedHistory = [
+      ...headers.map(h => ({ ...h._doc, type: 'Blog Header' })),
+      ...analysis.map(a => ({ ...a._doc, type: 'Image Analysis', title: `[${a.analysisType}] ${a.prediction}` }))
+    ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    res.json(unifiedHistory);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching global history' });
+  }
+});
+
+// Update Own Profile
+app.patch('/api/user/profile', authMiddleware, async (req, res) => {
+  try {
+    const { name, password } = req.body;
+    const user = await User.findById(req.user.userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    if (name) user.name = name;
+    if (password) {
+      user.password = await bcrypt.hash(password, 10);
+    }
+    
+    await user.save();
+    res.json({ message: 'Profile updated successfully', name: user.name });
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating profile' });
+  }
+});
+
+// Get Audit Logs (Superuser only)
+app.get('/api/admin/audit', authMiddleware, isSuperuser, async (req, res) => {
+  try {
+    const logs = await AuditLog.find()
+      .populate('performedBy', 'name email')
+      .populate('targetUser', 'name email')
+      .sort({ timestamp: -1 })
+      .limit(100);
+    res.json(logs);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching audit logs' });
+  }
+});
+
+// Admin Stats
+app.get('/api/admin/stats', authMiddleware, isAdmin, async (req, res) => {
+  try {
+    const userCount = await User.countDocuments();
+    const headerCount = await HeaderHistory.countDocuments();
+    const analysisCount = await AnalysisHistory.countDocuments();
+    const activeUsers = await User.countDocuments({ status: 'active' });
+
+    res.json({
+      totalUsers: userCount,
+      totalGenerations: headerCount + analysisCount,
+      activeUsers: activeUsers
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching stats' });
+  }
+});

@@ -7,6 +7,8 @@
   <title>AI Tools | Afya AI Lab</title>
   <link rel="stylesheet" href="/cs/styles.css">
   <link rel="icon" href="/assets/tuungane.jpeg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
   <style>
     .ai-tools-grid {
       display: grid;
@@ -109,32 +111,13 @@
     }
 
     @keyframes spin {
-      0% {
-        transform: rotate(0deg);
-      }
-
-      100% {
-        transform: rotate(360deg);
-      }
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
 
 <body>
-  <header>
-    <div class="header-container">
-      <h1>Afya eHealth</h1>
-      <nav>
-        <ul class="nav-links">
-          <li><a href="/">Home</a></li>
-          <li><a href="/about">About</a></li>
-          <li><a href="/ai-tools" class="active">AI Tools</a></li>
-          <li><a href="/contact">Contact</a></li>
-          <li><a href="/signin">Sign In</a></li>
-        </ul>
-      </nav>
-    </div>
-  </header>
 
   <section class="hero">
     <div class="hero-content">
@@ -164,15 +147,11 @@
       </div>
 
       <div id="results-gallery" class="gallery">
-        <!-- Results will appear here -->
       </div>
     </div>
   </div>
 
-  <footer>
-    <p>&copy; 2025 Afya AI Lab. All Rights Reserved.</p>
-  </footer>
-
+  <script type="module" src="/js/layout.js"></script>
   <script type="module" src="/js/header_generator.js"></script>
 </body>
 

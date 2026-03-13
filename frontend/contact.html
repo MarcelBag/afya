@@ -4,47 +4,826 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About Us Afya eHealth Project</title>
+  <title>Contact Us | Afya eHealth</title>
   <link rel="stylesheet" href="/cs/styles.css">
   <link rel="icon" href="/assets/tuungane.jpeg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,300&family=Sora:wght@300;400;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --blue-deep: #1e2a3a;
+      --blue-mid: #1771c6;
+      --blue-bright: #2497f3;
+      --blue-pale: rgba(36, 151, 243, 0.08);
+      --blue-glow: rgba(36, 151, 243, 0.18);
+      --white: #ffffff;
+      --ink: #0f1923;
+      --ink-soft: #374151;
+      --muted: #718096;
+      --muted-light: #9ca3af;
+      --border: #e5e7eb;
+      --bg: #f5f8fd;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─── HERO ───────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      background: linear-gradient(140deg, #0d1b2e 0%, #1771c6 55%, #2497f3 100%);
+      padding: 100px 24px 130px;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    /* animated mesh rings */
+    .hero-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      animation: pulse-ring 6s ease-in-out infinite;
+    }
+
+    .hero-ring:nth-child(1) {
+      width: 500px;
+      height: 500px;
+      top: -120px;
+      right: -80px;
+      animation-delay: 0s;
+    }
+
+    .hero-ring:nth-child(2) {
+      width: 350px;
+      height: 350px;
+      top: -60px;
+      right: -20px;
+      animation-delay: 1.2s;
+    }
+
+    .hero-ring:nth-child(3) {
+      width: 200px;
+      height: 200px;
+      top: 10px;
+      right: 40px;
+      animation-delay: 2.4s;
+    }
+
+    .hero-ring:nth-child(4) {
+      width: 600px;
+      height: 600px;
+      bottom: -220px;
+      left: -160px;
+      animation-delay: 0.8s;
+      border-color: rgba(255, 255, 255, 0.04);
+    }
+
+    @keyframes pulse-ring {
+
+      0%,
+      100% {
+        opacity: 0.5;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1.03);
+      }
+    }
+
+    /* floating particles */
+    .hero-particles {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .p-dot {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.35);
+      animation: float-up linear infinite;
+    }
+
+    .p-dot:nth-child(1) {
+      left: 10%;
+      animation-duration: 9s;
+      animation-delay: 0s;
+    }
+
+    .p-dot:nth-child(2) {
+      left: 20%;
+      animation-duration: 12s;
+      animation-delay: 2s;
+    }
+
+    .p-dot:nth-child(3) {
+      left: 35%;
+      animation-duration: 8s;
+      animation-delay: 1s;
+    }
+
+    .p-dot:nth-child(4) {
+      left: 55%;
+      animation-duration: 14s;
+      animation-delay: 3s;
+    }
+
+    .p-dot:nth-child(5) {
+      left: 70%;
+      animation-duration: 10s;
+      animation-delay: 0.5s;
+    }
+
+    .p-dot:nth-child(6) {
+      left: 85%;
+      animation-duration: 11s;
+      animation-delay: 1.8s;
+    }
+
+    .p-dot:nth-child(7) {
+      left: 42%;
+      animation-duration: 13s;
+      animation-delay: 4s;
+    }
+
+    .p-dot:nth-child(8) {
+      left: 78%;
+      animation-duration: 7s;
+      animation-delay: 2.5s;
+    }
+
+    @keyframes float-up {
+      0% {
+        bottom: -10px;
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 1;
+      }
+
+      90% {
+        opacity: 0.6;
+      }
+
+      100% {
+        bottom: 110%;
+        opacity: 0;
+      }
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 620px;
+      margin: 0 auto;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 100px;
+      padding: 6px 18px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+      backdrop-filter: blur(8px);
+      animation: fade-down 0.7s ease both;
+    }
+
+    .hero-badge::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #63e3a1;
+      box-shadow: 0 0 8px #63e3a1;
+      animation: blink 2s ease infinite;
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0.3
+      }
+    }
+
+    .hero h1 {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(2.4rem, 5vw, 3.4rem);
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.1;
+      margin-bottom: 18px;
+      animation: fade-down 0.7s 0.1s ease both;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(90deg, #fff 0%, rgba(255, 255, 255, 0.6) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 1.05rem;
+      color: rgba(255, 255, 255, 0.72);
+      line-height: 1.7;
+      animation: fade-down 0.7s 0.2s ease both;
+    }
+
+    @keyframes fade-down {
+      from {
+        opacity: 0;
+        transform: translateY(-18px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ─── LAYOUT ──────────────────────────────────────────── */
+    .page-body {
+      max-width: 800px;
+      margin: -60px auto 80px;
+      padding: 0 24px;
+      position: relative;
+      z-index: 2;
+      display: grid;
+      gap: 24px;
+      animation: rise 0.8s 0.35s cubic-bezier(.22, .68, 0, 1.2) both;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ─── CARD ────────────────────────────────────────────── */
+    .card {
+      background: var(--white);
+      border-radius: 28px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02), 0 20px 64px rgba(23, 50, 100, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      overflow: hidden;
+    }
+
+    .card-inner {
+      padding: 52px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 36px;
+    }
+
+    .card-header-text h2 {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.55rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+
+    .card-header-text p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .card-icon {
+      width: 54px;
+      height: 54px;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, var(--blue-bright), var(--blue-mid));
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      box-shadow: 0 8px 20px rgba(36, 151, 243, 0.3);
+    }
+
+    /* ─── DIVIDER ─────────────────────────────────────────── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border) 20%, var(--border) 80%, transparent);
+      margin-bottom: 36px;
+    }
+
+    /* ─── FORM ────────────────────────────────────────────── */
+    .contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media(max-width: 560px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .contact-field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .contact-field label {
+      font-weight: 600;
+      font-size: 0.825rem;
+      color: var(--ink-soft);
+      letter-spacing: 0.03em;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .label-required {
+      color: var(--blue-bright);
+    }
+
+    .field-wrap {
+      position: relative;
+    }
+
+    .field-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.95rem;
+      opacity: 0.45;
+      pointer-events: none;
+    }
+
+    .field-icon-ta {
+      position: absolute;
+      left: 16px;
+      top: 18px;
+      font-size: 0.95rem;
+      opacity: 0.45;
+      pointer-events: none;
+    }
+
+    .contact-field input,
+    .contact-field textarea {
+      width: 100%;
+      padding: 13px 16px 13px 44px;
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.925rem;
+      background: #fafbff;
+      color: var(--ink);
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      resize: none;
+      outline: none;
+    }
+
+    .contact-field textarea {
+      padding-left: 44px;
+      min-height: 148px;
+    }
+
+    .contact-field input:focus,
+    .contact-field textarea:focus {
+      border-color: var(--blue-bright);
+      background: var(--white);
+      box-shadow: 0 0 0 4px rgba(36, 151, 243, 0.1);
+    }
+
+    .contact-field input::placeholder,
+    .contact-field textarea::placeholder {
+      color: #c0cadb;
+    }
+
+    /* ─── CHAR COUNTER ────────────────────────────────────── */
+    .field-footer {
+      display: flex;
+      justify-content: flex-end;
+      font-size: 0.75rem;
+      color: var(--muted-light);
+      margin-top: -12px;
+    }
+
+    /* ─── STATUS ──────────────────────────────────────────── */
+    #contact-status {
+      display: none;
+      padding: 14px 20px;
+      border-radius: 14px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #contact-status.success {
+      display: flex;
+      background: #f0fdf4;
+      color: #16a34a;
+      border: 1px solid #bbf7d0;
+    }
+
+    #contact-status.error {
+      display: flex;
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+    }
+
+    .status-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .success .status-icon {
+      background: #dcfce7;
+    }
+
+    .error .status-icon {
+      background: #fee2e2;
+    }
+
+    /* ─── SUBMIT ROW ──────────────────────────────────────── */
+    .contact-submit {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    .contact-hint {
+      font-size: 0.8rem;
+      color: var(--muted-light);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .contact-submit-btn {
+      padding: 14px 36px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #2497f3 0%, #1771c6 100%);
+      color: #fff;
+      font-family: 'Sora', sans-serif;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: transform 0.18s, box-shadow 0.18s, opacity 0.18s;
+      box-shadow: 0 6px 20px rgba(36, 151, 243, 0.38);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .contact-submit-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, transparent 60%);
+    }
+
+    .contact-submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(36, 151, 243, 0.48);
+    }
+
+    .contact-submit-btn:active {
+      transform: translateY(0);
+    }
+
+    .contact-submit-btn:disabled {
+      opacity: 0.7;
+      cursor: wait;
+      transform: none;
+    }
+
+    .btn-arrow {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.22);
+      font-size: 0.8rem;
+      transition: transform 0.2s;
+    }
+
+    .contact-submit-btn:hover .btn-arrow {
+      transform: translateX(3px);
+    }
+
+    /* ─── INFO STRIP (cards) ──────────────────────────────── */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    @media(max-width: 600px) {
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .info-card {
+      background: var(--white);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 4px 20px rgba(23, 50, 100, 0.07);
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      text-align: center;
+      transition: transform 0.22s, box-shadow 0.22s;
+    }
+
+    .info-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 36px rgba(23, 50, 100, 0.13);
+    }
+
+    .info-card-icon {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, rgba(36, 151, 243, 0.12), rgba(23, 113, 198, 0.06));
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      border: 1px solid rgba(36, 151, 243, 0.12);
+    }
+
+    .info-card-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--blue-bright);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .info-card-value {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--ink-soft);
+      line-height: 1.4;
+    }
+
+    /* ─── RESPONSIVE CARD ─────────────────────────────────── */
+    @media(max-width: 600px) {
+      .card-inner {
+        padding: 32px 24px;
+      }
+
+      .card-header {
+        flex-direction: row;
+      }
+    }
+  </style>
 </head>
 
 <body>
-  <header>
-    <div class="header-container">
-      <h1><a href="/" style="color:inherit;text-decoration:none;">Image Analysis</a></h1>
-      <nav>
-        <ul class="nav-links">
-          <li><a href="/">Home</a></li>
-          <li><a href="/about" class="active">About</a></li>
-          <li><a href="/ai-tools">AI Tools</a></li>
-          <li><a href="/contact">Contact</a></li>
-          <li><a href="/signin">Sign In</a></li>
-        </ul>
-      </nav>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-ring"></div>
+    <div class="hero-ring"></div>
+    <div class="hero-ring"></div>
+    <div class="hero-ring"></div>
+    <div class="hero-particles">
+      <div class="p-dot"></div>
+      <div class="p-dot"></div>
+      <div class="p-dot"></div>
+      <div class="p-dot"></div>
+      <div class="p-dot"></div>
+      <div class="p-dot"></div>
+      <div class="p-dot"></div>
+      <div class="p-dot"></div>
     </div>
-  </header>
-  <!-- ==========================
-     Contact Section
-========================== -->
-  <section id="contact" class="contact-section">
-    <div class="container">
-      <h2 class="section-title">Get In Touch</h2>
-      <form action="https://formsubmit.co/5aae2ad84c9dda4efdb1b57165b95cc7" method="POST" class="contact-form"
-        autocomplete="off">
-        <div class="form-group">
-          <label for="name" class="form-label">Name<span>*</span></label>
-          <input type="text" id="name" name="name" class="form-input" required>
-        </div>
-        <div class="form-group">
-          <label for="email" class="form-label">Email<span>*</span></label>
-          <input type="email" id="email" name="email" class="form-input" required>
-        </div>
-        <div class="form-group">
-          <label for="message" class="form-label">Message<span>*</span></label>
-          <textarea id="message" name="message" rows="5" class="form-input" required></textarea>
-        </div>
-        <button type="submit" class="cta-btn contact-btn">Send Message</button>
-      </form>
+    <div class="hero-content">
+      <div class="hero-badge">Afya eHealth · Bukavu DRC</div>
+      <h1>Get In <span>Touch</span></h1>
+      <p>Have a question, a collaboration idea, or just want to say hello?<br>We'd love to hear from you — we respond
+        within 24–48 hours.</p>
     </div>
-  </section>
+  </div>
+  <br>
+  <br>
+  <br>
+  <!-- Page body -->
+  <div class="page-body">
+
+    <!-- Form card -->
+    <div class="card">
+      <div class="card-inner">
+        <div class="card-header">
+          <div class="card-header-text">
+            <h2>Send Us a Message</h2>
+            <p>Fill in the form below and our team will get back to you shortly.</p>
+          </div>
+
+        </div>
+
+        <div class="divider"></div>
+
+        <div id="contact-status">
+          <div class="status-icon">
+            <span id="contact-status-icon">✓</span>
+          </div>
+          <span id="contact-status-msg"></span>
+        </div>
+
+        <form class="contact-form" id="contact-form" autocomplete="off">
+
+          <div class="form-row">
+            <div class="contact-field">
+              <label for="contact-name">Your Name <span class="label-required">*</span></label>
+              <div class="field-wrap">
+                <span class="field-icon">👤</span>
+                <input type="text" id="contact-name" name="name" placeholder="Muntu Murhula" required>
+              </div>
+            </div>
+            <div class="contact-field">
+              <label for="contact-email">Email Address <span class="label-required">*</span></label>
+              <div class="field-wrap">
+                <span class="field-icon">@</span>
+                <input type="email" id="contact-email" name="email" placeholder="name@tuunganes.com" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="contact-field">
+            <label for="contact-message">Message <span class="label-required">*</span></label>
+            <div class="field-wrap">
+              <span class="field-icon-ta">💬</span>
+              <textarea id="contact-message" name="message"
+                placeholder="Tell us about your question or collaboration idea..." required maxlength="1000"></textarea>
+            </div>
+            <div class="field-footer">
+              <span id="char-count">0 / 1000</span>
+            </div>
+          </div>
+
+          <div class="contact-submit">
+            <span class="contact-hint">🔒 Your message is sent securely.</span>
+            <button type="submit" class="contact-submit-btn" id="submit-btn">
+              <span id="btn-label">Send Message</span>
+
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+    <!-- Info cards 
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="info-card-icon">📧</div>
+        <div class="info-card-label">Email</div>
+        <div class="info-card-value">marcelbag44@gmail.com</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-icon">🌍</div>
+        <div class="info-card-label">Organization</div>
+        <div class="info-card-value">Tuunganes, Bukavu DRC</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-icon">⏱</div>
+        <div class="info-card-label">Response Time</div>
+        <div class="info-card-value">Within 24–48 hours</div>
+      </div>
+    </div>
+-->
+  </div><!-- /page-body -->
+
+  <script type="module" src="/js/layout.js"></script>
+  <script>
+    /* ── character counter ── */
+    const msgArea = document.getElementById('contact-message');
+    const charCount = document.getElementById('char-count');
+    msgArea.addEventListener('input', () => {
+      const len = msgArea.value.length;
+      charCount.textContent = len + ' / 1000';
+      charCount.style.color = len > 900 ? '#ef4444' : '';
+    });
+
+    /* ── form submit (original JS preserved) ── */
+    document.getElementById('contact-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submit-btn');
+      const status = document.getElementById('contact-status');
+      const statusMsg = document.getElementById('contact-status-msg');
+      const statusIcon = document.getElementById('contact-status-icon');
+
+      btn.disabled = true;
+      document.getElementById('btn-label').textContent = 'Sending…';
+
+      try {
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: document.getElementById('contact-name').value,
+            email: document.getElementById('contact-email').value,
+            message: document.getElementById('contact-message').value,
+          })
+        });
+
+        const data = await res.json();
+        status.className = '';
+        if (res.ok) {
+          status.classList.add('success');
+          statusIcon.textContent = '✓';
+          statusMsg.textContent = "Your message was sent! We'll be in touch soon.";
+          e.target.reset();
+          charCount.textContent = '0 / 1000';
+        } else {
+          status.classList.add('error');
+          statusIcon.textContent = '✗';
+          statusMsg.textContent = data.message || 'Failed to send. Please try again.';
+        }
+      } catch (err) {
+        status.className = 'error';
+        statusIcon.textContent = '✗';
+        statusMsg.textContent = 'Network error — please try again.';
+      } finally {
+        btn.disabled = false;
+        document.getElementById('btn-label').textContent = 'Send Message';
+      }
+    });
+  </script>
+</body>
+
+</html>

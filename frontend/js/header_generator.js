@@ -32,6 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loader.classList.remove('hidden');
         generateBtn.disabled = true;
 
+        const progressInterval = startProgress();
+
         try {
             const token = localStorage.getItem('token');
             if (!token) {
@@ -54,16 +56,55 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(data.message || 'Failed to generate headers');
             }
 
+            stopProgress(progressInterval);
             renderGallery(data.results);
-            loadHistory(); // Refresh history sidebar after successful generation
+            loadHistory(); 
         } catch (error) {
+            stopProgress(progressInterval, true);
             console.error('Error generating headers:', error);
             alert('An error occurred: ' + error.message);
         } finally {
-            loader.classList.add('hidden');
-            generateBtn.disabled = false;
+            setTimeout(() => {
+                loader.classList.add('hidden');
+                generateBtn.disabled = false;
+            }, 1000); // Small delay to show 100%
         }
     });
+
+    function startProgress() {
+        const bar = document.getElementById('progress-bar');
+        const percent = document.getElementById('progress-percent');
+        let width = 0;
+        
+        bar.style.width = '0%';
+        percent.textContent = '0%';
+        
+        return setInterval(() => {
+            if (width < 30) {
+                width += 5; // Fast start
+            } else if (width < 70) {
+                width += 1.5; // Slow mid
+            } else if (width < 95) {
+                width += 0.5; // Very slow end
+            }
+            bar.style.width = width + '%';
+            percent.textContent = Math.round(width) + '%';
+        }, 500);
+    }
+
+    function stopProgress(interval, error = false) {
+        clearInterval(interval);
+        const bar = document.getElementById('progress-bar');
+        const percent = document.getElementById('progress-percent');
+        
+        if (error) {
+            bar.style.background = '#e53e3e';
+            percent.textContent = 'Error';
+        } else {
+            bar.style.width = '100%';
+            percent.textContent = '100%';
+        }
+    }
 
     async function loadHistory() {
         try {
