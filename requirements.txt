@@ -43,3 +43,5 @@ wheel==0.45.1
 wrapt==1.17.2
 Flask-Uploads==0.2.1  # For handling file uploads with Flask (if necessary)
 Flask-Cors>=4.0.2 # For handling CORS in Flask applications
+openai
+python-dotenv

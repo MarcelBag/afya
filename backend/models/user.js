@@ -17,6 +17,12 @@ const userSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  twoFactorCode: {
+    type: String
+  },
+  twoFactorExpires: {
+    type: Date
   }
 });
 

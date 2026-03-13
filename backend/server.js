@@ -12,6 +12,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const User = require('./models/User'); // Mongoose User model
+const nodemailer = require('nodemailer');
 
 const app = express();
 
@@ -19,6 +20,17 @@ const app = express();
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err));
+
+// Mail Transporter Configuration
+const transporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST,
+  port: parseInt(process.env.EMAIL_PORT),
+  secure: process.env.EMAIL_USE_TLS === 'False', // TLS often uses 587 and secure: false
+  auth: {
+    user: process.env.EMAIL_HOST_USER,
+    pass: process.env.EMAIL_HOST_PASSWORD,
+  },
+});
 
 // Middleware
 app.use(cors());
@@ -78,13 +90,77 @@ app.post('/api/signin', async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: 'Invalid credentials.' });
+    
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials.' });
-    const token = jwt.sign({ userId: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.status(200).json({ message: 'Signin successful!', token });
+
+    // Generate 2FA Code
+    const twoFactorCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const twoFactorExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+    user.twoFactorCode = twoFactorCode;
+    user.twoFactorExpires = twoFactorExpires;
+    await user.save();
+
+    // Send Email
+    const mailOptions = {
+      from: process.env.DEFAULT_FROM_EMAIL,
+      to: user.email,
+      subject: 'Your Afya Verification Code',
+      text: `Your verification code is: ${twoFactorCode}. It will expire in 10 minutes.`,
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px;">
+          <h2 style="color: #2497f3;">Afya Verification Code</h2>
+          <p>Hello ${user.name},</p>
+          <p>Your 2FA verification code is:</p>
+          <div style="font-size: 2rem; font-weight: bold; color: #1a365d; margin: 20px 0;">${twoFactorCode}</div>
+          <p>This code will expire in 10 minutes.</p>
+          <p>If you did not request this code, please ignore this email.</p>
+        </div>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ 
+      message: 'Verification code sent to your email.', 
+      requires2FA: true,
+      email: user.email 
+    });
   } catch (err) {
     console.error('Signin error:', err.message);
     res.status(500).json({ message: 'Server error during signin.' });
+  }
+});
+
+app.post('/api/verify-2fa', async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    const user = await User.findOne({ 
+      email, 
+      twoFactorCode: code, 
+      twoFactorExpires: { $gt: Date.now() } 
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired verification code.' });
+    }
+
+    // Clear the code after successful verification
+    user.twoFactorCode = undefined;
+    user.twoFactorExpires = undefined;
+    await user.save();
+
+    const token = jwt.sign(
+      { userId: user._id, email: user.email }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: '1h' }
+    );
+
+    res.status(200).json({ message: 'Verification successful!', token });
+  } catch (err) {
+    console.error('2FA verification error:', err.message);
+    res.status(500).json({ message: 'Server error during 2FA verification.' });
   }
 });
 
@@ -136,6 +212,22 @@ app.post('/api/upload-image', authMiddleware, upload.single('image'), async (req
   } catch (error) {
     console.error('Error during image upload or prediction:', error);
     res.status(500).json({ message: 'Error analyzing the image.' });
+  }
+});
+
+// ----------------------------
+// Blog Header Generation Proxy
+// ----------------------------
+app.post('/api/generate-headers', authMiddleware, async (req, res) => {
+  try {
+    const response = await axios.post('http://localhost:5001/api/generate-headers', req.body);
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error proxying header generation request:', error.message);
+    res.status(error.response?.status || 500).json({ 
+      message: 'Error generating headers.', 
+      details: error.response?.data || error.message 
+    });
   }
 });
 
@@ -250,6 +342,10 @@ app.get('/', (req, res) =>
 app.get(/^\/([a-zA-Z0-9_-]+)\.html$/, (req, res) => {
   res.redirect(301, `/${req.params[0]}`);
 });
+
+app.get('/verify-2fa', (req, res) =>
+  res.sendFile(path.join(FRONTEND_DIR, 'verify_2fa.html'))
+);
 
 /* Static handler with .html fallback */
 app.use(

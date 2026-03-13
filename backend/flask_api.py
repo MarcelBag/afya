@@ -3,6 +3,8 @@ from flask_cors import CORS
 import os
 from werkzeug.utils import secure_filename
 from models.model import predict  # Import our updated predict function
+from header_generator import generate_headers_batch
+from flask import send_from_directory
 
 app = Flask(__name__)
 CORS(app)
@@ -38,6 +40,23 @@ def predict_image():
             'analysisType': predicted_label  
         })
     return jsonify({'message': 'Invalid file format'}), 400
+
+@app.route('/api/generate-headers', methods=['POST'])
+def generate_headers():
+    data = request.get_json()
+    if not data or 'titles' not in data:
+        return jsonify({'message': 'No titles provided'}), 400
+    
+    titles = data['titles']
+    if not isinstance(titles, list):
+        return jsonify({'message': 'Titles must be a list'}), 400
+        
+    results = generate_headers_batch(titles)
+    return jsonify({'results': results})
+
+@app.route('/uploads/generated_headers/<filename>')
+def serve_generated_header(filename):
+    return send_from_directory('uploads/generated_headers', filename)
 @app.route('/', methods=['GET'])
 def home():
     return "Flask root"

@@ -46,9 +46,14 @@ document.addEventListener('DOMContentLoaded', () => {
           });
           const data = await res.json();
           if (res.ok) {
-            localStorage.setItem('token', data.token);
-            alert(data.message);
-            window.location.href = '/home';
+            if (data.requires2FA) {
+              localStorage.setItem('pending_email', data.email);
+              window.location.href = '/verify-2fa';
+            } else {
+              localStorage.setItem('token', data.token);
+              alert(data.message);
+              window.location.href = '/home';
+            }
           } else {
             alert(data.message);
           }
