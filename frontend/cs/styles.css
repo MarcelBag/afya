@@ -996,3 +996,301 @@ html, body {
     }
   }
   
+/* ==========================
+   AI Tool Hub & Selection
+========================== */
+.tool-selection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2.5rem;
+    padding: 2rem 0;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.selection-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 2.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.2rem;
+}
+
+.selection-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(34, 51, 84, 0.1);
+    border-color: #2497f3;
+}
+
+.selection-card .icon {
+    font-size: 3.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.selection-card h3 {
+    font-size: 1.6rem;
+    margin: 0;
+    color: #1a365d;
+}
+
+.selection-card p {
+    color: #718096;
+    font-size: 1.05rem;
+    line-height: 1.5;
+}
+
+.selection-card .go-btn {
+    margin-top: auto;
+    background: #f0f7ff;
+    color: #2497f3;
+    padding: 10px 24px;
+    border-radius: 50px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.selection-card:hover .go-btn {
+    background: #2497f3;
+    color: #fff;
+}
+
+/* Tool View Transitions */
+.tool-view {
+    display: none;
+}
+.tool-view.active {
+    display: block;
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.back-to-hub {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #2497f3;
+    cursor: pointer;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    transition: transform 0.2s;
+}
+
+.back-to-hub:hover {
+    transform: translateX(-5px);
+}
+
+/* Spinner and Loader */
+.spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border-left-color: #2497f3;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Gallery for Header Generator */
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 2rem;
+    margin-top: 2.5rem;
+}
+
+.gallery-card {
+    background: #fff;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 8px 16px rgba(34, 51, 84, 0.05);
+    border: 1px solid #f0f0f0;
+    transition: transform 0.3s;
+}
+
+.gallery-card:hover {
+    transform: scale(1.02);
+}
+
+.gallery-card img {
+    width: 100%;
+    aspect-ratio: 1792/1024;
+    object-fit: cover;
+    display: block;
+}
+
+.gallery-card-content {
+    padding: 1.5rem;
+    background: #fff;
+}
+
+.gallery-card-content h4 {
+    margin: 0;
+    font-size: 1.15rem;
+    color: #1a365d;
+    line-height: 1.4;
+    font-weight: 600;
+}
+
+/* Skeleton Loading State */
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #f8f8f8 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ==========================
+   Generator Layout & Sidebar
+========================== */
+.generator-layout {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+    margin-top: 2rem;
+}
+
+.history-sidebar {
+    width: 320px;
+    background: #fff;
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(34, 51, 84, 0.05);
+    max-height: 80vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1.5px solid #f1f5f9;
+}
+
+.sidebar-header h3 {
+    font-size: 1.15rem;
+    margin: 0;
+    color: #1a365d;
+}
+
+#refresh-history {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: transform 0.3s;
+}
+
+#refresh-history:hover {
+    transform: rotate(180deg);
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.history-item {
+    padding: 1rem;
+    border-radius: 12px;
+    background: #f8fafc;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.history-item:hover {
+    border-color: #2497f3;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(36, 151, 243, 0.08);
+}
+
+.history-item h4 {
+    font-size: 0.95rem;
+    margin: 0 0 0.5rem 0;
+    color: #334155;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.history-item .meta {
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+
+.generator-main {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+/* Enhanced Gallery & Download */
+.download-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(4px);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: all 0.2s;
+    opacity: 0;
+    transform: translateY(-5px);
+    border: none;
+    color: #2497f3;
+    font-size: 1.2rem;
+}
+
+.gallery-card:hover .download-btn {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.download-btn:hover {
+    background: #2497f3;
+    color: #fff;
+    transform: scale(1.1);
+}
+
+@media (max-width: 1024px) {
+    .generator-layout {
+        flex-direction: column;
+    }
+    .history-sidebar {
+        width: 100%;
+        max-height: 250px;
+    }
+}

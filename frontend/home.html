@@ -63,33 +63,102 @@
   </div>
 
   <!-- ======= Main Content Wrapper ======= -->
-  <main>
-    <!-- ======= Guidelines Section ======= -->
-    <section class="guidelines card">
-      <h2>Guidelines</h2>
-      <p>Welcome to the Image Analysis app. Follow these steps to analyze your image:</p>
-      <ul>
-        <li>Ensure the image is clear and relevant for the analysis.</li>
-        <li>Upload the image for "benign" or "malignant" detection.</li>
-        <li>Click the upload button and submit your image for processing.</li>
-      </ul>
-    </section>
+  <main class="container">
+    <!-- Hub Selection View -->
+    <div id="hub-view" class="tool-view active">
+      <section class="guidelines card" style="text-align: center;">
+        <h2>Welcome to Afya AI Lab</h2>
+        <p>Select a tool below to begin your analysis or creative generation.</p>
+      </section>
 
-    <!-- ======= Upload Section ======= -->
-    <section id="upload-section" class="card">
-      <h3>Upload Image for Analysis</h2>
-      <form id="upload-form">
-        <label for="image">Upload Image:</label>
-        <input type="file" id="image" name="image" accept="image/*" required>
-        <button type="submit">Submit Image</button>
-      </form>
-    </section>
-    
-    <!-- ======= Results Section ======= -->
-    <section id="results-section" class="hidden card">
-      <h2>Analysis Results</h2>
-      <div id="results"></div>
-    </section>
+      <div class="tool-selection-grid">
+        <div class="selection-card" id="select-image-analysis">
+          <div class="icon">🩺</div>
+          <h3>Image Analysis</h3>
+          <p>Early cancer detection and diagnosis using advanced computer vision models.</p>
+          <div class="go-btn">Start Diagnosis &rarr;</div>
+        </div>
+
+        <div class="selection-card" id="select-header-generator">
+          <div class="icon">🎨</div>
+          <h3>Blog Header Generator</h3>
+          <p>Generate professional medical-themed blog headers using DALL-E 3.</p>
+          <div class="go-btn">Start Creating &rarr;</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Image Analysis Tool View -->
+    <div id="image-analysis-view" class="tool-view">
+      <div class="back-to-hub" id="back-from-analysis">&larr; Back to Dashboard</div>
+      
+      <section class="guidelines card">
+        <h2>Image Analysis Guidelines</h2>
+        <ul>
+          <li>Ensure the image is clear and relevant for the analysis.</li>
+          <li>Upload the image for skin cancer detection (benign/malignant).</li>
+          <li>Click the upload button and submit your image for processing.</li>
+        </ul>
+      </section>
+
+      <section id="upload-section" class="card">
+        <h3>Upload Image for Analysis</h3>
+        <form id="upload-form">
+          <label for="image">Upload Image:</label>
+          <input type="file" id="image" name="image" accept="image/*" required>
+          <button type="submit" class="cta-btn">Submit Image</button>
+        </form>
+      </section>
+      
+      <section id="results-section" class="hidden card">
+        <h2>Analysis Results</h2>
+        <div id="results"></div>
+      </section>
+    </div>
+
+    <!-- Blog Header Generator Tool View -->
+    <div id="header-generator-view" class="tool-view">
+      <div class="back-to-hub" id="back-from-generator">&larr; Back to Dashboard</div>
+
+      <div class="generator-layout">
+        <!-- History Sidebar -->
+        <aside class="history-sidebar">
+          <div class="sidebar-header">
+            <h3>Recent History</h3>
+            <button id="refresh-history" title="Refresh history">🔄</button>
+          </div>
+          <div id="history-list" class="history-list">
+            <!-- History items will appear here -->
+            <p class="empty-state">No history yet.</p>
+          </div>
+        </aside>
+
+        <!-- Main Generator Area -->
+        <main class="generator-main">
+          <section class="card">
+            <h3>Blog Header Generator</h3>
+            <p style="color: #718096; margin-bottom: 2rem;">Paste your blog titles below (one per line). Consistent, premium designs every time.</p>
+
+            <form id="generator-form">
+              <div class="form-group" style="width: 100%;">
+                <textarea id="blog-titles" class="form-input" style="min-height: 100px;"
+                  placeholder="e.g. Understanding Skin Health&#10;Preventing Sun Damage"></textarea>
+              </div>
+              <button type="submit" id="generate-btn" class="cta-btn" style="width: 100%; margin-top: 1rem;">Generate Headers</button>
+            </form>
+
+            <div id="loader" class="center hidden" style="margin-top: 2rem; flex-direction: column; gap: 10px;">
+              <div class="spinner"></div>
+              <p>Generating AI artwork... this may take a minute.</p>
+            </div>
+          </section>
+
+          <div id="results-gallery" class="gallery">
+            <!-- Results will appear here -->
+          </div>
+        </main>
+      </div>
+    </div>
   </main>
 
   <!-- ======= Footer ======= -->
@@ -98,7 +167,8 @@
   </footer>
 
   <!-- ======= Scripts ======= -->
-  <script src="/js/script.js"></script>
-  <script src="/js/upload.js"></script>
+  <script type="module" src="/js/script.js"></script>
+  <script type="module" src="/js/upload.js"></script>
+  <script type="module" src="/js/header_generator.js"></script>
 </body>
 </html>

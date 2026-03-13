@@ -24,7 +24,7 @@ def generate_header(title, output_dir="uploads/generated_headers/"):
             model="dall-e-3",
             prompt=prompt,
             n=1,
-            size="1024x1024",
+            size="1792x1024",
             quality="standard",
         )
         

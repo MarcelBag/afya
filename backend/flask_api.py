@@ -66,10 +66,10 @@ def api_root():
     return "Flask API root - it works"
 
 @app.route('/api', methods=['GET'])
-def home():
+def api_home():
     return '🩺 Skin Lesion API is running!'
 @app.get("/api/healthz")
 def health():
     return {"status": "ok"}, 200
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=5001, debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=True)

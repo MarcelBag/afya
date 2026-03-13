@@ -188,6 +188,40 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.toggle('dark-theme', themeSelect.value === 'dark');
       });
     }
+
+    // ---------------------------
+    // Tool Switching Logic
+    // ---------------------------
+    const hubView = document.getElementById('hub-view');
+    const analysisView = document.getElementById('image-analysis-view');
+    const generatorView = document.getElementById('header-generator-view');
+
+    const selectAnalysis = document.getElementById('select-image-analysis');
+    const selectGenerator = document.getElementById('select-header-generator');
+
+    const backFromAnalysis = document.getElementById('back-from-analysis');
+    const backFromGenerator = document.getElementById('back-from-generator');
+
+    function showView(view) {
+      [hubView, analysisView, generatorView].forEach(v => {
+        if (v) v.classList.remove('active');
+      });
+      if (view) view.classList.add('active');
+    }
+
+    if (selectAnalysis) {
+      selectAnalysis.addEventListener('click', () => showView(analysisView));
+    }
+    if (selectGenerator) {
+      selectGenerator.addEventListener('click', () => showView(generatorView));
+    }
+
+    if (backFromAnalysis) {
+      backFromAnalysis.addEventListener('click', () => showView(hubView));
+    }
+    if (backFromGenerator) {
+      backFromGenerator.addEventListener('click', () => showView(hubView));
+    }
   }
 
   // ---------------------------

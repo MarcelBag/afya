@@ -12,6 +12,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const User = require('./models/User'); // Mongoose User model
+const HeaderHistory = require('./models/HeaderHistory');
 const nodemailer = require('nodemailer');
 
 const app = express();
@@ -221,13 +222,40 @@ app.post('/api/upload-image', authMiddleware, upload.single('image'), async (req
 app.post('/api/generate-headers', authMiddleware, async (req, res) => {
   try {
     const response = await axios.post('http://afya-backend:5001/api/generate-headers', req.body);
-    res.json(response.data);
+    const data = response.data;
+
+    // Save successful generations to history
+    if (data.results) {
+      const successfulGenerations = data.results
+        .filter(r => !r.error)
+        .map(r => ({
+          userId: req.user.userId,
+          title: r.title,
+          imageUrl: r.image
+        }));
+      
+      if (successfulGenerations.length > 0) {
+        await HeaderHistory.insertMany(successfulGenerations);
+      }
+    }
+
+    res.json(data);
   } catch (error) {
     console.error('Error proxying header generation request:', error.message);
     res.status(error.response?.status || 500).json({ 
       message: 'Error generating headers.', 
       details: error.response?.data || error.message 
     });
+  }
+});
+
+app.get('/api/header-history', authMiddleware, async (req, res) => {
+  try {
+    const history = await HeaderHistory.find({ userId: req.user.userId }).sort({ createdAt: -1 });
+    res.json(history);
+  } catch (error) {
+    console.error('Error fetching header history:', error);
+    res.status(500).json({ message: 'Error fetching history' });
   }
 });
 
@@ -353,6 +381,9 @@ app.use(
     extensions: ['html'], // /about → about.html
   })
 );
+
+/* Serve Uploads statically */
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 /* ----------------------------
    Start server
