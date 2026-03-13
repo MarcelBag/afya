@@ -1,5 +1,6 @@
 services:
   flask-backend:
+    container_name: afya-backend
     build:
       context: ..
       dockerfile: docker/flask.Dockerfile
@@ -14,6 +15,7 @@ services:
       - mongodb
 
   express-gateway:
+    container_name: afya-gateway
     build:
       context: ..
       dockerfile: docker/node.Dockerfile
@@ -29,6 +31,7 @@ services:
       - mongodb
 
   mongodb:
+    container_name: afya-mongodb
     image: mongo:latest
     ports:
       - "27017:27017"

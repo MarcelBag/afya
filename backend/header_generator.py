@@ -6,7 +6,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=api_key) if api_key else None
 
 STYLE_TEMPLATE = "soft pastel colors, minimalist medical illustration, female health theme, modern digital health branding, soft gradients, clean background, professional blog header style"
 
@@ -17,6 +18,8 @@ def generate_header(title, output_dir="uploads/generated_headers/"):
     prompt = f"{STYLE_TEMPLATE}. Content: {title}"
     
     try:
+        if not client:
+            return None, "OpenAI API key not configured."
         response = client.images.generate(
             model="dall-e-3",
             prompt=prompt,

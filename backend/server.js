@@ -200,7 +200,7 @@ app.post('/api/upload-image', authMiddleware, upload.single('image'), async (req
       }
     });
     */
-    const response = await axios.post('http://localhost:5001/predict', formData, {
+    const response = await axios.post('http://afya-backend:5001/predict', formData, {
         headers: {
           ...formData.getHeaders(),
           'Authorization': `Bearer ${token}`
@@ -220,7 +220,7 @@ app.post('/api/upload-image', authMiddleware, upload.single('image'), async (req
 // ----------------------------
 app.post('/api/generate-headers', authMiddleware, async (req, res) => {
   try {
-    const response = await axios.post('http://localhost:5001/api/generate-headers', req.body);
+    const response = await axios.post('http://afya-backend:5001/api/generate-headers', req.body);
     res.json(response.data);
   } catch (error) {
     console.error('Error proxying header generation request:', error.message);
