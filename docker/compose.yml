@@ -1,28 +1,28 @@
 services:
   flask-backend:
     build:
-      context: .
+      context: ..
       dockerfile: docker/flask.Dockerfile
     ports:
       - "5001:5001"
     env_file:
-      - .env
+      - ../.env
     volumes:
-      - ./backend:/app
-      - ./uploads:/app/uploads
+      - ../backend:/app
+      - ../uploads:/app/uploads
     depends_on:
       - mongodb
 
   express-gateway:
     build:
-      context: .
+      context: ..
       dockerfile: docker/node.Dockerfile
     ports:
       - "4000:4000"
     env_file:
-      - .env
+      - ../.env
     volumes:
-      - .:/app
+      - ..:/app
       - /app/node_modules
     depends_on:
       - flask-backend

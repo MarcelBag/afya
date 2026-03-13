@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 
 # Determine which compose files to use
-COMPOSE_FILES := -f compose.yml
+COMPOSE_FILES := -f docker/compose.yml
 
 DC := docker compose $(COMPOSE_FILES)
 
