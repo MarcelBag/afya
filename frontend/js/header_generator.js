@@ -133,12 +133,43 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         historyList.innerHTML = history.map(item => `
-            <div class="history-item" onclick="window.scrollToTool('${item.imageUrl}', '${item.title.replace(/'/g, "\\'")}')">
-                <h4>${item.title}</h4>
-                <div class="meta">${new Date(item.createdAt).toLocaleDateString()}</div>
+            <div class="history-item">
+                <div class="history-item-content" onclick="window.scrollToTool('${item.imageUrl}', '${item.title.replace(/'/g, "\\'")}')">
+                    <h4>${item.title}</h4>
+                    <div class="meta">${new Date(item.createdAt).toLocaleDateString()}</div>
+                </div>
+                <div class="history-item-actions">
+                    <button class="delete-history-btn" onclick="deleteHistoryItem('${item._id}', event)" title="Delete History Item">
+                        &times;
+                    </button>
+                </div>
             </div>
         `).join('');
     }
+
+    window.deleteHistoryItem = async (id, event) => {
+        if (event) event.stopPropagation();
+        
+        if (!confirm('Are you sure you want to delete this history item?')) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`/api/header-history/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                loadHistory(); // Refresh the list
+            } else {
+                const data = await res.json();
+                alert('Failed to delete: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error deleting history item:', error);
+            alert('An error occurred during deletion.');
+        }
+    };
 
     // Helper to scroll/show a history item in the main gallery
     window.scrollToTool = (imageUrl, title) => {

@@ -1,5 +1,5 @@
 /**
- * Afya Script — Page-specific logic only
+ * Afya Script Page-specific logic only
  * Layout, user profile, settings, and logout are all handled by layout.js
  */
 

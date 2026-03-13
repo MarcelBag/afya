@@ -8,98 +8,1367 @@
   <link rel="stylesheet" href="/cs/styles.css">
   <link rel="icon" href="/assets/tuungane.jpeg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="/js/particles-hero.js"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700&display=swap"
+    rel="stylesheet">
+
+  <style>
+    /* ─────────────────────────────────────────────
+       All scoped under .ix- prefix zero bleed
+       to other pages sharing styles.css
+    ───────────────────────────────────────────── */
+
+    :root {
+      --c-blue: #2497f3;
+      --c-mid: #1771c6;
+      --c-ink: #0d1117;
+      --c-soft: #4a5568;
+      --c-muted: #8896ab;
+      --c-border: #e2e8f0;
+      --c-bg: #f4f7fb;
+      --c-white: #ffffff;
+    }
+
+    .ix-page * {
+      box-sizing: border-box;
+    }
+
+    .ix-page {
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    /* ════════════════════════════════════════
+       HERO
+    ════════════════════════════════════════ */
+    .ix-hero {
+      position: relative;
+      min-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 24px 70px;
+      overflow: hidden;
+      background: radial-gradient(ellipse at 30% 60%, #0e2a5c 0%, #0a1628 45%, #06111f 100%);
+    }
+
+    /* dot-grid texture */
+    .ix-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(36, 151, 243, 0.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(36, 151, 243, 0.055) 1px, transparent 1px);
+      background-size: 52px 52px;
+      mask-image: radial-gradient(ellipse 80% 80% at center, black 20%, transparent 72%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* center glow orb */
+    .ix-hero::after {
+      content: '';
+      position: absolute;
+      width: 560px;
+      height: 560px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(36, 151, 243, 0.16) 0%, transparent 68%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 0;
+      animation: ix-orb 5.5s ease-in-out infinite;
+    }
+
+    @keyframes ix-orb {
+
+      0%,
+      100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: .7;
+      }
+
+      50% {
+        transform: translate(-50%, -50%) scale(1.14);
+        opacity: 1;
+      }
+    }
+
+    /* particles canvas */
+    .ix-hero canvas {
+      position: absolute !important;
+      inset: 0 !important;
+      z-index: 1 !important;
+    }
+
+    .ix-hero-inner {
+      position: relative;
+      z-index: 2;
+      max-width: 720px;
+      width: 100%;
+      text-align: center;
+    }
+
+    /* badge */
+    .ix-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      border: 1px solid rgba(36, 151, 243, 0.38);
+      background: rgba(36, 151, 243, 0.07);
+      backdrop-filter: blur(10px);
+      border-radius: 100px;
+      padding: 5px 18px 5px 8px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.82);
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      margin-bottom: 26px;
+      animation: ix-rise 0.6s ease both;
+    }
+
+    .ix-badge-pip {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(36, 151, 243, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .ix-badge-pip::after {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #63e3a1;
+      box-shadow: 0 0 8px #63e3a1;
+      animation: ix-blink 2s ease infinite;
+    }
+
+    @keyframes ix-blink {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .18
+      }
+    }
+
+    /* headline */
+    .ix-h1 {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(1.85rem, 4vw, 3rem);
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.1;
+      letter-spacing: -0.025em;
+      margin: 0 0 16px;
+      animation: ix-rise 0.6s 0.1s ease both;
+    }
+
+    .ix-h1 .ix-grad {
+      background: linear-gradient(100deg, #7dcfff 0%, #2497f3 45%, #aee0ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .ix-sub {
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.55);
+      line-height: 1.78;
+      max-width: 480px;
+      margin: 0 auto 34px;
+      animation: ix-rise 0.6s 0.2s ease both;
+    }
+
+    /* CTA row */
+    .ix-ctas {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 11px;
+      flex-wrap: wrap;
+      animation: ix-rise 0.6s 0.3s ease both;
+    }
+
+    .ix-btn-fill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 28px;
+      background: var(--c-blue);
+      color: #fff;
+      border-radius: 10px;
+      border: none;
+      font-family: 'Sora', sans-serif;
+      font-weight: 700;
+      font-size: 0.875rem;
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: 0 6px 22px rgba(36, 151, 243, 0.45);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .ix-btn-fill:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(36, 151, 243, 0.56);
+    }
+
+    .ix-btn-outline {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 26px;
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(255, 255, 255, 0.78);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      font-family: 'Sora', sans-serif;
+      font-weight: 600;
+      font-size: 0.875rem;
+      text-decoration: none;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: background 0.2s, color 0.2s, transform 0.2s;
+    }
+
+    .ix-btn-outline:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      transform: translateY(-2px);
+    }
+
+    /* stat pills */
+    .ix-pills {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      margin-top: 40px;
+      flex-wrap: wrap;
+      animation: ix-rise 0.6s 0.46s ease both;
+    }
+
+    .ix-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 100px;
+      padding: 6px 15px 6px 7px;
+      backdrop-filter: blur(8px);
+    }
+
+    .ix-pill-ico {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(36, 151, 243, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
+    }
+
+    .ix-pill-lbl {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.62);
+    }
+
+    .ix-pill-lbl strong {
+      display: block;
+      color: #fff;
+      font-family: 'Sora', sans-serif;
+      font-weight: 700;
+      font-size: 0.8rem;
+      line-height: 1.2;
+    }
+
+    /* scroll cue */
+    .ix-scroll {
+      position: absolute;
+      bottom: 26px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      animation: ix-rise 0.6s 0.7s ease both;
+    }
+
+    .ix-scroll span {
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    .ix-scroll-bar {
+      width: 1px;
+      height: 30px;
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), transparent);
+      animation: ix-drip 1.9s ease infinite;
+    }
+
+    @keyframes ix-drip {
+      0% {
+        transform: scaleY(0);
+        transform-origin: top;
+        opacity: 1;
+      }
+
+      50% {
+        transform: scaleY(1);
+        transform-origin: top;
+        opacity: 1;
+      }
+
+      100% {
+        transform: scaleY(1);
+        transform-origin: bottom;
+        opacity: 0;
+      }
+    }
+
+    @keyframes ix-rise {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ════════════════════════════════════════
+       WAVE + BODY
+    ════════════════════════════════════════ */
+    .ix-wave {
+      display: block;
+      width: 100%;
+      margin-bottom: -2px;
+      background: radial-gradient(ellipse at 30% 60%, #0e2a5c, #0a1628 45%, #06111f);
+    }
+
+    .ix-body {
+      background: var(--c-bg);
+      padding: 0 24px 80px;
+    }
+
+    .ix-wrap {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* ════════════════════════════════════════
+       WHY AI SECTION
+    ════════════════════════════════════════ */
+    .ix-why {
+      padding-top: 52px;
+    }
+
+    .ix-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.67rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--c-blue);
+      margin-bottom: 10px;
+    }
+
+    .ix-eyebrow::before {
+      content: '';
+      width: 18px;
+      height: 2px;
+      background: var(--c-blue);
+      border-radius: 2px;
+    }
+
+    .ix-why-head {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(1.3rem, 2.4vw, 1.75rem);
+      font-weight: 700;
+      color: var(--c-ink);
+      margin: 0 0 6px;
+      letter-spacing: -0.02em;
+    }
+
+    .ix-why-lead {
+      font-size: 0.9rem;
+      color: var(--c-soft);
+      line-height: 1.72;
+      margin: 0 0 28px;
+      max-width: 640px;
+    }
+
+    .ix-why-lead a {
+      color: var(--c-blue);
+      text-decoration: none;
+      font-weight: 600;
+      border-bottom: 1px solid rgba(36, 151, 243, 0.3);
+      transition: border-color 0.15s;
+    }
+
+    .ix-why-lead a:hover {
+      border-color: var(--c-blue);
+    }
+
+    /* stat cards row */
+    .ix-stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .ix-stat-card {
+      background: var(--c-white);
+      border: 1px solid var(--c-border);
+      border-radius: 16px;
+      padding: 20px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: 0 2px 10px rgba(10, 22, 40, 0.04);
+      transition: transform 0.22s, box-shadow 0.22s;
+      animation: ix-rise 0.5s ease both;
+    }
+
+    .ix-stat-card:nth-child(1) {
+      animation-delay: .08s;
+    }
+
+    .ix-stat-card:nth-child(2) {
+      animation-delay: .16s;
+    }
+
+    .ix-stat-card:nth-child(3) {
+      animation-delay: .24s;
+    }
+
+    .ix-stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 28px rgba(36, 151, 243, 0.1);
+    }
+
+    .ix-stat-ico {
+      font-size: 1.4rem;
+      line-height: 1;
+    }
+
+    .ix-stat-val {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--c-ink);
+      line-height: 1.2;
+    }
+
+    .ix-stat-desc {
+      font-size: 0.8rem;
+      color: var(--c-muted);
+      line-height: 1.5;
+    }
+
+    /* body text block */
+    .ix-why-body {
+      font-size: 0.9rem;
+      color: var(--c-soft);
+      line-height: 1.78;
+      margin: 0 0 28px;
+    }
+
+    .ix-why-body strong {
+      color: var(--c-ink);
+    }
+
+    /* expandable details */
+    .ix-details {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 0;
+    }
+
+    .ix-detail {
+      background: var(--c-white);
+      border: 1px solid var(--c-border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(10, 22, 40, 0.04);
+      transition: box-shadow 0.2s;
+    }
+
+    .ix-detail:hover {
+      box-shadow: 0 6px 20px rgba(36, 151, 243, 0.08);
+    }
+
+    .ix-detail summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--c-ink);
+      cursor: pointer;
+      list-style: none;
+      user-select: none;
+      gap: 12px;
+    }
+
+    .ix-detail summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .ix-detail-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .ix-detail-tag {
+      display: inline-flex;
+      background: rgba(36, 151, 243, 0.08);
+      color: var(--c-mid);
+      border-radius: 6px;
+      padding: 2px 9px;
+      font-size: 0.67rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    .ix-chevron {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      color: var(--c-muted);
+      transition: transform 0.25s;
+    }
+
+    .ix-detail[open] .ix-chevron {
+      transform: rotate(180deg);
+    }
+
+    .ix-detail-body {
+      padding: 0 20px 20px;
+      border-top: 1px solid var(--c-border);
+      font-size: 0.875rem;
+      color: var(--c-soft);
+      line-height: 1.75;
+    }
+
+    .ix-detail-body ul {
+      margin: 12px 0 0 1.1rem;
+      padding: 0;
+    }
+
+    .ix-detail-body ul li {
+      margin-bottom: 7px;
+    }
+
+    .ix-detail-body strong {
+      color: var(--c-ink);
+    }
+
+    .ix-detail-body h3 {
+      font-family: 'Sora', sans-serif;
+      font-size: 0.92rem;
+      color: var(--c-mid);
+      margin: 12px 0 6px;
+      font-weight: 700;
+    }
+
+    .ix-detail-body a {
+      color: var(--c-blue);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(36, 151, 243, 0.3);
+      transition: border-color 0.15s;
+    }
+
+    .ix-detail-body a:hover {
+      border-color: var(--c-blue);
+    }
+
+    /* ════════════════════════════════════════
+       MISSION SECTION
+    ════════════════════════════════════════ */
+    .ix-mission {
+      margin-top: 52px;
+    }
+
+    .ix-mission-card {
+      background: var(--c-white);
+      border: 1px solid var(--c-border);
+      border-radius: 22px;
+      padding: 40px 40px;
+      box-shadow: 0 4px 24px rgba(10, 22, 40, 0.06);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* decorative accent line */
+    .ix-mission-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--c-blue), #60b4ff, var(--c-mid));
+      border-radius: 22px 22px 0 0;
+    }
+
+    .ix-mission-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    .ix-mission-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(36, 151, 243, 0.12), rgba(23, 113, 198, 0.06));
+      border: 1px solid rgba(36, 151, 243, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+
+    .ix-mission-title {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(1.1rem, 2vw, 1.4rem);
+      font-weight: 700;
+      color: var(--c-ink);
+      margin: 0 0 5px;
+      letter-spacing: -0.02em;
+    }
+
+    .ix-mission-sub {
+      font-size: 0.875rem;
+      color: var(--c-muted);
+      margin: 0;
+    }
+
+    .ix-mission-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .ix-mission-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.875rem;
+      color: var(--c-soft);
+      line-height: 1.65;
+      background: var(--c-bg);
+      border: 1px solid var(--c-border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .ix-mission-list li:hover {
+      border-color: rgba(36, 151, 243, 0.3);
+      box-shadow: 0 4px 14px rgba(36, 151, 243, 0.07);
+    }
+
+    .ix-mission-list li::before {
+      content: '✓';
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(36, 151, 243, 0.1);
+      color: var(--c-blue);
+      font-size: 0.65rem;
+      font-weight: 800;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ════════════════════════════════════════
+       LECUN / JEPA SECTION
+    ════════════════════════════════════════ */
+    .ix-jepa {
+      margin-top: 52px;
+    }
+
+    /* quote card */
+    .ix-quote-card {
+      position: relative;
+      background: linear-gradient(135deg, #0a1628 0%, #0f2044 100%);
+      border-radius: 20px;
+      padding: 36px 40px;
+      margin-bottom: 24px;
+      overflow: hidden;
+      border: 1px solid rgba(36, 151, 243, 0.2);
+    }
+
+    .ix-quote-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--c-blue), #60b4ff, transparent);
+    }
+
+    /* large background quotemark */
+    .ix-quote-card::after {
+      content: '\201C';
+      position: absolute;
+      top: -10px;
+      left: 24px;
+      font-size: 9rem;
+      line-height: 1;
+      font-family: 'Sora', serif;
+      color: rgba(36, 151, 243, 0.12);
+      pointer-events: none;
+      font-weight: 800;
+    }
+
+    .ix-quote-author {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .ix-quote-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(36, 151, 243, 0.3), rgba(23, 113, 198, 0.15));
+      border: 2px solid rgba(36, 151, 243, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .ix-quote-who {
+      font-family: 'Sora', sans-serif;
+    }
+
+    .ix-quote-who strong {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 2px;
+    }
+
+    .ix-quote-who span {
+      font-size: 0.74rem;
+      color: rgba(255, 255, 255, 0.45);
+    }
+
+    .ix-quote-text {
+      font-size: 1rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.82);
+      line-height: 1.75;
+      font-style: italic;
+      position: relative;
+      z-index: 1;
+      border-left: 3px solid rgba(36, 151, 243, 0.5);
+      padding-left: 18px;
+      margin: 0;
+    }
+
+    /* two-col context + jepa intro */
+    .ix-jepa-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .ix-jepa-block {
+      background: var(--c-white);
+      border: 1px solid var(--c-border);
+      border-radius: 18px;
+      padding: 26px 24px;
+      box-shadow: 0 2px 10px rgba(10, 22, 40, 0.05);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .ix-jepa-block:hover {
+      border-color: rgba(36, 151, 243, 0.3);
+      box-shadow: 0 8px 24px rgba(36, 151, 243, 0.08);
+    }
+
+    .ix-jepa-block-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      margin-bottom: 14px;
+    }
+
+    .ix-icon-red {
+      background: rgba(239, 68, 68, 0.09);
+      border: 1px solid rgba(239, 68, 68, 0.18);
+    }
+
+    .ix-icon-indigo {
+      background: rgba(99, 102, 241, 0.09);
+      border: 1px solid rgba(99, 102, 241, 0.18);
+    }
+
+    .ix-jepa-block h4 {
+      font-family: 'Sora', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--c-ink);
+      margin: 0 0 8px;
+    }
+
+    .ix-jepa-block p {
+      font-size: 0.855rem;
+      color: var(--c-soft);
+      line-height: 1.72;
+      margin: 0;
+    }
+
+    .ix-jepa-block ul {
+      margin: 8px 0 0 1.1rem;
+      padding: 0;
+      font-size: 0.855rem;
+      color: var(--c-soft);
+      line-height: 1.72;
+    }
+
+    .ix-jepa-block ul li {
+      margin-bottom: 5px;
+    }
+
+    .ix-jepa-block strong {
+      color: var(--c-ink);
+    }
+
+    /* JEPA explainer full-width card */
+    .ix-jepa-full {
+      background: var(--c-white);
+      border: 1px solid var(--c-border);
+      border-radius: 18px;
+      padding: 28px 28px;
+      box-shadow: 0 2px 10px rgba(10, 22, 40, 0.05);
+      margin-bottom: 16px;
+    }
+
+    .ix-jepa-full-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .ix-jepa-full-head .ix-jepa-block-icon {
+      margin-bottom: 0;
+    }
+
+    .ix-jepa-full-head h4 {
+      font-family: 'Sora', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--c-ink);
+      margin: 0;
+    }
+
+    .ix-jepa-full-head span {
+      font-size: 0.75rem;
+      color: var(--c-muted);
+    }
+
+    .ix-jepa-full p {
+      font-size: 0.875rem;
+      color: var(--c-soft);
+      line-height: 1.75;
+      margin: 0 0 12px;
+    }
+
+    .ix-jepa-full p:last-child {
+      margin: 0;
+    }
+
+    .ix-jepa-full strong {
+      color: var(--c-ink);
+    }
+
+    .ix-jepa-full a {
+      color: var(--c-blue);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(36, 151, 243, 0.3);
+      transition: border-color 0.15s;
+      font-weight: 600;
+    }
+
+    .ix-jepa-full a:hover {
+      border-color: var(--c-blue);
+    }
+
+    /* our research banner */
+    .ix-research-banner {
+      background: linear-gradient(110deg, #f0f7ff 0%, #e8f3fd 100%);
+      border: 1px solid rgba(36, 151, 243, 0.2);
+      border-radius: 18px;
+      padding: 26px 28px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .ix-research-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(36, 151, 243, 0.12);
+      border: 1px solid rgba(36, 151, 243, 0.2);
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .ix-research-text h4 {
+      font-family: 'Sora', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--c-ink);
+      margin: 0 0 6px;
+    }
+
+    .ix-research-text p {
+      font-size: 0.855rem;
+      color: var(--c-soft);
+      line-height: 1.72;
+      margin: 0;
+    }
+
+    .ix-research-text strong {
+      color: var(--c-mid);
+    }
+
+    /* ── responsive ── */
+    @media (max-width: 680px) {
+      .ix-jepa-cols {
+        grid-template-columns: 1fr;
+      }
+
+      .ix-quote-card {
+        padding: 24px 20px;
+      }
+
+      .ix-research-banner {
+        flex-direction: column;
+        gap: 12px;
+      }
+    }
+
+    /* ── responsive ── */
+    @media (max-width: 680px) {
+      .ix-hero {
+        min-height: auto;
+        padding: 58px 20px 50px;
+      }
+
+      .ix-stats-row {
+        grid-template-columns: 1fr;
+      }
+
+      .ix-mission-list {
+        grid-template-columns: 1fr;
+      }
+
+      .ix-mission-card {
+        padding: 24px 20px;
+      }
+
+      .ix-mission-top {
+        flex-direction: column;
+        gap: 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .ix-pills {
+        gap: 7px;
+      }
+    }
+  </style>
 </head>
 
-<body>
+<body class="ix-page">
 
-  <!-- ==========================
-       Hero Section
-  =========================== -->
-  <section class="hero">
-    <div class="hero-content">
-      <h2>Empowering Early Diagnosis <br> through Image Analysis</h2>
-      <p>AI-driven tools for faster, more accurate, and accessible healthcare for all.</p>
-      <a href="/signin" class="cta-btn">Get Started</a>
-    </div>
-  </section>
+  <!-- ══════════════════════════════════════
+       HERO
+  ══════════════════════════════════════ -->
+  <section class="ix-hero hero">
 
-  <!-- ==========================
-      Why AI for Skin Cancer?
-  ========================== -->
-  <aside class="thesis-summary">
-    <h2>Why Artificial Intelligence for Skin Cancer?</h2>
-    <p>
-      In 2019, pioneers <a href="http://lecun.com/" target="_blank" rel="noopener"> Yann LeCun</a>, <a
-        href="https://www.nobelprize.org/prizes/physics/2024/hinton/facts/" target="_blank" rel="noopener"> Geoffrey
-        Hinton </a>, and <a href=" https://amturing.acm.org/award_winners/bengio_3406375.cfmYoshua" target="_blank"
-        rel="noopener"> Yoshua Bengio </a>received the
-      <a href="https://amturing.acm.org/" target="_blank" rel="noopener">Turing Award</a> for their breakthroughs in
-      neural networks, driving today's AI revolution.
-    </p>
-    <p>
-      <strong>Early and accurate diagnosis</strong> is the key to beating deadly diseases like cancer. Yet, traditional
-      medical diagnostics especially for skin cancer remain challenging, subjective, and often inaccessible in many
-      parts of the world.
-    </p>
-    <ul>
-      <li><strong>Each year, over 10 million people die of cancer globally.</strong></li>
-      <li>Skin cancer rates are rising, with early detection critical for survival</li>
-      <li>AI can analyze skin images rapidly, consistently, and objectively.</li>
-    </ul>
-    <p>
-      By harnessing AI, we can empower doctors and patients with <strong>faster, more accurate, and more widely
-        accessible tools</strong> — helping save lives and transform healthcare for everyone, everywhere.
-    </p>
+    <div class="ix-hero-inner">
 
-    <details>
-      <summary>Read more: AI Challenges & Healthcare Impact</summary>
-      <ul>
-        <li><strong>Challenge:</strong> Early, precise detection is crucial, but time-consuming and sometimes subjective.</li>
-        <li><strong>AI Opportunity:</strong> Algorithms can identify subtle patterns in skin images that humans might miss.</li>
-        <li><strong>Efficiency:</strong> Automation allows healthcare workers to focus on complex tasks.</li>
-        <li><strong>Ethics & Data:</strong> Data privacy, bias, and ongoing model validation are important for real-world impact.</li>
-      </ul>
-    </details>
-
-    <details>
-      <summary>Read more: The Origins of AI & Predictive Health</summary>
-      <div class="details-inner">
-        <h3>From Turing's Test to Modern Medical AI</h3>
-        <p>
-          In <a href="https://en.wikipedia.org/wiki/Turing_test" target="_blank" rel="noopener">1950, Alan Turing</a>
-          imagined a test to see if a machine could imitate a human.
-        </p>
-        <p>
-          AI's founders, including
-          <a href="https://en.wikipedia.org/wiki/John_McCarthy_(computer_scientist)" target="_blank" rel="noopener">John McCarthy</a> and
-          <a href="https://en.wikipedia.org/wiki/Marvin_Minsky" target="_blank" rel="noopener">Marvin Minsky</a>, built
-          early neural network machines — paving the way for today's deep learning breakthroughs.
-        </p>
-        <p>
-          In healthcare, <strong>predictive AI</strong> helps anticipate risks before they happen and enables early
-          detection of diseases such as cancer, diabetes, or even new pandemics.
-        </p>
+      <div class="ix-badge">
+        <span class="ix-badge-pip"></span>
+        AI-Powered Early Diagnosis
       </div>
-    </details>
-  </aside>
 
-  <!-- ==========================
-       Mission Section
-  =========================== -->
-  <section class="intro">
-    <div class="intro-card">
-      <h2>Saving Lives through Accurate Health Diagnosis</h2>
-      <ul>
-        <li>Early, careful diagnosis saves countless lives — this is our mission.</li>
-        <li>We believe in offering true assistance and support when it matters most.</li>
-        <li>Life with cancer is possible, especially with timely help and hope.</li>
-        <li>Every year, cancer kills thousands — but early detection changes outcomes.</li>
-        <li>Many hospitals still lack equipment for timely diagnosis — we bridge the gap with technology.</li>
-        <li>We collaborate with cancer societies and researchers worldwide for a healthier tomorrow.</li>
-      </ul>
+      <h1 class="ix-h1">
+        Empowering Early Diagnosis<br>
+        <span class="ix-grad">through Image Analysis</span>
+      </h1>
+
+      <p class="ix-sub">
+        AI-driven tools for faster, more accurate, and accessible
+        healthcare for all.
+      </p>
+
+      <div class="ix-ctas">
+        <a href="/signin" class="ix-btn-fill">
+          Get Started
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+            <path d="M1 6.5h11M7 2l4.5 4.5L7 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </a>
+        <a href="/about" class="ix-btn-outline">Learn More</a>
+      </div>
+
+      <div class="ix-pills">
+        <div class="ix-pill">
+          <div class="ix-pill-ico">🔬</div>
+          <div class="ix-pill-lbl"><strong>Computer Vision</strong>Skin Analysis</div>
+        </div>
+        <div class="ix-pill">
+          <div class="ix-pill-ico">⚡</div>
+          <div class="ix-pill-lbl"><strong>Rapid Results</strong>Seconds, not days</div>
+        </div>
+        <div class="ix-pill">
+          <div class="ix-pill-ico">🌍</div>
+          <div class="ix-pill-lbl"><strong>Accessible</strong>Built for the DRC</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="ix-scroll">
+      <span>scroll</span>
+      <div class="ix-scroll-bar"></div>
     </div>
   </section>
+
+  <!-- wave separator -->
+  <svg class="ix-wave" viewBox="0 0 1440 50" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"
+    aria-hidden="true">
+    <path d="M0 50L80 43C160 36 320 22 480 18.3C640 14.7 800 21.3 960 25.7C1120 30 1280 32 1360 33L1440 34V50H0Z"
+      fill="#f4f7fb" />
+  </svg>
+
+  <!-- ══════════════════════════════════════
+       BODY
+  ══════════════════════════════════════ -->
+  <div class="ix-body">
+    <div class="ix-wrap">
+
+      <!-- ── Why AI section ── -->
+      <div class="ix-why">
+
+        <div class="ix-eyebrow">Research &amp; Context</div>
+        <h2 class="ix-why-head">Why Artificial Intelligence for Skin Cancer?</h2>
+
+        <p class="ix-why-lead">
+          In 2019, pioneers
+          <a href="http://lecun.com/" target="_blank" rel="noopener">Yann LeCun</a>,
+          <a href="https://www.nobelprize.org/prizes/physics/2024/hinton/facts/" target="_blank" rel="noopener">Geoffrey
+            Hinton</a>, and
+          <a href="https://amturing.acm.org/award_winners/bengio_3406375.cfm" target="_blank" rel="noopener">Yoshua
+            Bengio</a>
+          received the <a href="https://amturing.acm.org/" target="_blank" rel="noopener">Turing Award</a> for their
+          breakthroughs in neural networks, driving today's AI revolution.
+        </p>
+
+        <!-- stat cards -->
+        <div class="ix-stats-row">
+          <div class="ix-stat-card">
+            <div class="ix-stat-ico">☠️</div>
+            <div class="ix-stat-val">10M+ deaths</div>
+            <div class="ix-stat-desc">People die of cancer globally each year. Early detection is the most powerful
+              intervention we have.</div>
+          </div>
+          <div class="ix-stat-card">
+            <div class="ix-stat-ico">📈</div>
+            <div class="ix-stat-val">Rising rates</div>
+            <div class="ix-stat-desc">Skin cancer incidence is increasing worldwide, with survival strongly tied to how
+              early it is caught.</div>
+          </div>
+          <div class="ix-stat-card">
+            <div class="ix-stat-ico">🤖</div>
+            <div class="ix-stat-val">AI advantage</div>
+            <div class="ix-stat-desc">AI analyses skin images rapidly, consistently, and objectively at a scale no human
+              team can match.</div>
+          </div>
+        </div>
+
+        <p class="ix-why-body">
+          <strong>Early and accurate diagnosis</strong> is the key to beating deadly diseases like cancer. Yet,
+          traditional medical diagnostics, especially for skin cancer, remain challenging, subjective, and often
+          inaccessible in many parts of the world. By harnessing AI, we can empower doctors and patients with
+          <strong>faster, more accurate, and more widely accessible tools</strong>, helping save lives and transform
+          healthcare for everyone, everywhere.
+        </p>
+
+        <!-- expandable details -->
+        <div class="ix-details">
+
+          <details class="ix-detail">
+            <summary>
+              <span class="ix-detail-label">
+                <span class="ix-detail-tag">Challenges</span>
+                AI Challenges &amp; Healthcare Impact
+              </span>
+              <svg class="ix-chevron" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M5 7.5l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg>
+            </summary>
+            <div class="ix-detail-body">
+              <ul>
+                <li><strong>Challenge:</strong> Early, precise detection is crucial, but time-consuming and sometimes
+                  subjective.</li>
+                <li><strong>AI Opportunity:</strong> Algorithms can identify subtle patterns in skin images that humans
+                  might miss.</li>
+                <li><strong>Efficiency:</strong> Automation allows healthcare workers to focus on complex tasks.</li>
+                <li><strong>Ethics &amp; Data:</strong> Data privacy, bias, and ongoing model validation are important
+                  for real-world impact.</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="ix-detail">
+            <summary>
+              <span class="ix-detail-label">
+                <span class="ix-detail-tag">History</span>
+                The Origins of AI &amp; Predictive Health
+              </span>
+              <svg class="ix-chevron" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M5 7.5l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg>
+            </summary>
+            <div class="ix-detail-body">
+              <h3>From Turing's Test to Modern Medical AI</h3>
+              <p>
+                In <a href="https://en.wikipedia.org/wiki/Turing_test" target="_blank" rel="noopener">1950, Alan
+                  Turing</a>
+                imagined a test to see if a machine could imitate a human.
+              </p>
+              <p>
+                AI's founders, including
+                <a href="https://en.wikipedia.org/wiki/John_McCarthy_(computer_scientist)" target="_blank"
+                  rel="noopener">John McCarthy</a> and
+                <a href="https://en.wikipedia.org/wiki/Marvin_Minsky" target="_blank" rel="noopener">Marvin Minsky</a>,
+                built early neural network machines, paving the way for today's deep learning breakthroughs.
+              </p>
+              <p>
+                In healthcare, <strong>predictive AI</strong> helps anticipate risks before they happen and enables
+                early detection of diseases such as cancer, diabetes, or even new pandemics.
+              </p>
+            </div>
+          </details>
+
+        </div>
+      </div><!-- /.ix-why -->
+
+      <!-- ── LeCun / JEPA section ── -->
+      <div class="ix-jepa">
+
+        <div class="ix-eyebrow">The Next Frontier</div>
+
+        <!-- Quote card -->
+        <div class="ix-quote-card">
+          <div class="ix-quote-author">
+            <div class="ix-quote-avatar">🧠</div>
+            <div class="ix-quote-who">
+              <strong>Yann LeCun</strong>
+              <span>Chief AI Scientist, Meta &middot; Turing Award Laureate 2018</span>
+            </div>
+          </div>
+          <p class="ix-quote-text">
+            "LLMs cannot be the path to real intelligence. They predict the next token. They have no model of the world,
+            no persistent memory, no ability to plan, and no common sense. They are incredibly useful, but they are not
+            going to get us to human-level AI by themselves."
+          </p>
+        </div>
+
+        <!-- Two-col: LLM limits + What is JEPA -->
+        <div class="ix-jepa-cols">
+
+          <div class="ix-jepa-block">
+            <div class="ix-jepa-block-icon ix-icon-red">⚠️</div>
+            <h4>The Limits of Large Language Models</h4>
+            <p>
+              LeCun argues that <strong>LLMs are not a path to genuine intelligence</strong>. Despite their impressive
+              outputs, they operate by predicting the next token in a sequence. This means they have no persistent
+              memory across conversations, no grounded understanding of the physical world, no reliable causal
+              reasoning, and no ability to plan sequences of actions toward a goal.
+            </p>
+            <ul>
+              <li>They hallucinate facts with high confidence</li>
+              <li>They cannot learn continuously from new experience</li>
+              <li>They lack any internal world model</li>
+              <li>They are brittle outside their training distribution</li>
+            </ul>
+          </div>
+
+          <div class="ix-jepa-block">
+            <div class="ix-jepa-block-icon ix-icon-indigo">🔮</div>
+            <h4>Why JEPA Is the Way Forward</h4>
+            <p>
+              LeCun's proposed alternative is the
+              <strong>Joint Embedding Predictive Architecture (JEPA)</strong>, a model that learns by predicting
+              abstract representations of the world rather than raw tokens or pixels. Instead of asking "what word
+              comes next?", JEPA asks "what is a plausible abstract state of the world given what I observe?"
+            </p>
+            <p>
+              This allows the model to build an <strong>internal world model</strong>, reason about cause and effect,
+              plan ahead, and generalise far beyond its training data. It is how LeCun believes machines will
+              eventually reach and surpass human-level intelligence.
+            </p>
+          </div>
+
+        </div>
+
+        <!-- JEPA explainer full width -->
+        <div class="ix-jepa-full">
+          <div class="ix-jepa-full-head">
+            <div class="ix-jepa-block-icon ix-icon-indigo" style="margin-bottom:0;">🧩</div>
+            <div>
+              <h4>What Exactly Is JEPA?</h4>
+              <span>Joint Embedding Predictive Architecture</span>
+            </div>
+          </div>
+          <p>
+            A <strong>Joint Embedding Predictive Architecture</strong> is a self-supervised learning framework
+            introduced by LeCun and his team at Meta AI. Rather than reconstructing raw inputs (like pixels or
+            tokens), it trains two encoder networks to produce abstract representations of an input and a
+            prediction target, then learns to make those representations agree.
+          </p>
+          <p>
+            The key insight is that prediction in <strong>abstract space</strong> is far richer than prediction in
+            raw signal space. A model does not need to predict every pixel of the next video frame to understand
+            physics. It only needs to predict a compact, structured representation of what will happen. This forces
+            the network to extract the truly meaningful structure of the world, much like how the human brain works.
+          </p>
+          <p>
+            LeCun published the foundational vision in his 2022 position paper
+            <a href="https://openreview.net/forum?id=BZ5a1r-kVsf" target="_blank" rel="noopener">
+              "A Path Towards Autonomous Machine Intelligence"
+            </a>.
+            Meta AI has since demonstrated JEPA variants such as
+            <a href="https://ai.meta.com/blog/v-jepa-yann-lecun-self-supervised-learning/" target="_blank"
+              rel="noopener">
+              V-JEPA
+            </a>
+            (video understanding without labels) and
+            <a href="https://ai.meta.com/blog/yann-lecun-advances-in-ai-self-supervised-learning/" target="_blank"
+              rel="noopener">
+              I-JEPA
+            </a>
+            (image understanding), showing the architecture learns richer and more transferable representations than
+            transformer-based generative models.
+          </p>
+        </div>
+
+        <!-- Our research banner -->
+        <div class="ix-research-banner">
+          <div class="ix-research-badge">🔭</div>
+          <div class="ix-research-text">
+            <h4>Afya eHealth and JEPA Research</h4>
+            <p>
+              We are actively exploring how JEPA-inspired architectures can be applied to <strong>medical image
+                understanding</strong> in low-resource settings. Current deep learning models for skin cancer
+              detection are trained on large labelled datasets that are difficult and costly to obtain in the DRC.
+              JEPA's self-supervised, world-model approach offers a promising path to building diagnostic AI that
+              <strong>learns from far fewer labelled examples</strong>, generalises across different skin types and
+              imaging conditions, and builds a structured representation of lesion morphology rather than
+              pattern-matching against training data. This research direction is central to our long-term vision
+              of accessible, robust AI diagnostics for Sub-Saharan Africa.
+            </p>
+          </div>
+        </div>
+
+      </div><!-- /.ix-jepa -->
+
+      <!-- ── Mission section ── -->
+      <div class="ix-mission">
+
+        <div class="ix-eyebrow">Our Mission</div>
+
+        <div class="ix-mission-card">
+          <div class="ix-mission-top">
+            <div class="ix-mission-icon">💙</div>
+            <div>
+              <h2 class="ix-mission-title">Saving Lives through Accurate Health Diagnosis</h2>
+              <p class="ix-mission-sub">Every detection made early is a life given back.</p>
+            </div>
+          </div>
+
+          <ul class="ix-mission-list">
+            <li>Early, careful diagnosis saves countless lives. This is our mission.</li>
+            <li>We believe in offering true assistance and support when it matters most.</li>
+            <li>Life with cancer is possible, especially with timely help and hope.</li>
+            <li>Every year, cancer kills thousands, but early detection changes outcomes.</li>
+            <li>Many hospitals still lack equipment for timely diagnosis. We bridge the gap with technology.</li>
+            <li>We collaborate with cancer societies and researchers worldwide for a healthier tomorrow.</li>
+          </ul>
+        </div>
+
+      </div><!-- /.ix-mission -->
+
+    </div>
+  </div>
 
   <script type="module" src="/js/layout.js"></script>
 </body>

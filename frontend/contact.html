@@ -25,31 +25,24 @@
       --blue-deep: #1e2a3a;
       --blue-mid: #1771c6;
       --blue-bright: #2497f3;
-      --blue-pale: rgba(36, 151, 243, 0.08);
-      --blue-glow: rgba(36, 151, 243, 0.18);
-      --white: #ffffff;
       --ink: #0f1923;
       --ink-soft: #374151;
       --muted: #718096;
-      --muted-light: #9ca3af;
+      --muted-light: #94a3b8;
       --border: #e5e7eb;
       --bg: #f5f8fd;
-    }
-
-    html {
-      scroll-behavior: smooth;
+      --white: #ffffff;
     }
 
     body {
       font-family: 'DM Sans', sans-serif;
       background: var(--bg);
       color: var(--ink);
-      min-height: 100vh;
-      overflow-x: hidden;
+      line-height: 1.6;
     }
 
     /* ─── HERO ───────────────────────────────────────────── */
-    .hero {
+    .contact-hero {
       position: relative;
       background: linear-gradient(140deg, #0d1b2e 0%, #1771c6 55%, #2497f3 100%);
       padding: 100px 24px 130px;
@@ -244,7 +237,7 @@
       }
     }
 
-    .hero h1 {
+    .contact-hero h1 {
       font-family: 'Sora', sans-serif;
       font-size: clamp(2.4rem, 5vw, 3.4rem);
       font-weight: 800;
@@ -254,14 +247,14 @@
       animation: fade-down 0.7s 0.1s ease both;
     }
 
-    .hero h1 span {
+    .contact-hero h1 span {
       background: linear-gradient(90deg, #fff 0%, rgba(255, 255, 255, 0.6) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
 
-    .hero p {
+    .contact-hero p {
       font-size: 1.05rem;
       color: rgba(255, 255, 255, 0.72);
       line-height: 1.7;
@@ -283,13 +276,11 @@
     /* ─── LAYOUT ──────────────────────────────────────────── */
     .page-body {
       max-width: 800px;
-      margin: -60px auto 80px;
-      padding: 0 24px;
+      margin: -60px auto 100px;
       position: relative;
-      z-index: 2;
-      display: grid;
-      gap: 24px;
-      animation: rise 0.8s 0.35s cubic-bezier(.22, .68, 0, 1.2) both;
+      z-index: 5;
+      padding: 0 20px;
+      animation: rise 0.8s 0.3s cubic-bezier(0.22, 0.68, 0, 1.2) both;
     }
 
     @keyframes rise {
@@ -656,7 +647,7 @@
 <body>
 
   <!-- Hero -->
-  <div class="hero">
+  <div class="contact-hero">
     <div class="hero-ring"></div>
     <div class="hero-ring"></div>
     <div class="hero-ring"></div>
@@ -674,7 +665,7 @@
     <div class="hero-content">
       <div class="hero-badge">Afya eHealth · Bukavu DRC</div>
       <h1>Get In <span>Touch</span></h1>
-      <p>Have a question, a collaboration idea, or just want to say hello?<br>We'd love to hear from you — we respond
+      <p>Have a question, a collaboration idea, or just want to say hello?<br>We'd love to hear from you we respond
         within 24–48 hours.</p>
     </div>
   </div>
@@ -817,7 +808,7 @@
       } catch (err) {
         status.className = 'error';
         statusIcon.textContent = '✗';
-        statusMsg.textContent = 'Network error — please try again.';
+        statusMsg.textContent = 'Network error please try again.';
       } finally {
         btn.disabled = false;
         document.getElementById('btn-label').textContent = 'Send Message';

@@ -9,39 +9,20 @@
   <link rel="icon" href="/assets/tuungane.jpeg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="/js/particles-hero.js"></script>
   <style>
-    .form-input {
-      border-radius: 12px;
-      padding: 0.8rem 1.2rem;
-      border: 1.5px solid #edf2f7;
-      background: #f8fafc;
-      transition: all 0.2s;
-    }
-
-    .form-input:focus {
-      border-color: #2497f3;
-      background: #fff;
-      box-shadow: 0 0 0 4px rgba(36, 151, 243, 0.1);
-    }
-
-    .auth-btn {
-      padding: 1rem;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #2497f3 0%, #1771c6 100%);
-      font-weight: 700;
-      margin-top: 1.5rem;
-    }
+    /* Removed redundant styles to allow global styles.css to take over */
   </style>
 </head>
 
 <body>
-  <main class="auth-main">
+  <main class="auth-main hero">
     <section class="auth-card">
       <div style="margin-bottom: 1.5rem;">
         <img src="/assets/tuungane.jpeg" alt="Afya" style="width:60px;height:60px;border-radius:14px;object-fit:cover;">
       </div>
       <h2 class="auth-title">Join Afya</h2>
-      <p style="color: #718096; margin-top: -2rem; margin-bottom: 2rem;">Start your journey to better health diagnosis.
+      <p style="color: rgba(255,255,255,0.6); margin-bottom: 2rem;">Start your journey to better health diagnosis.
       </p>
 
       <form class="auth-form" id="signup-form">

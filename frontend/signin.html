@@ -9,39 +9,20 @@
   <link rel="icon" href="/assets/tuungane.jpeg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="/js/particles-hero.js"></script>
   <style>
-    .form-input {
-      border-radius: 12px;
-      padding: 0.8rem 1.2rem;
-      border: 1.5px solid #edf2f7;
-      background: #f8fafc;
-      transition: all 0.2s;
-    }
-
-    .form-input:focus {
-      border-color: #2497f3;
-      background: #fff;
-      box-shadow: 0 0 0 4px rgba(36, 151, 243, 0.1);
-    }
-
-    .auth-btn {
-      padding: 1rem;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #2497f3 0%, #1771c6 100%);
-      font-weight: 700;
-      margin-top: 1.5rem;
-    }
+    /* Removed redundant styles to allow global styles.css to take over */
   </style>
 </head>
 
 <body>
-  <main class="auth-main">
+  <main class="auth-main hero">
     <section class="auth-card">
       <div style="margin-bottom: 1.5rem;">
         <img src="/assets/tuungane.jpeg" alt="Afya" style="width:60px;height:60px;border-radius:14px;object-fit:cover;">
       </div>
       <h2 class="auth-title">Welcome Back</h2>
-      <p style="color: #718096; margin-top: -2rem; margin-bottom: 2rem;">Sign in to continue your healthcare analysis.</p>
+      <p style="color: rgba(255,255,255,0.6); margin-bottom: 2rem;">Sign in to continue your healthcare analysis.</p>
 
       <form class="auth-form" id="signin-form">
         <div class="form-group">
@@ -51,6 +32,9 @@
         <div class="form-group">
           <label for="password" class="form-label">Password</label>
           <input type="password" id="password" name="password" class="form-input" placeholder="••••••••" required>
+        </div>
+        <div style="text-align: right; margin-top: -0.5rem; margin-bottom: 1rem;">
+          <a href="/forgot-password" style="color: #2497f3; font-size: 0.85rem; text-decoration: none;">Forgot Password?</a>
         </div>
         <button type="button" class="cta-btn auth-btn" id="login-btn">Login</button>
       </form>

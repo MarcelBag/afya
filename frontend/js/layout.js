@@ -29,7 +29,7 @@ import { initSettings } from './settings.js';
   const userInitial = userName ? userName[0].toUpperCase() : '?';
   const userRole = payload?.role || 'user';
 
-  // ─── Admin pages have their own sidebar layout — only inject settings modal ───
+  // ─── Admin pages have their own sidebar layout only inject settings modal ───
   if (isAdmin) {
     if (isLoggedIn) {
       initSettings(token, {
@@ -48,7 +48,7 @@ import { initSettings } from './settings.js';
   const navLinks = [
     { href: '/', label: 'Home' },
     { href: '/about', label: 'About' },
-    { href: '/ai-tools', label: 'AI Tools' },
+    { href: '/home', label: 'AI Tools' },
     { href: '/contact', label: 'Contact' },
   ];
 
@@ -89,7 +89,6 @@ import { initSettings } from './settings.js';
       <ul class="nav-links">
         ${navHTML}
         <li><a href="/signin" class="nav-auth-btn">Sign In</a></li>
-        <li><a href="/signup" class="nav-auth-btn nav-signup-btn">Sign Up</a></li>
       </ul>`;
   }
 

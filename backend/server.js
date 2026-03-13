@@ -254,6 +254,70 @@ app.post('/api/verify-2fa', async (req, res) => {
 });
 
 // ----------------------------
+// Forgot Password Flow
+// ----------------------------
+app.post('/api/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      // Don't reveal if user exists for security, just say we sent a code if found
+      return res.status(200).json({ message: 'If account exists, a code was sent.' });
+    }
+
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    user.twoFactorCode = verificationCode;
+    user.twoFactorExpires = Date.now() + 15 * 60 * 1000; // 15 mins
+    await user.save();
+
+    await transporter.sendMail({
+      from: process.env.DEFAULT_FROM_EMAIL,
+      to: user.email,
+      subject: 'Afya Password Reset Code',
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px;">
+          <h2 style="color: #2497f3;">Password Reset Verification</h2>
+          <p>You requested to reset your password. Use the following code:</p>
+          <div style="font-size: 2rem; font-weight: bold; color: #1a365d; margin: 20px 0;">${verificationCode}</div>
+          <p>This code will expire in 15 minutes.</p>
+        </div>
+      `,
+    });
+
+    res.status(200).json({ message: 'Verification code sent to your email.' });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ message: 'Error processing request.' });
+  }
+});
+
+app.post('/api/reset-password', async (req, res) => {
+  try {
+    const { email, code, newPassword } = req.body;
+    const user = await User.findOne({ 
+      email, 
+      twoFactorCode: code, 
+      twoFactorExpires: { $gt: Date.now() } 
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired verification code.' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    user.password = hashedPassword;
+    user.twoFactorCode = undefined;
+    user.twoFactorExpires = undefined;
+    await user.save();
+
+    res.status(200).json({ message: 'Password reset successfully!' });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ message: 'Error resetting password.' });
+  }
+});
+
+// ----------------------------
 // Auth Middleware
 // ----------------------------
 const authMiddleware = (req, res, next) => {
@@ -354,6 +418,27 @@ app.get('/api/header-history', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Error fetching header history:', error);
     res.status(500).json({ message: 'Error fetching history' });
+  }
+});
+
+app.delete('/api/header-history/:id', authMiddleware, async (req, res) => {
+  try {
+    const item = await HeaderHistory.findOne({ _id: req.params.id, userId: req.user.userId });
+    if (!item) return res.status(404).json({ message: 'History item not found' });
+
+    // Delete file from disk if it's a local path
+    if (item.imageUrl.startsWith('/uploads/')) {
+      const filePath = path.join(__dirname, '..', item.imageUrl);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    }
+
+    await HeaderHistory.deleteOne({ _id: req.params.id });
+    res.json({ message: 'History item deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting header history:', error);
+    res.status(500).json({ message: 'Error deleting history item' });
   }
 });
 

@@ -1,17 +1,971 @@
+<!-- frontend/home.html -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Home | Afya eHealth</title>
   <link rel="stylesheet" href="/cs/styles.css">
   <link rel="icon" href="/assets/tuungane.jpeg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700&display=swap"
+    rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body>
 
-  <!-- ======= Error Modal ======= -->
+  <style>
+    /* ─────────────────────────────────────────────
+       All styles are scoped with .hp- prefix so
+       they never bleed into other pages that share
+       the same styles.css file.
+    ───────────────────────────────────────────── */
+
+    :root {
+      --c-blue: #2497f3;
+      --c-mid: #1771c6;
+      --c-dark: #0a1628;
+      --c-navy: #0f2044;
+      --c-ink: #0d1117;
+      --c-soft: #4a5568;
+      --c-muted: #8896ab;
+      --c-border: #e2e8f0;
+      --c-bg: #f4f7fb;
+      --c-white: #ffffff;
+    }
+
+    .hp-page * {
+      box-sizing: border-box;
+    }
+
+    .hp-page {
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    /* ════════════════════════════════════════
+       HERO
+    ════════════════════════════════════════ */
+    .hp-hero {
+      position: relative;
+      min-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 24px 70px;
+      overflow: hidden;
+      background: radial-gradient(ellipse at 30% 60%, #0e2a5c 0%, #0a1628 45%, #06111f 100%);
+    }
+
+    /* grid texture */
+    .hp-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(36, 151, 243, 0.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(36, 151, 243, 0.055) 1px, transparent 1px);
+      background-size: 52px 52px;
+      mask-image: radial-gradient(ellipse 80% 80% at center, black 20%, transparent 72%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* center glow orb */
+    .hp-hero::after {
+      content: '';
+      position: absolute;
+      width: 560px;
+      height: 560px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(36, 151, 243, 0.16) 0%, transparent 68%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 0;
+      animation: hp-orb 5.5s ease-in-out infinite;
+    }
+
+    @keyframes hp-orb {
+
+      0%,
+      100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: .7;
+      }
+
+      50% {
+        transform: translate(-50%, -50%) scale(1.14);
+        opacity: 1;
+      }
+    }
+
+    /* particles.js canvas */
+    .hp-hero canvas {
+      position: absolute !important;
+      inset: 0 !important;
+      z-index: 1 !important;
+    }
+
+    .hp-hero-inner {
+      position: relative;
+      z-index: 2;
+      max-width: 740px;
+      width: 100%;
+      text-align: center;
+    }
+
+    /* ── badge ── */
+    .hp-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      border: 1px solid rgba(36, 151, 243, 0.38);
+      background: rgba(36, 151, 243, 0.07);
+      backdrop-filter: blur(10px);
+      border-radius: 100px;
+      padding: 5px 18px 5px 8px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.82);
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      margin-bottom: 26px;
+      animation: hp-rise 0.6s ease both;
+    }
+
+    .hp-badge-pip {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(36, 151, 243, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .hp-badge-pip::after {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #63e3a1;
+      box-shadow: 0 0 8px #63e3a1;
+      animation: hp-blink 2s ease infinite;
+    }
+
+    @keyframes hp-blink {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .18
+      }
+    }
+
+    /* ── headline ── */
+    .hp-h1 {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(1.9rem, 4vw, 3rem);
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.1;
+      letter-spacing: -0.025em;
+      margin: 0 0 16px;
+      animation: hp-rise 0.6s 0.1s ease both;
+    }
+
+    .hp-h1 .hp-grad {
+      background: linear-gradient(100deg, #7dcfff 0%, #2497f3 45%, #aee0ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hp-sub {
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.55);
+      line-height: 1.78;
+      max-width: 500px;
+      margin: 0 auto 34px;
+      animation: hp-rise 0.6s 0.2s ease both;
+    }
+
+    /* ── CTA buttons ── */
+    .hp-ctas {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 11px;
+      flex-wrap: wrap;
+      animation: hp-rise 0.6s 0.3s ease both;
+    }
+
+    .hp-btn-fill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 26px;
+      background: var(--c-blue);
+      color: #fff;
+      border-radius: 10px;
+      border: none;
+      font-family: 'Sora', sans-serif;
+      font-weight: 700;
+      font-size: 0.855rem;
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: 0 6px 22px rgba(36, 151, 243, 0.45);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .hp-btn-fill:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(36, 151, 243, 0.56);
+    }
+
+    .hp-btn-outline {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 26px;
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(255, 255, 255, 0.78);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      font-family: 'Sora', sans-serif;
+      font-weight: 600;
+      font-size: 0.855rem;
+      text-decoration: none;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: background 0.2s, color 0.2s, transform 0.2s;
+    }
+
+    .hp-btn-outline:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      transform: translateY(-2px);
+    }
+
+    /* ── stat pills ── */
+    .hp-pills {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      margin-top: 40px;
+      flex-wrap: wrap;
+      animation: hp-rise 0.6s 0.46s ease both;
+    }
+
+    .hp-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 100px;
+      padding: 6px 15px 6px 7px;
+      backdrop-filter: blur(8px);
+    }
+
+    .hp-pill-ico {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(36, 151, 243, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
+    }
+
+    .hp-pill-lbl {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.62);
+    }
+
+    .hp-pill-lbl strong {
+      display: block;
+      color: #fff;
+      font-family: 'Sora', sans-serif;
+      font-weight: 700;
+      font-size: 0.8rem;
+      line-height: 1.2;
+    }
+
+    /* ── scroll cue ── */
+    .hp-scroll {
+      position: absolute;
+      bottom: 26px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      animation: hp-rise 0.6s 0.7s ease both;
+    }
+
+    .hp-scroll span {
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    .hp-scroll-bar {
+      width: 1px;
+      height: 30px;
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), transparent);
+      animation: hp-drip 1.9s ease infinite;
+    }
+
+    @keyframes hp-drip {
+      0% {
+        transform: scaleY(0);
+        transform-origin: top;
+        opacity: 1;
+      }
+
+      50% {
+        transform: scaleY(1);
+        transform-origin: top;
+        opacity: 1;
+      }
+
+      100% {
+        transform: scaleY(1);
+        transform-origin: bottom;
+        opacity: 0;
+      }
+    }
+
+    @keyframes hp-rise {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ════════════════════════════════════════
+       BODY BELOW HERO
+    ════════════════════════════════════════ */
+    .hp-wave {
+      display: block;
+      width: 100%;
+      margin-bottom: -2px;
+      background: radial-gradient(ellipse at 30% 60%, #0e2a5c, #0a1628 45%, #06111f);
+    }
+
+    .hp-body {
+      background: var(--c-bg);
+      padding: 0 24px 72px;
+    }
+
+    .hp-wrap {
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+
+    /* ── section heading ── */
+    .hp-section-hd {
+      padding-top: 48px;
+      margin-bottom: 26px;
+    }
+
+    .hp-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.67rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--c-blue);
+      margin-bottom: 9px;
+    }
+
+    .hp-eyebrow::before {
+      content: '';
+      width: 18px;
+      height: 2px;
+      background: var(--c-blue);
+      border-radius: 2px;
+    }
+
+    .hp-section-hd h2 {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(1.3rem, 2.4vw, 1.75rem);
+      font-weight: 700;
+      color: var(--c-ink);
+      margin: 0 0 5px;
+      letter-spacing: -0.02em;
+    }
+
+    .hp-section-hd p {
+      font-size: 0.88rem;
+      color: var(--c-soft);
+      margin: 0;
+      line-height: 1.7;
+      max-width: 420px;
+    }
+
+    /* ── tool card grid ── */
+    .hp-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .hp-card {
+      background: var(--c-white);
+      border-radius: 20px;
+      border: 1px solid var(--c-border);
+      padding: 30px 28px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 2px 10px rgba(10, 22, 40, 0.05);
+      transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+      animation: hp-rise 0.5s ease both;
+    }
+
+    .hp-card:nth-child(1) {
+      animation-delay: 0.08s;
+    }
+
+    .hp-card:nth-child(2) {
+      animation-delay: 0.18s;
+    }
+
+    .hp-card:hover {
+      border-color: var(--c-blue);
+      transform: translateY(-5px);
+      box-shadow: 0 18px 44px rgba(36, 151, 243, 0.13);
+    }
+
+    /* corner glow */
+    .hp-card::after {
+      content: '';
+      position: absolute;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(36, 151, 243, 0.1) 0%, transparent 70%);
+      top: -50px;
+      right: -50px;
+      opacity: 0;
+      transition: opacity 0.35s;
+    }
+
+    .hp-card:hover::after {
+      opacity: 1;
+    }
+
+    /* chip */
+    .hp-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      border-radius: 100px;
+      padding: 3px 11px;
+      font-size: 0.66rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+      width: fit-content;
+    }
+
+    .hp-chip-blue {
+      background: rgba(36, 151, 243, 0.09);
+      color: var(--c-mid);
+    }
+
+    .hp-chip-green {
+      background: rgba(16, 185, 129, 0.09);
+      color: #0d9060;
+    }
+
+    /* icon */
+    .hp-card-ico {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 16px;
+    }
+
+    .hp-ico-blue {
+      background: rgba(36, 151, 243, 0.1);
+      border: 1px solid rgba(36, 151, 243, 0.18);
+    }
+
+    .hp-ico-green {
+      background: rgba(16, 185, 129, 0.09);
+      border: 1px solid rgba(16, 185, 129, 0.16);
+    }
+
+    .hp-card h3 {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--c-ink);
+      margin: 0 0 7px;
+    }
+
+    .hp-card p {
+      font-size: 0.855rem;
+      color: var(--c-soft);
+      line-height: 1.72;
+      margin: 0 0 18px;
+      flex: 1;
+    }
+
+    /* feature tags */
+    .hp-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 22px;
+    }
+
+    .hp-tag {
+      font-size: 0.68rem;
+      font-weight: 500;
+      background: var(--c-bg);
+      color: var(--c-muted);
+      border: 1px solid var(--c-border);
+      border-radius: 6px;
+      padding: 3px 9px;
+    }
+
+    /* CTA inside card */
+    .hp-card-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 18px;
+      background: linear-gradient(135deg, var(--c-blue), var(--c-mid));
+      color: #fff;
+      border-radius: 9px;
+      font-family: 'Sora', sans-serif;
+      font-weight: 700;
+      font-size: 0.8rem;
+      align-self: flex-start;
+      width: fit-content;
+      box-shadow: 0 4px 12px rgba(36, 151, 243, 0.28);
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+
+    .hp-card-btn-arr {
+      transition: transform 0.2s;
+    }
+
+    .hp-card:hover .hp-card-btn {
+      box-shadow: 0 7px 22px rgba(36, 151, 243, 0.44);
+    }
+
+    .hp-card:hover .hp-card-btn-arr {
+      transform: translateX(4px);
+    }
+
+    /* ── inner tool views ── */
+    .hp-views .back-to-hub,
+    #back-from-analysis,
+    #back-from-generator {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--c-blue);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 22px;
+      background: rgba(36, 151, 243, 0.07);
+      padding: 7px 14px;
+      border-radius: 8px;
+      border: none;
+      font-family: inherit;
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    #back-from-analysis:hover,
+    #back-from-generator:hover {
+      background: rgba(36, 151, 243, 0.13);
+      transform: translateX(-4px);
+    }
+
+    /* ════════════════════════════════════════
+       IMAGE LIGHTBOX MODAL
+    ════════════════════════════════════════ */
+    .hp-lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .hp-lightbox.open {
+      display: flex;
+    }
+
+    /* backdrop */
+    .hp-lightbox-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(6, 17, 31, 0.88);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      cursor: pointer;
+      animation: hp-lb-fade 0.22s ease both;
+    }
+
+    /* panel */
+    .hp-lightbox-panel {
+      position: relative;
+      z-index: 1;
+      max-width: 880px;
+      width: 100%;
+      border-radius: 20px;
+      overflow: hidden;
+      background: #0a1628;
+      box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06);
+      animation: hp-lb-pop 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .hp-lightbox-panel img {
+      width: 100%;
+      display: block;
+      max-height: 78vh;
+      object-fit: contain;
+      background: #06111f;
+    }
+
+    /* caption bar */
+    .hp-lightbox-caption {
+      padding: 14px 20px 16px;
+      background: #0a1628;
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .hp-lightbox-caption p {
+      font-family: 'Sora', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.82);
+      margin: 0;
+    }
+
+    /* close button */
+    .hp-lightbox-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: background 0.2s, transform 0.2s;
+      z-index: 2;
+      line-height: 1;
+    }
+
+    .hp-lightbox-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.1);
+    }
+
+    /* nav arrows */
+    .hp-lightbox-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.09);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #fff;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: background 0.2s, transform 0.2s;
+      z-index: 2;
+    }
+
+    .hp-lightbox-nav:hover {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .hp-lightbox-nav.prev {
+      left: -56px;
+    }
+
+    .hp-lightbox-nav.next {
+      right: -56px;
+    }
+
+    .hp-lightbox-nav:disabled {
+      opacity: 0.25;
+      cursor: default;
+    }
+
+    /* counter badge */
+    .hp-lightbox-counter {
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.72rem;
+      font-family: 'Sora', sans-serif;
+      color: rgba(255, 255, 255, 0.38);
+      letter-spacing: 0.06em;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    @keyframes hp-lb-fade {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes hp-lb-pop {
+      from {
+        opacity: 0;
+        transform: scale(0.93) translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    /* hover zoom-in cursor on gallery images */
+    #header-generator-view .gallery-card .hp-img-wrap {
+      position: relative;
+      cursor: zoom-in;
+      overflow: hidden;
+    }
+
+    #header-generator-view .gallery-card .hp-img-wrap img {
+      transition: transform 0.35s ease;
+    }
+
+    #header-generator-view .gallery-card .hp-img-wrap:hover img {
+      transform: scale(1.04);
+    }
+
+    /* hover overlay hint */
+    #header-generator-view .gallery-card .hp-img-wrap::after {
+      content: '⤢';
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(10, 22, 40, 0.65);
+      backdrop-filter: blur(6px);
+      color: #fff;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.22s;
+      pointer-events: none;
+    }
+
+    #header-generator-view .gallery-card .hp-img-wrap:hover::after {
+      opacity: 1;
+    }
+
+    /* ── responsive lightbox ── */
+    @media (max-width: 900px) {
+      .hp-lightbox-nav.prev {
+        left: 6px;
+      }
+
+      .hp-lightbox-nav.next {
+        right: 6px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .hp-lightbox-nav {
+        display: none;
+      }
+    }
+
+    /* ════════════════════════════════════════
+       GALLERY 3-column grid
+       scoped to generator view only
+    ════════════════════════════════════════ */
+    #header-generator-view .gallery {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 24px;
+      align-items: start;
+    }
+
+    /* 1 card: sits naturally in col 1 */
+    #header-generator-view .gallery:has(.gallery-card:only-child) .gallery-card {
+      grid-column: 1 / 2;
+    }
+
+    /* 2 cards: span first 2 cols only */
+    #header-generator-view .gallery:has(.gallery-card:nth-child(2):last-child) .gallery-card:nth-child(1) {
+      grid-column: 1 / 2;
+    }
+
+    #header-generator-view .gallery:has(.gallery-card:nth-child(2):last-child) .gallery-card:nth-child(2) {
+      grid-column: 2 / 3;
+    }
+
+    /* Card base */
+    #header-generator-view .gallery-card {
+      border-radius: 16px;
+      overflow: hidden;
+      background: #fff;
+      border: 1px solid var(--c-border);
+      box-shadow: 0 2px 12px rgba(10, 22, 40, 0.07);
+      transition: transform 0.25s, box-shadow 0.25s;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    #header-generator-view .gallery-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 14px 36px rgba(36, 151, 243, 0.13);
+    }
+
+    /* Uniform image ratio */
+    #header-generator-view .gallery-card img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      display: block;
+    }
+
+    #header-generator-view .gallery-card .skeleton {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+    }
+
+    /* Caption */
+    #header-generator-view .gallery-card-content {
+      padding: 12px 14px 14px;
+      background: #fff;
+    }
+
+    #header-generator-view .gallery-card-content h4 {
+      font-family: 'Sora', sans-serif;
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--c-ink);
+      margin: 0;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* Download button */
+    #header-generator-view .gallery-card .download-btn {
+      top: 10px;
+      right: 10px;
+      width: 34px;
+      height: 34px;
+      font-size: 0.95rem;
+    }
+
+    /* ── responsive ── */
+    @media (max-width: 900px) {
+      #header-generator-view .gallery {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      /* reset per-card column overrides */
+      #header-generator-view .gallery .gallery-card {
+        grid-column: auto !important;
+      }
+    }
+
+    @media (max-width: 560px) {
+      #header-generator-view .gallery {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .hp-hero {
+        min-height: auto;
+        padding: 58px 20px 50px;
+      }
+
+      .hp-pills {
+        gap: 7px;
+      }
+
+      .hp-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hp-card {
+        padding: 22px 18px;
+      }
+
+      .hp-section-hd {
+        padding-top: 32px;
+      }
+    }
+  </style>
+</head>
+
+<body class="hp-page">
+
+  <!-- ══ Error Modal ══ -->
   <div id="error-modal" class="modal hidden">
     <div class="modal-content">
       <span class="close-button" id="close-error">&times;</span>
@@ -19,110 +973,314 @@
     </div>
   </div>
 
-  <!-- ======= Main Content Wrapper ======= -->
-  <main class="container">
-    <!-- Hub Selection View -->
-    <div id="hub-view" class="tool-view active">
-      <section class="guidelines card" style="text-align: center;">
-        <h2>Welcome to Afya AI Lab</h2>
-        <p>Select a tool below to begin your analysis or creative generation.</p>
-      </section>
+  <!-- ══════════════════════════════════════
+       HERO
+  ══════════════════════════════════════ -->
+  <div class="hp-hero hero">
 
-      <div class="tool-selection-grid">
-        <div class="selection-card" id="select-image-analysis">
-          <div class="icon">🩺</div>
-          <h3>Image Analysis</h3>
-          <p>Early cancer detection and diagnosis using advanced computer vision models.</p>
-          <div class="go-btn">Start Diagnosis &rarr;</div>
+    <div class="hp-hero-inner">
+
+      <div class="hp-badge">
+        <span class="hp-badge-pip"></span>
+        Afya eHealth · Bukavu, DRC
+      </div>
+
+      <h1 class="hp-h1">
+        AI-Powered Tools for<br><span class="hp-grad">Frontline Health Workers</span>
+      </h1>
+
+      <p class="hp-sub">
+        Early cancer detection and medical content creation —
+        purpose-built for health workers in the Democratic Republic of Congo.
+      </p>
+
+      <div class="hp-ctas">
+        <a href="#tools" class="hp-btn-fill">
+          Explore Tools
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+            <path d="M1 6.5h11M7 2l4.5 4.5L7 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </a>
+        <a href="/about" class="hp-btn-outline">Our Mission</a>
+      </div>
+
+      <div class="hp-pills">
+        <div class="hp-pill">
+          <div class="hp-pill-ico">🔬</div>
+          <div class="hp-pill-lbl"><strong>Computer Vision</strong>Skin Analysis</div>
         </div>
-
-        <div class="selection-card" id="select-header-generator">
-          <div class="icon">🎨</div>
-          <h3>Blog Header Generator</h3>
-          <p>Generate professional medical-themed blog headers using DALL-E 3.</p>
-          <div class="go-btn">Start Creating &rarr;</div>
+        <div class="hp-pill">
+          <div class="hp-pill-ico">✦</div>
+          <div class="hp-pill-lbl"><strong>DALL·E 3</strong>Blog Visuals</div>
+        </div>
+        <div class="hp-pill">
+          <div class="hp-pill-ico">🌍</div>
+          <div class="hp-pill-lbl"><strong>Free Access</strong>Open to all</div>
         </div>
       </div>
+
     </div>
 
-    <!-- Image Analysis Tool View -->
-    <div id="image-analysis-view" class="tool-view">
-      <div class="back-to-hub" id="back-from-analysis">&larr; Back to Dashboard</div>
-      
-      <section class="guidelines card">
-        <h2>Image Analysis Guidelines</h2>
-        <ul>
-          <li>Ensure the image is clear and relevant for the analysis.</li>
-          <li>Upload the image for skin cancer detection (benign/malignant).</li>
-          <li>Click the upload button and submit your image for processing.</li>
-        </ul>
-      </section>
-
-      <section id="upload-section" class="card">
-        <h3>Upload Image for Analysis</h3>
-        <form id="upload-form">
-          <label for="image">Upload Image:</label>
-          <input type="file" id="image" name="image" accept="image/*" required>
-          <button type="submit" class="cta-btn">Submit Image</button>
-        </form>
-      </section>
-      
-      <section id="results-section" class="hidden card">
-        <h2>Analysis Results</h2>
-        <div id="results"></div>
-      </section>
+    <div class="hp-scroll">
+      <span>scroll</span>
+      <div class="hp-scroll-bar"></div>
     </div>
+  </div>
 
-    <!-- Blog Header Generator Tool View -->
-    <div id="header-generator-view" class="tool-view">
-      <div class="back-to-hub" id="back-from-generator">&larr; Back to Dashboard</div>
+  <!-- wave separator -->
+  <svg class="hp-wave" viewBox="0 0 1440 50" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"
+    aria-hidden="true">
+    <path d="M0 50L80 43C160 36 320 22 480 18.3C640 14.7 800 21.3 960 25.7C1120 30 1280 32 1360 33L1440 34V50H0Z"
+      fill="#f4f7fb" />
+  </svg>
 
-      <div class="generator-layout">
-        <!-- History Sidebar -->
-        <aside class="history-sidebar">
-          <div class="sidebar-header">
-            <h3>Recent History</h3>
-            <button id="refresh-history" title="Refresh history">🔄</button>
+  <!-- ══════════════════════════════════════
+       BODY
+  ══════════════════════════════════════ -->
+  <div class="hp-body">
+    <div class="hp-wrap">
+
+      <main class="container hp-views" id="tools">
+
+        <!-- ─── Hub view ─── -->
+        <div id="hub-view" class="tool-view active">
+
+          <div class="hp-section-hd">
+            <div class="hp-eyebrow">AI-Powered Tools</div>
+            <h2>What would you like to do today?</h2>
+            <p>Choose from our clinical AI suite diagnosis or content creation, ready in seconds.</p>
           </div>
-          <div id="history-list" class="history-list">
-            <p class="empty-state">No history yet.</p>
-          </div>
-        </aside>
 
-        <!-- Main Generator Area -->
-        <main class="generator-main">
-          <section class="card">
-            <h3>Blog Header Generator</h3>
-            <p style="color: #718096; margin-bottom: 2rem;">Paste your blog titles below (one per line). Consistent, premium designs every time.</p>
+          <div class="hp-grid">
 
-            <form id="generator-form">
-              <div class="form-group" style="width: 100%;">
-                <textarea id="blog-titles" class="form-input" style="min-height: 100px;"
-                  placeholder="e.g. Understanding Skin Health&#10;Preventing Sun Damage"></textarea>
+            <!-- Image Analysis -->
+            <div class="hp-card" id="select-image-analysis">
+              <div class="hp-chip hp-chip-blue">🩺 Diagnosis</div>
+              <div class="hp-card-ico hp-ico-blue">🔬</div>
+              <h3>Image Analysis</h3>
+              <p>Early skin cancer detection powered by computer vision. Upload a dermoscopy image and receive instant
+                benign / malignant classification.</p>
+              <div class="hp-tags">
+                <span class="hp-tag">Skin Cancer</span>
+                <span class="hp-tag">Benign / Malignant</span>
+                <span class="hp-tag">CV Model</span>
               </div>
-              <button type="submit" id="generate-btn" class="cta-btn" style="width: 100%; margin-top: 1rem;">Generate Headers</button>
-            </form>
-
-            <div id="loader" class="center hidden" style="margin-top: 2rem; flex-direction: column; gap: 15px;">
-              <div class="spinner"></div>
-              <div class="progress-container" style="width: 100%; max-width: 400px; height: 10px; background: #edf2f7; border-radius: 20px; overflow: hidden; margin: 10px 0;">
-                <div id="progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #2497f3, #63b3ed); transition: width 0.3s ease;"></div>
+              <div class="hp-card-btn">
+                Start Diagnosis
+                <span class="hp-card-btn-arr">→</span>
               </div>
-              <p id="loader-text">Generating AI artwork... <span id="progress-percent">0%</span></p>
             </div>
+
+            <!-- Blog Header Generator -->
+            <div class="hp-card" id="select-header-generator">
+              <div class="hp-chip hp-chip-green">✦ Creative</div>
+              <div class="hp-card-ico hp-ico-green">🎨</div>
+              <h3>Blog Header Generator</h3>
+              <p>Generate professional medical-themed blog header images using DALL·E 3. Paste your titles, get premium
+                visuals every time.</p>
+              <div class="hp-tags">
+                <span class="hp-tag">DALL·E 3</span>
+                <span class="hp-tag">Medical Theme</span>
+                <span class="hp-tag">Batch Mode</span>
+              </div>
+              <div class="hp-card-btn">
+                Start Creating
+                <span class="hp-card-btn-arr">→</span>
+              </div>
+            </div>
+
+          </div>
+        </div><!-- /#hub-view -->
+
+        <!-- ─── Image Analysis view ─── -->
+        <div id="image-analysis-view" class="tool-view">
+          <button id="back-from-analysis" class="back-to-hub">← Back to Dashboard</button>
+
+          <section class="guidelines card">
+            <h2>Image Analysis Guidelines</h2>
+            <ul>
+              <li>Ensure the image is clear and relevant for the analysis.</li>
+              <li>Upload the image for skin cancer detection (benign / malignant).</li>
+              <li>Click the upload button and submit your image for processing.</li>
+            </ul>
           </section>
 
-          <div id="results-gallery" class="gallery">
-          </div>
-        </main>
-      </div>
-    </div>
-  </main>
+          <section id="upload-section" class="card">
+            <h3>Upload Image for Analysis</h3>
+            <form id="upload-form">
+              <label for="image">Upload Image:</label>
+              <input type="file" id="image" name="image" accept="image/*" required>
+              <button type="submit" class="cta-btn">Submit Image</button>
+            </form>
+          </section>
 
-  <!-- ======= Scripts ======= -->
+          <section id="results-section" class="hidden card">
+            <h2>Analysis Results</h2>
+            <div id="results"></div>
+          </section>
+        </div><!-- /#image-analysis-view -->
+
+        <!-- ─── Blog Header Generator view ─── -->
+        <div id="header-generator-view" class="tool-view">
+          <button id="back-from-generator" class="back-to-hub">← Back to Dashboard</button>
+
+          <div class="generator-layout">
+            <aside class="history-sidebar">
+              <div class="sidebar-header">
+                <h3>Recent History</h3>
+                <button id="refresh-history" title="Refresh history">🔄</button>
+              </div>
+              <div id="history-list" class="history-list">
+                <p class="empty-state">No history yet.</p>
+              </div>
+            </aside>
+
+            <main class="generator-main">
+              <section class="card">
+                <h3>Blog Header Generator</h3>
+                <p style="color:#718096;margin-bottom:1.5rem;">Paste your blog titles below (one per line). Consistent,
+                  premium designs every time.</p>
+                <form id="generator-form">
+                  <div class="form-group" style="width:100%;">
+                    <textarea id="blog-titles" class="form-input" style="min-height:100px;"
+                      placeholder="e.g. Understanding Skin Health&#10;Preventing Sun Damage"></textarea>
+                  </div>
+                  <button type="submit" id="generate-btn" class="cta-btn" style="width:100%;margin-top:1rem;">Generate
+                    Headers</button>
+                </form>
+                <div id="loader" class="center hidden" style="margin-top:2rem;flex-direction:column;gap:15px;">
+                  <div class="spinner"></div>
+                  <div class="progress-container"
+                    style="width:100%;max-width:400px;height:10px;background:#edf2f7;border-radius:20px;overflow:hidden;margin:10px 0;">
+                    <div id="progress-bar"
+                      style="width:0%;height:100%;background:linear-gradient(90deg,#2497f3,#63b3ed);transition:width .3s ease;">
+                    </div>
+                  </div>
+                  <p id="loader-text">Generating AI artwork… <span id="progress-percent">0%</span></p>
+                </div>
+              </section>
+              <div id="results-gallery" class="gallery"></div>
+            </main>
+          </div>
+        </div><!-- /#header-generator-view -->
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ══ Image Lightbox ══ -->
+  <div class="hp-lightbox" id="hp-lightbox" role="dialog" aria-modal="true" aria-label="Image preview">
+    <div class="hp-lightbox-backdrop" id="hp-lb-backdrop"></div>
+    <div class="hp-lightbox-panel" id="hp-lb-panel">
+      <button class="hp-lightbox-close" id="hp-lb-close" aria-label="Close">&times;</button>
+      <button class="hp-lightbox-nav prev" id="hp-lb-prev" aria-label="Previous">&#8592;</button>
+      <button class="hp-lightbox-nav next" id="hp-lb-next" aria-label="Next">&#8594;</button>
+      <img id="hp-lb-img" src="" alt="">
+      <div class="hp-lightbox-caption">
+        <p id="hp-lb-title"></p>
+      </div>
+      <span class="hp-lightbox-counter" id="hp-lb-counter"></span>
+    </div>
+  </div>
+
+  <!-- ══ Scripts all original, untouched ══ -->
+  <script src="/js/particles-hero.js"></script>
   <script type="module" src="/js/layout.js"></script>
   <script type="module" src="/js/script.js"></script>
   <script type="module" src="/js/upload.js"></script>
   <script type="module" src="/js/header_generator.js"></script>
+
+  <!-- ══ Lightbox logic (delegated works with dynamically added cards) ══ -->
+  <script>
+    (function () {
+      const gallery = document.getElementById('results-gallery');
+      const lightbox = document.getElementById('hp-lightbox');
+      const lbImg = document.getElementById('hp-lb-img');
+      const lbTitle = document.getElementById('hp-lb-title');
+      const lbCounter = document.getElementById('hp-lb-counter');
+      const lbClose = document.getElementById('hp-lb-close');
+      const lbBackdrop = document.getElementById('hp-lb-backdrop');
+      const lbPrev = document.getElementById('hp-lb-prev');
+      const lbNext = document.getElementById('hp-lb-next');
+
+      let currentIndex = 0;
+
+      /* ── Wrap every img the generator inserts into .hp-img-wrap ── */
+      /* We use a MutationObserver so we catch cards added after page load */
+      const observer = new MutationObserver(() => {
+        gallery.querySelectorAll('.gallery-card img:not([data-lb-ready])').forEach(img => {
+          img.setAttribute('data-lb-ready', '1');
+
+          /* wrap in a div so the hover overlay pseudo-element works */
+          const wrap = document.createElement('div');
+          wrap.className = 'hp-img-wrap';
+          img.parentNode.insertBefore(wrap, img);
+          wrap.appendChild(img);
+        });
+      });
+      observer.observe(gallery, { childList: true, subtree: true });
+
+      /* ── Helpers ── */
+      function getCards() {
+        return Array.from(gallery.querySelectorAll('.gallery-card'));
+      }
+
+      function openAt(index) {
+        const cards = getCards();
+        if (!cards.length) return;
+        currentIndex = Math.max(0, Math.min(index, cards.length - 1));
+
+        const card = cards[currentIndex];
+        const img = card.querySelector('img');
+        const title = card.querySelector('h4, .gallery-card-content h4, [class*="title"]');
+
+        lbImg.src = img ? img.src : '';
+        lbImg.alt = img ? (img.alt || '') : '';
+        lbTitle.textContent = title ? title.textContent.replace(/^\d+\.\s*/, '') : '';
+        lbCounter.textContent = cards.length > 1
+          ? (currentIndex + 1) + ' / ' + cards.length
+          : '';
+
+        lbPrev.disabled = currentIndex === 0;
+        lbNext.disabled = currentIndex === cards.length - 1;
+
+        lightbox.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        lbClose.focus();
+      }
+
+      function close() {
+        lightbox.classList.remove('open');
+        document.body.style.overflow = '';
+        lbImg.src = '';
+      }
+
+      /* ── Delegated click on gallery images ── */
+      gallery.addEventListener('click', function (e) {
+        const wrap = e.target.closest('.hp-img-wrap');
+        if (!wrap) return;
+        const card = wrap.closest('.gallery-card');
+        const cards = getCards();
+        openAt(cards.indexOf(card));
+      });
+
+      /* ── Controls ── */
+      lbClose.addEventListener('click', close);
+      lbBackdrop.addEventListener('click', close);
+      lbPrev.addEventListener('click', () => openAt(currentIndex - 1));
+      lbNext.addEventListener('click', () => openAt(currentIndex + 1));
+
+      /* ── Keyboard ── */
+      document.addEventListener('keydown', function (e) {
+        if (!lightbox.classList.contains('open')) return;
+        if (e.key === 'Escape') close();
+        if (e.key === 'ArrowLeft') openAt(currentIndex - 1);
+        if (e.key === 'ArrowRight') openAt(currentIndex + 1);
+      });
+    })();
+  </script>
+
 </body>
+
 </html>
