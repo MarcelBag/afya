@@ -39,9 +39,10 @@ torch/
 *.model
 *.hdf5
 # Environment file
-.env*
-.env.prod
-.env.dev
+.env
+!.env.prod
+!.env.dev
+!.env.example
 
 # Database files
 /backend/models/tafuta.db
