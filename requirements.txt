@@ -39,8 +39,6 @@ ultralytics
 
 # ==============================
 # OTHER AUTO-INSTALLED DEPENDENCIES
-# These are automatically installed by
-# Flask / Ultralytics if needed
 # ==============================
 
 #blinker>=1.7.0
