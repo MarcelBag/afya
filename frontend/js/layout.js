@@ -61,10 +61,11 @@ import { initSettings } from './settings.js';
   let rightSideHTML;
   if (isLoggedIn) {
     const adminNavItem = (userRole === 'admin' || userRole === 'superuser')
-      ? `<li><a href="/admin" class="nav-admin-link">Admin ↗</a></li>` : '';
+      ? `<li><a href="/admin" class="nav-admin-link" style="color:#2497f3;font-weight:700;">Admin ↗</a></li>` : '';
 
     rightSideHTML = `
       <ul class="nav-links">
+        ${adminNavItem}
         ${navHTML}
       </ul>
       <div class="user-dropdown">

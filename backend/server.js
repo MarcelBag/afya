@@ -25,7 +25,7 @@ const app = express();
 // ----------------------------
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',')
-  : ['http://localhost:4000', 'https://afya.tuunganes.com'];
+  : ['http://localhost:4000', 'http://localhost:4006', 'https://afya.tuunganes.com'];
 
 const corsOptions = {
   origin: (origin, callback) => {
