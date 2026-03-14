@@ -118,7 +118,7 @@ const isSuperuser = (req, res, next) => {
   }
 };
 
-const VERSION = "1.1.1"; // Dependency fix bump
+const VERSION = "1.1.2"; // Port fix bump
 
 // ----------------------------
 // 3. Public API Routes
@@ -431,8 +431,7 @@ app.get('*', (req, res) => {
 });
 
 // ----------------------------
-// 8. Start
-// ----------------------------
+const PORT = process.env.PORT || 4005;
 app.listen(PORT, () => {
     console.log(`[GATEWAY v${VERSION}] Listening on port ${PORT}`);
     console.log(`[GATEWAY v${VERSION}] FLASK_BACKEND_URL: ${FLASK_BACKEND_URL}`);
