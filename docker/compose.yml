@@ -20,7 +20,7 @@ services:
       context: ..
       dockerfile: docker/node.Dockerfile
     ports:
-      - "4000:4000"
+      - "4005:4005"
     env_file:
       - ${ENV_FILE:-../.env}
     volumes:
