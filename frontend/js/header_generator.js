@@ -1,3 +1,5 @@
+import { showNotification } from './notifications.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     const titlesTextarea = document.getElementById('blog-titles');
     const generateBtn = document.getElementById('generate-btn');
@@ -20,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const text = titlesTextarea.value.trim();
         if (!text) {
-            alert('Please enter at least one blog title.');
+            showNotification('Please enter at least one blog title.', 'warning');
             return;
         }
 
@@ -37,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const token = localStorage.getItem('token');
             if (!token) {
-                alert('Please sign in to use AI tools.');
+                showNotification('Please sign in to use AI tools.', 'warning');
                 window.location.href = '/signin';
                 return;
             }
@@ -62,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             stopProgress(progressInterval, true);
             console.error('Error generating headers:', error);
-            alert('An error occurred: ' + error.message);
+            showNotification('An error occurred: ' + error.message, 'error');
         } finally {
             setTimeout(() => {
                 loader.classList.add('hidden');
@@ -163,11 +165,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 loadHistory(); // Refresh the list
             } else {
                 const data = await res.json();
-                alert('Failed to delete: ' + data.message);
+                showNotification('Failed to delete: ' + data.message, 'error');
             }
         } catch (error) {
             console.error('Error deleting history item:', error);
-            alert('An error occurred during deletion.');
+            showNotification('An error occurred during deletion.', 'error');
         }
     };
 
@@ -226,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.URL.revokeObjectURL(blobUrl);
         } catch (error) {
             console.error('Download failed:', error);
-            alert('Failed to download image.');
+            showNotification('Failed to download image.', 'error');
         }
     };
 });

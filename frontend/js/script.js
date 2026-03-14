@@ -2,6 +2,7 @@
  * Afya Script Page-specific logic only
  * Layout, user profile, settings, and logout are all handled by layout.js
  */
+import { showNotification } from './notifications.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   // ---------------------------
@@ -22,14 +23,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         const data = await res.json();
         if (res.ok) {
-          alert(data.message);
+          showNotification(data.message, 'success');
           window.location.href = '/signin';
         } else {
-          alert(data.message);
+          showNotification(data.message, 'error');
         }
       } catch (error) {
         console.error('Signup Error:', error);
-        alert('Something went wrong during signup.');
+        showNotification('Something went wrong during signup.', 'error');
       }
     });
   }
@@ -56,15 +57,15 @@ document.addEventListener('DOMContentLoaded', () => {
               window.location.href = '/verify-2fa';
             } else {
               localStorage.setItem('token', data.token);
-              alert(data.message);
+              showNotification(data.message, 'success');
               window.location.href = '/home';
             }
           } else {
-            alert(data.message);
+            showNotification(data.message, 'error');
           }
         } catch (error) {
           console.error('Signin Error:', error);
-          alert('Something went wrong during signin.');
+          showNotification('Something went wrong during signin.', 'error');
         }
       });
     }

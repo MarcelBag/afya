@@ -2,6 +2,7 @@
  * Shared Settings Component for Afya
  * Handles UI injection and logic for Profile Settings
  */
+import { showNotification } from './notifications.js';
 
 export function initSettings(token, options = {}) {
     const { onUpdateSuccess } = options;
@@ -72,7 +73,7 @@ export function initSettings(token, options = {}) {
             const confirmPassword = document.getElementById('settings-confirm-password').value;
 
             if (newPassword && newPassword !== confirmPassword) {
-                alert("Passwords do not match.");
+                showNotification("Passwords do not match.", "warning");
                 return;
             }
 
@@ -81,7 +82,7 @@ export function initSettings(token, options = {}) {
             if (newPassword) body.password = newPassword;
 
             if (Object.keys(body).length === 0) {
-                alert("No changes provided.");
+                showNotification("No changes provided.", "info");
                 return;
             }
 
@@ -98,16 +99,16 @@ export function initSettings(token, options = {}) {
                 const data = await res.json();
                 
                 if (res.ok) {
-                    alert(data.message);
+                    showNotification(data.message, "success");
                     modal.classList.add('hidden');
                     form.reset();
                     if (onUpdateSuccess) onUpdateSuccess(newName || payload.name);
                 } else {
-                    alert(data.message);
+                    showNotification(data.message, "error");
                 }
             } catch (err) {
                 console.error("Settings error:", err);
-                alert('Server error occurred.');
+                showNotification('Server error occurred.', "error");
             }
         });
     }

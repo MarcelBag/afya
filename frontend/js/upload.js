@@ -1,3 +1,5 @@
+import { showNotification } from './notifications.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     function showErrorModal(message) {
       const modal = document.getElementById('error-modal');
@@ -38,9 +40,16 @@ document.addEventListener('DOMContentLoaded', () => {
       formData.append('image', image);
     
       try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showNotification('Please sign in to use AI tools.', 'warning');
+            window.location.href = '/signin';
+            return;
+        }
+
         const res = await fetch('/api/upload-image', {
           method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+          headers: { 'Authorization': 'Bearer ' + token },
           body: formData
         });
     
@@ -66,8 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       } catch (error) {
         console.error('Error:', error);
-        showErrorModal('Something went wrong during image upload.');
+        showNotification('Something went wrong during image upload: ' + error.message, 'error');
       }
     });
   });
-  

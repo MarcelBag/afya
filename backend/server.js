@@ -75,6 +75,8 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.use(express.json()); // Ensure JSON parsing is consistently handled
+app.use(express.urlencoded({ extended: true }));
 
 // ----------------------------
 // File upload setup with multer
@@ -578,10 +580,42 @@ app.use(
 /* Serve Uploads statically */
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-/* ----------------------------
-   Start server
----------------------------- */
-const PORT = process.env.PORT || 4000;
+// ----------------------------
+// API Catch-all and Error Handling
+// ----------------------------
+
+// Catch-all for undefined /api routes should return JSON 404
+app.all('/api/*', (req, res) => {
+  res.status(404).json({ 
+    message: `API endpoint ${req.method} ${req.originalUrl} not found`,
+    error: 'RouteNotFound'
+  });
+});
+
+// Global Error Handler for API routes
+app.use('/api', (err, req, res, next) => {
+  console.error('API Error:', err);
+  
+  // Handle Axios errors specifically (from proxying)
+  if (err.isAxiosError) {
+    return res.status(err.response?.status || 502).json({
+      message: 'Proxy Error: Failed to communicate with downstream service',
+      details: err.response?.data || err.message,
+      code: 'PROXY_FAILURE'
+    });
+  }
+
+  res.status(err.status || 500).json({
+    message: 'Internal Server Error',
+    details: process.env.NODE_ENV === 'development' ? err.message : undefined,
+    code: 'INTERNAL_ERROR'
+  });
+});
+
+// ----------------------------
+// Start server
+// ----------------------------
+const PORT = process.env.PORT || 4005;
 app.listen(PORT, () =>
   console.log(`Server running at http://localhost:${PORT}`)
 );
