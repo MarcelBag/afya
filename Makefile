@@ -35,8 +35,8 @@ pull:
 
 prod:
 	# Ensure production environment variables are used
-	$(DC) build
-	$(DC) up -d
+	ENV_FILE=../.env.prod $(DC) build
+	ENV_FILE=../.env.prod $(DC) up -d
 
 stop: down
 

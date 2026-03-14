@@ -7,7 +7,7 @@ services:
     ports:
       - "5001:5001"
     env_file:
-      - ../.env
+      - ${ENV_FILE:-../.env}
     volumes:
       - ../backend:/app
       - ../uploads:/app/uploads
@@ -22,7 +22,7 @@ services:
     ports:
       - "4000:4000"
     env_file:
-      - ../.env
+      - ${ENV_FILE:-../.env}
     volumes:
       - ..:/app
       - /app/node_modules
