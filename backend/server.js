@@ -150,6 +150,7 @@ app.post('/api/signin', async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials.' });
 
     const twoFactorCode = Math.floor(100000 + Math.random() * 900000).toString();
+    console.log(`[DEBUG] Generated 2FA code ${twoFactorCode} for ${email}`);
     user.twoFactorCode = twoFactorCode;
     user.twoFactorExpires = Date.now() + 10 * 60 * 1000;
     await user.save();
@@ -165,6 +166,7 @@ app.post('/api/signin', async (req, res) => {
 
     res.json({ message: 'Code sent to email.', requires2FA: true, email: user.email });
   } catch (err) {
+    console.error('[DEBUG] Signin error:', err);
     res.status(500).json({ message: 'Server error during signin.' });
   }
 });
@@ -172,8 +174,26 @@ app.post('/api/signin', async (req, res) => {
 app.post('/api/verify-2fa', async (req, res) => {
   try {
     const { email, code } = req.body;
-    const user = await User.findOne({ email, twoFactorCode: code, twoFactorExpires: { $gt: Date.now() } });
-    if (!user) return res.status(400).json({ message: 'Invalid or expired code.' });
+    console.log(`[DEBUG] Attempting to verify 2FA for ${email} with code ${code}`);
+    
+    // Find user first to debug why verification might fail
+    const user = await User.findOne({ email });
+    if (!user) {
+      console.log(`[DEBUG] User not found for email ${email}`);
+      return res.status(400).json({ message: 'Invalid or expired code.' });
+    }
+    
+    console.log(`[DEBUG] User found. Stored code: ${user.twoFactorCode}, Expires: ${user.twoFactorExpires}, Current Time: ${new Date()}`);
+
+    if (user.twoFactorCode !== code) {
+      console.log(`[DEBUG] Code mismatch. Received: ${code}, Expected: ${user.twoFactorCode}`);
+      return res.status(400).json({ message: 'Invalid or expired code.' });
+    }
+
+    if (user.twoFactorExpires < Date.now()) {
+      console.log(`[DEBUG] Code expired. Expires at: ${user.twoFactorExpires}, Current time: ${new Date()}`);
+      return res.status(400).json({ message: 'Invalid or expired code.' });
+    }
 
     if (user.status !== 'active') return res.status(403).json({ message: 'Account deactivated.' });
 
