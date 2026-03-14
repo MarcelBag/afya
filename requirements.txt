@@ -1,48 +1,68 @@
-absl-py
-astunparse
-blinker>=1.7.0
-certifi
-charset-normalizer
-click
+# ==============================
+# REQUIRED FOR HEAD Generator APPLICATION
+# ==============================
+
 Flask>=3.0.0
-flatbuffers
-gast
-google-pasta
-grpcio
-h5py
-idna
-itsdangerous
-Jinja2
-keras
-libclang
-Markdown
-markdown-it-py
-MarkupSafe
-mdurl
-ml_dtypes
-namex
-numpy>=1.26.0
-opt_einsum
-optree
-packaging
-pillow
-protobuf
-Pygments
-requests
-rich
-setuptools
-six
-tensorboard
-tensorboard-data-server
-tensorflow>=2.16.0
-termcolor
-typing_extensions
-Werkzeug
-wheel
-wrapt
-Flask-Uploads==0.2.1  # For handling file uploads with Flask (if necessary)
-Flask-Cors>=4.0.2 # For handling CORS in Flask applications
-openai
+Flask-Cors>=4.0.2
+Flask-Uploads==0.2.1
 python-dotenv
+openai
+
+numpy>=1.26.0
+pillow
 opencv-python-headless
+
 ultralytics
+
+
+# ==============================
+# TENSORFLOW ECOSYSTEM (DISABLED) until we get some space
+# ==============================
+
+#absl-py
+#astunparse
+#flatbuffers
+#gast
+#google-pasta
+#grpcio
+#h5py
+#keras
+#libclang
+#ml_dtypes
+#opt_einsum
+#tensorboard
+#tensorboard-data-server
+#tensorflow>=2.16.0
+#termcolor
+#wrapt
+
+
+# ==============================
+# OTHER AUTO-INSTALLED DEPENDENCIES
+# These are automatically installed by
+# Flask / Ultralytics if needed
+# ==============================
+
+#blinker>=1.7.0
+#certifi
+#charset-normalizer
+#click
+#idna
+#itsdangerous
+#Jinja2
+#Markdown
+#markdown-it-py
+#MarkupSafe
+#mdurl
+#namex
+#optree
+#packaging
+#protobuf
+#Pygments
+#requests
+#rich
+#setuptools
+#six
+#typing_extensions
+#Werkzeug
+#wheel
