@@ -972,6 +972,7 @@ button:focus,
   outline: none;
   border-color: #3182ce;
   background: #fff;
+  color: #1a202c;
 }
 
 .cta-btn,
