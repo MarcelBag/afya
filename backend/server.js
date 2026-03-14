@@ -15,7 +15,7 @@ const nodemailer = require('nodemailer');
 
 const User = require('./models/User');
 
-const FLASK_BACKEND_URL = process.env.FLASK_BACKEND_URL || 'http://flask-backend:5002';
+const FLASK_BACKEND_URL = process.env.FLASK_BACKEND_URL || 'http://afya-backend:5002';
 const HeaderHistory = require('./models/HeaderHistory');
 const AnalysisHistory = require('./models/AnalysisHistory');
 const AuditLog = require('./models/AuditLog');
@@ -118,7 +118,7 @@ const isSuperuser = (req, res, next) => {
   }
 };
 
-const VERSION = "1.0.9"; // Extreme debug bump
+const VERSION = "1.1.0"; // Final stable version
 
 // ----------------------------
 // 3. Public API Routes
@@ -152,12 +152,12 @@ app.post('/api/signin', async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials.' });
 
     const twoFactorCode = Math.floor(100000 + Math.random() * 900000).toString();
-    console.log(`[DEBUG] Attempting to send 2FA code ${twoFactorCode} to ${email}`);
+    console.log(`[DEBUG v${VERSION}] Signin attempt for ${email}. Generated code: ${twoFactorCode}`);
     user.twoFactorCode = twoFactorCode;
     user.twoFactorExpires = Date.now() + 10 * 60 * 1000;
     await user.save();
 
-    console.log(`[DEBUG] User saved with 2FA code. Sending email via ${process.env.EMAIL_HOST}...`);
+    console.log(`[DEBUG v${VERSION}] User saved. Sending mail via ${process.env.EMAIL_HOST}...`);
     await transporter.sendMail({
       from: process.env.DEFAULT_FROM_EMAIL,
       to: user.email,
@@ -167,11 +167,11 @@ app.post('/api/signin', async (req, res) => {
              </div>`
     });
 
-    console.log(`[DEBUG] Email sent to ${email}. Returning requires2FA=true`);
-    res.json({ message: 'Code sent to email.', requires2FA: true, email: user.email });
+    console.log(`[DEBUG v${VERSION}] Email sent. Response: requires2FA=true`);
+    res.json({ message: 'Code sent to email.', requires2FA: true, email: user.email, version: VERSION });
   } catch (err) {
-    console.error('[CRITICAL] Signin error:', err);
-    res.status(500).json({ message: 'Server error during signin.', error: err.message });
+    console.error(`[CRITICAL v${VERSION}] Signin error:`, err);
+    res.status(500).json({ message: 'Server error during signin.', error: err.message, version: VERSION });
   }
 });
 
@@ -294,9 +294,9 @@ app.post('/api/upload-image', authMiddleware, upload.single('image'), async (req
 
 app.post('/api/generate-headers', authMiddleware, async (req, res, next) => {
   try {
-    // Check if flask-backend is reachable
+    console.log(`[DEBUG v${VERSION}] Proxying generate-headers to ${FLASK_BACKEND_URL}...`);
     const response = await axios.post(`${FLASK_BACKEND_URL}/api/generate-headers`, req.body);
-    console.log(`[DEBUG] Proxied generate-headers to ${FLASK_BACKEND_URL}. Response Status: ${response.status}`);
+    console.log(`[DEBUG v${VERSION}] Proxy Success. Status: ${response.status}`);
     const data = response.data;
 
     if (data.results) {
@@ -307,9 +307,9 @@ app.post('/api/generate-headers', authMiddleware, async (req, res, next) => {
     }
     res.json(data);
   } catch (error) {
-    console.error('[DEBUG] Proxy Error:', error.message);
+    console.error(`[DEBUG v${VERSION}] Proxy Error:`, error.message);
     if (error.response) {
-      console.error('[DEBUG] Proxy Error Data:', error.response.data);
+      console.error(`[DEBUG v${VERSION}] Proxy Error Data:`, error.response.data);
     }
     next(error); // Pass to global error handler
   }
@@ -433,5 +433,8 @@ app.get('*', (req, res) => {
 // ----------------------------
 // 8. Start
 // ----------------------------
-const PORT = process.env.PORT || 4005;
-app.listen(PORT, () => console.log(`Gateway running on port ${PORT}`));
+app.listen(PORT, () => {
+    console.log(`[GATEWAY v${VERSION}] Listening on port ${PORT}`);
+    console.log(`[GATEWAY v${VERSION}] FLASK_BACKEND_URL: ${FLASK_BACKEND_URL}`);
+    console.log(`[GATEWAY v${VERSION}] MongoDB URI configured: ${!!process.env.MONGODB_URI}`);
+});
