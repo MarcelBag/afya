@@ -14,6 +14,8 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 
 const User = require('./models/User');
+
+const FLASK_BACKEND_URL = process.env.FLASK_BACKEND_URL || 'http://flask-backend:5002';
 const HeaderHistory = require('./models/HeaderHistory');
 const AnalysisHistory = require('./models/AnalysisHistory');
 const AuditLog = require('./models/AuditLog');
@@ -270,7 +272,7 @@ app.post('/api/upload-image', authMiddleware, upload.single('image'), async (req
     formData.append('image', fs.createReadStream(req.file.path));
     formData.append('analysis-type', req.body['analysis-type'] || 'Unknown');
 
-    const response = await axios.post('http://flask-backend:5002/api/predict', formData, {
+    const response = await axios.post(`${FLASK_BACKEND_URL}/api/predict`, formData, {
       headers: { ...formData.getHeaders(), 'Authorization': req.headers.authorization }
     });
 
@@ -291,7 +293,7 @@ app.post('/api/upload-image', authMiddleware, upload.single('image'), async (req
 app.post('/api/generate-headers', authMiddleware, async (req, res, next) => {
   try {
     // Check if flask-backend is reachable
-    const response = await axios.post('http://flask-backend:5002/api/generate-headers', req.body);
+    const response = await axios.post(`${FLASK_BACKEND_URL}/api/generate-headers`, req.body);
     const data = response.data;
 
     if (data.results) {
