@@ -7,6 +7,7 @@ Flask-Cors>=4.0.2
 Flask-Uploads==0.2.1
 python-dotenv
 openai
+requests
 
 numpy>=1.26.0
 pillow

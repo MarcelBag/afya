@@ -118,7 +118,7 @@ const isSuperuser = (req, res, next) => {
   }
 };
 
-const VERSION = "1.1.0"; // Final stable version
+const VERSION = "1.1.1"; // Dependency fix bump
 
 // ----------------------------
 // 3. Public API Routes
