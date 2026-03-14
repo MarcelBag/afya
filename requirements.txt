@@ -16,25 +16,25 @@ ultralytics
 
 
 # ==============================
-# TENSORFLOW ECOSYSTEM (DISABLED) until we get some space
+# TENSORFLOW ECOSYSTEM
 # ==============================
 
-#absl-py
-#astunparse
-#flatbuffers
-#gast
-#google-pasta
-#grpcio
-#h5py
-#keras
-#libclang
-#ml_dtypes
-#opt_einsum
-#tensorboard
-#tensorboard-data-server
-#tensorflow>=2.16.0
-#termcolor
-#wrapt
+absl-py
+astunparse
+flatbuffers
+gast
+google-pasta
+grpcio
+h5py
+keras
+libclang
+ml_dtypes
+opt_einsum
+tensorboard
+tensorboard-data-server
+tensorflow>=2.16.0
+termcolor
+wrapt
 
 
 # ==============================

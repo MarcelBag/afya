@@ -15,7 +15,7 @@ const nodemailer = require('nodemailer');
 
 const User = require('./models/User');
 
-const FLASK_BACKEND_URL = process.env.FLASK_BACKEND_URL || 'http://flask-backend:5002';
+const FLASK_BACKEND_URL = process.env.FLASK_BACKEND_URL || 'http://afya-backend:5002';
 const HeaderHistory = require('./models/HeaderHistory');
 const AnalysisHistory = require('./models/AnalysisHistory');
 const AuditLog = require('./models/AuditLog');
