@@ -116,9 +116,14 @@ const isSuperuser = (req, res, next) => {
   }
 };
 
+const VERSION = "1.0.5"; // Increment to break cache
+
 // ----------------------------
 // 3. Public API Routes
 // ----------------------------
+app.get('/api/ping', (req, res) => {
+  res.json({ status: 'ok', version: VERSION, message: 'Gateway is running' });
+});
 
 app.post('/api/signup', async (req, res) => {
   try {
