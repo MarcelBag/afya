@@ -2,7 +2,12 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
 from werkzeug.utils import secure_filename
-from models.model import predict  # Import our updated predict function
+try:
+    from models.model import predict
+    PREDICTION_ENABLED = True
+except Exception as e:
+    print(f"Warning: Image prediction disabled due to missing dependencies: {e}")
+    PREDICTION_ENABLED = False
 from header_generator import generate_headers_batch
 from flask import send_from_directory
 
@@ -18,6 +23,8 @@ def allowed_file(filename):
 
 @app.route('/api/predict', methods=['POST'])
 def predict_image():
+    if not PREDICTION_ENABLED:
+        return jsonify({'message': 'Image analysis is currently disabled (TensorFlow not installed).'}), 503
     if 'image' not in request.files:
         return jsonify({'message': 'No image part'}), 400
 
