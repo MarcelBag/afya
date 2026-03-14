@@ -118,7 +118,7 @@ const isSuperuser = (req, res, next) => {
   }
 };
 
-const VERSION = "1.0.7"; // Bump to verify clean deploy
+const VERSION = "1.0.8"; // Final verification bump
 
 // ----------------------------
 // 3. Public API Routes
