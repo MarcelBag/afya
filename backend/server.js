@@ -15,7 +15,7 @@ const nodemailer = require('nodemailer');
 
 const User = require('./models/User');
 
-const FLASK_BACKEND_URL = process.env.FLASK_BACKEND_URL || 'http://afya-backend:5002';
+const FLASK_BACKEND_URL = process.env.FLASK_BACKEND_URL || 'http://flask-backend:5002';
 const HeaderHistory = require('./models/HeaderHistory');
 const AnalysisHistory = require('./models/AnalysisHistory');
 const AuditLog = require('./models/AuditLog');
@@ -118,7 +118,7 @@ const isSuperuser = (req, res, next) => {
   }
 };
 
-const VERSION = "1.0.8"; // Final verification bump
+const VERSION = "1.0.9"; // Extreme debug bump
 
 // ----------------------------
 // 3. Public API Routes
@@ -152,11 +152,12 @@ app.post('/api/signin', async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials.' });
 
     const twoFactorCode = Math.floor(100000 + Math.random() * 900000).toString();
-    console.log(`[DEBUG] Generated 2FA code ${twoFactorCode} for ${email}`);
+    console.log(`[DEBUG] Attempting to send 2FA code ${twoFactorCode} to ${email}`);
     user.twoFactorCode = twoFactorCode;
     user.twoFactorExpires = Date.now() + 10 * 60 * 1000;
     await user.save();
 
+    console.log(`[DEBUG] User saved with 2FA code. Sending email via ${process.env.EMAIL_HOST}...`);
     await transporter.sendMail({
       from: process.env.DEFAULT_FROM_EMAIL,
       to: user.email,
@@ -166,10 +167,11 @@ app.post('/api/signin', async (req, res) => {
              </div>`
     });
 
+    console.log(`[DEBUG] Email sent to ${email}. Returning requires2FA=true`);
     res.json({ message: 'Code sent to email.', requires2FA: true, email: user.email });
   } catch (err) {
-    console.error('[DEBUG] Signin error:', err);
-    res.status(500).json({ message: 'Server error during signin.' });
+    console.error('[CRITICAL] Signin error:', err);
+    res.status(500).json({ message: 'Server error during signin.', error: err.message });
   }
 });
 
@@ -294,6 +296,7 @@ app.post('/api/generate-headers', authMiddleware, async (req, res, next) => {
   try {
     // Check if flask-backend is reachable
     const response = await axios.post(`${FLASK_BACKEND_URL}/api/generate-headers`, req.body);
+    console.log(`[DEBUG] Proxied generate-headers to ${FLASK_BACKEND_URL}. Response Status: ${response.status}`);
     const data = response.data;
 
     if (data.results) {
@@ -304,6 +307,10 @@ app.post('/api/generate-headers', authMiddleware, async (req, res, next) => {
     }
     res.json(data);
   } catch (error) {
+    console.error('[DEBUG] Proxy Error:', error.message);
+    if (error.response) {
+      console.error('[DEBUG] Proxy Error Data:', error.response.data);
+    }
     next(error); // Pass to global error handler
   }
 });
