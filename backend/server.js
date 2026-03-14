@@ -118,7 +118,7 @@ const isSuperuser = (req, res, next) => {
   }
 };
 
-const VERSION = "1.0.5"; // Increment to break cache
+const VERSION = "1.0.6"; // Increment to break cache
 
 // ----------------------------
 // 3. Public API Routes
