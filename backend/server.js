@@ -333,7 +333,27 @@ app.patch('/api/admin/users/:id', authMiddleware, isSuperuser, async (req, res) 
 });
 
 // ----------------------------
-// 6. Static Serving & Frontend
+// 6. API Error Handling & Catch-all (Must be BEFORE static serving)
+// ----------------------------
+
+// Final API catch-all (Must be after all valid /api routes)
+app.all('/api/*', (req, res) => {
+  res.status(404).json({ message: `API endpoint ${req.method} ${req.originalUrl} not found` });
+});
+
+// Global API Error Handler
+app.use('/api', (err, req, res, next) => {
+  console.error('API Error:', err.message);
+  const status = err.response?.status || err.status || 500;
+  res.status(status).json({
+    message: 'Internal Server Error',
+    details: err.isAxiosError ? (err.response?.data || err.message) : (process.env.NODE_ENV === 'development' ? err.message : undefined),
+    code: 'API_ERROR'
+  });
+});
+
+// ----------------------------
+// 7. Static Serving & Frontend
 // ----------------------------
 const FRONTEND_DIR = path.join(__dirname, '../frontend');
 
@@ -348,26 +368,6 @@ app.get(/^\/([a-zA-Z0-9_-]+)\.html$/, (req, res) => res.redirect(301, `/${req.pa
 
 // Static files with extensions support
 app.use(express.static(FRONTEND_DIR, { extensions: ['html'] }));
-
-// ----------------------------
-// 7. Error Handling & Catch-all
-// ----------------------------
-
-// Final API catch-all (Must be after all /api routes)
-app.all('/api/*', (req, res) => {
-  res.status(404).json({ message: `API endpoint ${req.method} ${req.originalUrl} not found` });
-});
-
-// Global API Error Handler
-app.use('/api', (err, req, res, next) => {
-  console.error('API Error:', err.message);
-  const status = err.response?.status || err.status || 500;
-  res.status(status).json({
-    message: 'Internal Server Error',
-    details: err.response?.data || err.message,
-    code: 'API_ERROR'
-  });
-});
 
 // Final fallback for SPA (Not strictly needed here but good practice)
 app.get('*', (req, res) => {
