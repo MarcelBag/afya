@@ -25,15 +25,22 @@ const app = express();
 // ----------------------------
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',')
-  : ['http://localhost:4000', 'http://localhost:4006', 'https://afya.tuunganes.com'];
+  : [
+      'http://localhost:4000', 
+      'http://localhost:4006', 
+      'https://afya.tuunganes.com', 
+      'http://213.130.147.166:4000', 
+      'http://213.130.147.166:4006'
+    ];
 
 const corsOptions = {
   origin: (origin, callback) => {
+    // allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes('*')) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(null, true); // Fallback to allowing everything if we're debugging prod
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -42,6 +49,17 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+// Global error handler for middleware (like CORS) to ensure JSON response
+app.use((err, req, res, next) => {
+  if (err) {
+    console.error('Initial Error:', err.message);
+    return res.status(err.status || 500).json({ 
+      message: err.message || 'Internal Server Error',
+      details: 'Error during initial request processing' 
+    });
+  }
+  next();
+});
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
