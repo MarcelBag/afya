@@ -270,7 +270,7 @@ app.post('/api/upload-image', authMiddleware, upload.single('image'), async (req
     formData.append('image', fs.createReadStream(req.file.path));
     formData.append('analysis-type', req.body['analysis-type'] || 'Unknown');
 
-    const response = await axios.post('http://afya-backend:5002/api/predict', formData, {
+    const response = await axios.post('http://flask-backend:5002/api/predict', formData, {
       headers: { ...formData.getHeaders(), 'Authorization': req.headers.authorization }
     });
 
@@ -290,8 +290,8 @@ app.post('/api/upload-image', authMiddleware, upload.single('image'), async (req
 
 app.post('/api/generate-headers', authMiddleware, async (req, res, next) => {
   try {
-    // Check if afya-backend is reachable
-    const response = await axios.post('http://afya-backend:5002/api/generate-headers', req.body);
+    // Check if flask-backend is reachable
+    const response = await axios.post('http://flask-backend:5002/api/generate-headers', req.body);
     const data = response.data;
 
     if (data.results) {

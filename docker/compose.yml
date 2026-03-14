@@ -5,7 +5,7 @@ services:
       context: ..
       dockerfile: docker/flask.Dockerfile
     ports:
-      - "5001:5001"
+      - "5002:5002"
     env_file:
       - ${ENV_FILE:-../.env}
     volumes:
