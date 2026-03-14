@@ -55,15 +55,25 @@ const transporter = nodemailer.createTransport({
 });
 
 // Middleware
-app.use(cors());
-app.use(bodyParser.json());
-//app.use(express.static(path.join(__dirname, '../frontend')));
+const allowedOrigins = process.env.CORS_ORIGIN 
+  ? process.env.CORS_ORIGIN.split(',') 
+  : ['http://localhost:4000', 'https://afya.tuunganes.com'];
 
 const corsOptions = {
-  origin: ['http://localhost:4000', 'https://afya.tuunganes.com'],
-  methods: ['GET', 'POST'],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes('*')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 };
+
 app.use(cors(corsOptions));
 
 // ----------------------------
