@@ -1,3 +1,4 @@
+// backend/server.js
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -55,8 +56,8 @@ const transporter = nodemailer.createTransport({
 });
 
 // Middleware
-const allowedOrigins = process.env.CORS_ORIGIN 
-  ? process.env.CORS_ORIGIN.split(',') 
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',')
   : ['http://localhost:4000', 'https://afya.tuunganes.com'];
 
 const corsOptions = {
@@ -84,18 +85,18 @@ app.use(express.urlencoded({ extended: true }));
 //const upload = multer({ dest: 'uploads/' });
 // Custom storage engine using multer (do not re-require multer)
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, 'uploads/');
-    },
-    filename: function (req, file, cb) {
-      // Use the original file name to preserve the extension
-      cb(null, file.originalname);
-    }
-  });
-  
-  // Update the upload variable to use the custom storage
-  const upload = multer({ storage });
-  
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename: function (req, file, cb) {
+    // Use the original file name to preserve the extension
+    cb(null, file.originalname);
+  }
+});
+
+// Update the upload variable to use the custom storage
+const upload = multer({ storage });
+
 // ----------------------------
 // Signup Route
 // ----------------------------
@@ -175,7 +176,7 @@ app.post('/api/signin', async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: 'Invalid credentials.' });
-    
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials.' });
 
@@ -207,10 +208,10 @@ app.post('/api/signin', async (req, res) => {
 
     await transporter.sendMail(mailOptions);
 
-    res.status(200).json({ 
-      message: 'Verification code sent to your email.', 
+    res.status(200).json({
+      message: 'Verification code sent to your email.',
       requires2FA: true,
-      email: user.email 
+      email: user.email
     });
   } catch (err) {
     console.error('Signin error:', err.message);
@@ -221,10 +222,10 @@ app.post('/api/signin', async (req, res) => {
 app.post('/api/verify-2fa', async (req, res) => {
   try {
     const { email, code } = req.body;
-    const user = await User.findOne({ 
-      email, 
-      twoFactorCode: code, 
-      twoFactorExpires: { $gt: Date.now() } 
+    const user = await User.findOne({
+      email,
+      twoFactorCode: code,
+      twoFactorExpires: { $gt: Date.now() }
     });
 
     if (!user) {
@@ -244,7 +245,7 @@ app.post('/api/verify-2fa', async (req, res) => {
         details: `Auto-promoted ${user.email} based on EMAIL_HOST_USER env variable.`
       }).save();
     }
-    
+
     // Check if user is active
     if (user.status !== 'active') {
       return res.status(403).json({ message: 'Account deactivated. Please contact support.' });
@@ -253,8 +254,8 @@ app.post('/api/verify-2fa', async (req, res) => {
     await user.save();
 
     const token = jwt.sign(
-      { userId: user._id, email: user.email, role: user.role }, 
-      process.env.JWT_SECRET, 
+      { userId: user._id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
       { expiresIn: '12h' }
     );
 
@@ -306,10 +307,10 @@ app.post('/api/forgot-password', async (req, res) => {
 app.post('/api/reset-password', async (req, res) => {
   try {
     const { email, code, newPassword } = req.body;
-    const user = await User.findOne({ 
-      email, 
-      twoFactorCode: code, 
-      twoFactorExpires: { $gt: Date.now() } 
+    const user = await User.findOne({
+      email,
+      twoFactorCode: code,
+      twoFactorExpires: { $gt: Date.now() }
     });
 
     if (!user) {
@@ -349,7 +350,7 @@ app.post('/api/upload-image', authMiddleware, upload.single('image'), async (req
   try {
     const token = req.headers.authorization.split(' ')[1];
     if (!req.file) return res.status(400).json({ message: 'No image uploaded.' });
-    
+
     // Prepare form data to forward the file to the Flask API
     const FormData = require('form-data');
     const formData = new FormData();
@@ -366,12 +367,12 @@ app.post('/api/upload-image', authMiddleware, upload.single('image'), async (req
     });
     */
     const response = await axios.post('http://afya-backend:5002/predict', formData, {
-        headers: {
-          ...formData.getHeaders(),
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
+      headers: {
+        ...formData.getHeaders(),
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
     const { prediction, confidence, analysisType } = response.data;
 
     // Save to AnalysisHistory
@@ -407,7 +408,7 @@ app.post('/api/generate-headers', authMiddleware, async (req, res) => {
           title: r.title,
           imageUrl: r.image
         }));
-      
+
       if (successfulGenerations.length > 0) {
         await HeaderHistory.insertMany(successfulGenerations);
       }
@@ -416,9 +417,9 @@ app.post('/api/generate-headers', authMiddleware, async (req, res) => {
     res.json(data);
   } catch (error) {
     console.error('Error proxying header generation request:', error.message);
-    res.status(error.response?.status || 500).json({ 
-      message: 'Error generating headers.', 
-      details: error.response?.data || error.message 
+    res.status(error.response?.status || 500).json({
+      message: 'Error generating headers.',
+      details: error.response?.data || error.message
     });
   }
 });
@@ -586,7 +587,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Catch-all for undefined /api routes should return JSON 404
 app.all('/api/*', (req, res) => {
-  res.status(404).json({ 
+  res.status(404).json({
     message: `API endpoint ${req.method} ${req.originalUrl} not found`,
     error: 'RouteNotFound'
   });
@@ -595,7 +596,7 @@ app.all('/api/*', (req, res) => {
 // Global Error Handler for API routes
 app.use('/api', (err, req, res, next) => {
   console.error('API Error:', err);
-  
+
   // Handle Axios errors specifically (from proxying)
   if (err.isAxiosError) {
     return res.status(err.response?.status || 502).json({
@@ -697,7 +698,7 @@ app.get('/api/admin/history', authMiddleware, isAdmin, async (req, res) => {
   try {
     const headers = await HeaderHistory.find().populate('userId', 'name email').sort({ createdAt: -1 });
     const analysis = await AnalysisHistory.find().populate('userId', 'name email').sort({ createdAt: -1 });
-    
+
     // Combine and sort
     const unifiedHistory = [
       ...headers.map(h => ({ ...h._doc, type: 'Blog Header' })),
@@ -721,7 +722,7 @@ app.patch('/api/user/profile', authMiddleware, async (req, res) => {
     if (password) {
       user.password = await bcrypt.hash(password, 10);
     }
-    
+
     await user.save();
     res.json({ message: 'Profile updated successfully', name: user.name });
   } catch (error) {
