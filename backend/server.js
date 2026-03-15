@@ -118,7 +118,7 @@ const isSuperuser = (req, res, next) => {
   }
 };
 
-const VERSION = "1.1.2"; // Port fix bump
+const VERSION = "1.1.3"; // Robust session bump
 
 // ----------------------------
 // 3. Public API Routes

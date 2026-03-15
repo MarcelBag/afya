@@ -11,15 +11,20 @@ import { initSettings } from './settings.js';
 
   if (isLoggedIn) {
     try {
-      payload = JSON.parse(atob(token.split('.')[1]));
+      const parts = token.split('.');
+      if (parts.length !== 3) throw new Error('Invalid token format');
+      payload = JSON.parse(atob(parts[1]));
       // Check token expiry
       if (payload.exp && payload.exp * 1000 < Date.now()) {
-        localStorage.removeItem('token');
-        window.location.href = '/signin';
-        return;
+        throw new Error('Token expired');
       }
     } catch (e) {
+      console.warn('Invalid or expired token removed:', e.message);
       localStorage.removeItem('token');
+      if (currentPath === '/home' || currentPath.startsWith('/admin')) {
+        window.location.href = '/signin';
+      }
+      return;
     }
   }
 

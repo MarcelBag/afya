@@ -6,7 +6,12 @@ import { showNotification } from './notifications.js';
 
 export function initSettings(token, options = {}) {
     const { onUpdateSuccess } = options;
-    const payload = JSON.parse(atob(token.split('.')[1]));
+    let payload = {};
+    try {
+        payload = JSON.parse(atob(token.split('.')[1]));
+    } catch (e) {
+        console.error('Failed to parse token in settings:', e);
+    }
 
     // 1. Inject Modal HTML
     const modalHTML = `
