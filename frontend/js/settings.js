@@ -5,7 +5,14 @@
 import { showNotification } from './notifications.js';
 
 export function initSettings(token, options = {}) {
+    // ─── Guard ────────────────────────────────────────────────────────────────
+    // If a #settings-modal already exists in the DOM (e.g. admin page has it
+    // built-in), skip injection entirely to prevent a duplicate panel.
+    if (document.getElementById('settings-modal')) return;
+    // ─────────────────────────────────────────────────────────────────────────
+
     const { onUpdateSuccess } = options;
+
     let payload = {};
     try {
         payload = JSON.parse(atob(token.split('.')[1]));
@@ -13,7 +20,7 @@ export function initSettings(token, options = {}) {
         console.error('Failed to parse token in settings:', e);
     }
 
-    // 1. Inject Modal HTML
+    // ── 1. Inject Modal HTML ──────────────────────────────────────────────────
     const modalHTML = `
     <div id="settings-modal" class="modal hidden">
         <div class="modal-content">
@@ -26,7 +33,7 @@ export function initSettings(token, options = {}) {
                     <label style="font-size: 0.85rem; font-weight: 600; color: #4a5568;">Display Name</label>
                     <input type="text" id="settings-new-name" class="form-input" style="width: 100%; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 0.75rem 1rem;" placeholder="Enter full name">
                 </div>
-                
+
                 <div style="border-top: 1px solid #edf2f7; margin: 2rem 0; padding-top: 1.5rem;">
                     <h3 style="font-size: 0.9rem; font-weight: 700; color: #2d3748; margin-bottom: 1.25rem;">Update Password</h3>
                     <div class="form-group" style="margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
@@ -46,17 +53,19 @@ export function initSettings(token, options = {}) {
 
     document.body.insertAdjacentHTML('beforeend', modalHTML);
 
-    // 2. Element References
+    // ── 2. Element References ─────────────────────────────────────────────────
     const modal = document.getElementById('settings-modal');
     const form = document.getElementById('profile-settings-form');
     const closeBtn = document.getElementById('close-settings');
     const openBtn = document.getElementById('open-settings');
 
+    // ── 3. Open / Close ───────────────────────────────────────────────────────
     if (openBtn) {
         openBtn.addEventListener('click', () => {
             modal.classList.remove('hidden');
-            // Pre-fill name if we have it
-            document.getElementById('settings-new-name').value = payload.name || payload.email.split('@')[0];
+            // Pre-fill name from token payload
+            document.getElementById('settings-new-name').value =
+                payload.name || payload.email?.split('@')[0] || '';
         });
     }
 
@@ -64,21 +73,22 @@ export function initSettings(token, options = {}) {
         closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
     }
 
-    // Close on click outside
+    // Close on backdrop click
     modal.addEventListener('click', (e) => {
         if (e.target === modal) modal.classList.add('hidden');
     });
 
-    // 3. Logic Handler
+    // ── 4. Form Submit ────────────────────────────────────────────────────────
     if (form) {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+
             const newName = document.getElementById('settings-new-name').value.trim();
             const newPassword = document.getElementById('settings-new-password').value;
             const confirmPassword = document.getElementById('settings-confirm-password').value;
 
             if (newPassword && newPassword !== confirmPassword) {
-                showNotification("Passwords do not match.", "warning");
+                showNotification('Passwords do not match.', 'warning');
                 return;
             }
 
@@ -87,7 +97,7 @@ export function initSettings(token, options = {}) {
             if (newPassword) body.password = newPassword;
 
             if (Object.keys(body).length === 0) {
-                showNotification("No changes provided.", "info");
+                showNotification('No changes provided.', 'info');
                 return;
             }
 
@@ -100,20 +110,20 @@ export function initSettings(token, options = {}) {
                     },
                     body: JSON.stringify(body)
                 });
-                
+
                 const data = await res.json();
-                
+
                 if (res.ok) {
-                    showNotification(data.message, "success");
+                    showNotification(data.message, 'success');
                     modal.classList.add('hidden');
                     form.reset();
                     if (onUpdateSuccess) onUpdateSuccess(newName || payload.name);
                 } else {
-                    showNotification(data.message, "error");
+                    showNotification(data.message, 'error');
                 }
             } catch (err) {
-                console.error("Settings error:", err);
-                showNotification('Server error occurred.', "error");
+                console.error('Settings error:', err);
+                showNotification('Server error occurred.', 'error');
             }
         });
     }
