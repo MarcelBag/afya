@@ -118,12 +118,13 @@ const isSuperuser = (req, res, next) => {
   }
 };
 
-const VERSION = "1.1.3"; // Robust session bump
+const VERSION = "1.1.4"; // Diagnostic ping bump
 
 // ----------------------------
 // 3. Public API Routes
 // ----------------------------
 app.get('/api/ping', (req, res) => {
+  console.log(`[DEBUG v${VERSION}] Ping received from ${req.ip}`);
   res.json({ status: 'ok', version: VERSION, message: 'Gateway is running' });
 });
 
