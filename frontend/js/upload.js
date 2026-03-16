@@ -135,7 +135,8 @@ document.addEventListener('DOMContentLoaded', () => {
           const confidence = data.confidence || 0;
           
           resultsContainer.innerHTML = `
-            <div style="margin-bottom: 25px; border-radius: 12px; overflow: hidden; border: 1px solid var(--c-border);">
+            <div class="hp-img-wrap" style="margin-bottom: 25px; border-radius: 12px; overflow: hidden; border: 1px solid var(--c-border);" 
+                 onclick="window.openLightbox('${data.imagePath}', '${prediction}')">
               <img src="${data.imagePath}" alt="Analyzed Skin" style="width: 100%; height: 200px; object-fit: cover; display: block;">
             </div>
             

@@ -961,7 +961,41 @@
       }
     }
 
-    /* ── Image Analysis Results ── */
+    /* ── Image Analysis Results & Lightbox ── */
+    .hp-img-wrap {
+      position: relative;
+      cursor: zoom-in;
+      overflow: hidden;
+    }
+    .hp-img-wrap img {
+      transition: transform 0.35s ease;
+    }
+    .hp-img-wrap:hover img {
+      transform: scale(1.04);
+    }
+    .hp-img-wrap::after {
+      content: '⤢';
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(10, 22, 40, 0.65);
+      backdrop-filter: blur(6px);
+      color: #fff;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.22s;
+      pointer-events: none;
+    }
+    .hp-img-wrap:hover::after {
+      opacity: 1;
+    }
+
     .analysis-card {
       padding: 0;
       margin-top: 20px;
@@ -1475,23 +1509,32 @@
       const lbNext = document.getElementById('hp-lb-next');
 
       let currentIndex = 0;
+      let isGalleryView = false;
 
-      /* ── Wrap every img the generator inserts into .hp-img-wrap ── */
-      /* We use a MutationObserver so we catch cards added after page load */
+      window.openLightbox = function(src, title) {
+          lbImg.src = src;
+          lbTitle.textContent = title || '';
+          lbCounter.textContent = '';
+          lbPrev.style.display = 'none';
+          lbNext.style.display = 'none';
+          
+          lightbox.classList.add('open');
+          document.body.style.overflow = 'hidden';
+          lbClose.focus();
+          isGalleryView = false;
+      };
+
       const observer = new MutationObserver(() => {
         gallery.querySelectorAll('.gallery-card img:not([data-lb-ready])').forEach(img => {
           img.setAttribute('data-lb-ready', '1');
-
-          /* wrap in a div so the hover overlay pseudo-element works */
           const wrap = document.createElement('div');
           wrap.className = 'hp-img-wrap';
           img.parentNode.insertBefore(wrap, img);
           wrap.appendChild(img);
         });
       });
-      observer.observe(gallery, { childList: true, subtree: true });
+      if (gallery) observer.observe(gallery, { childList: true, subtree: true });
 
-      /* ── Helpers ── */
       function getCards() {
         return Array.from(gallery.querySelectorAll('.gallery-card'));
       }
@@ -1506,18 +1549,18 @@
         const title = card.querySelector('h4, .gallery-card-content h4, [class*="title"]');
 
         lbImg.src = img ? img.src : '';
-        lbImg.alt = img ? (img.alt || '') : '';
         lbTitle.textContent = title ? title.textContent.replace(/^\d+\.\s*/, '') : '';
-        lbCounter.textContent = cards.length > 1
-          ? (currentIndex + 1) + ' / ' + cards.length
-          : '';
+        lbCounter.textContent = cards.length > 1 ? (currentIndex + 1) + ' / ' + cards.length : '';
 
+        lbPrev.style.display = cards.length > 1 ? 'flex' : 'none';
+        lbNext.style.display = cards.length > 1 ? 'flex' : 'none';
         lbPrev.disabled = currentIndex === 0;
         lbNext.disabled = currentIndex === cards.length - 1;
 
         lightbox.classList.add('open');
         document.body.style.overflow = 'hidden';
         lbClose.focus();
+        isGalleryView = true;
       }
 
       function close() {
@@ -1526,27 +1569,28 @@
         lbImg.src = '';
       }
 
-      /* ── Delegated click on gallery images ── */
-      gallery.addEventListener('click', function (e) {
-        const wrap = e.target.closest('.hp-img-wrap');
-        if (!wrap) return;
-        const card = wrap.closest('.gallery-card');
-        const cards = getCards();
-        openAt(cards.indexOf(card));
-      });
+      if (gallery) {
+        gallery.addEventListener('click', function (e) {
+          const wrap = e.target.closest('.hp-img-wrap');
+          if (!wrap) return;
+          const card = wrap.closest('.gallery-card');
+          const cards = getCards();
+          openAt(cards.indexOf(card));
+        });
+      }
 
-      /* ── Controls ── */
       lbClose.addEventListener('click', close);
       lbBackdrop.addEventListener('click', close);
       lbPrev.addEventListener('click', () => openAt(currentIndex - 1));
       lbNext.addEventListener('click', () => openAt(currentIndex + 1));
 
-      /* ── Keyboard ── */
       document.addEventListener('keydown', function (e) {
         if (!lightbox.classList.contains('open')) return;
         if (e.key === 'Escape') close();
-        if (e.key === 'ArrowLeft') openAt(currentIndex - 1);
-        if (e.key === 'ArrowRight') openAt(currentIndex + 1);
+        if (isGalleryView) {
+            if (e.key === 'ArrowLeft') openAt(currentIndex - 1);
+            if (e.key === 'ArrowRight') openAt(currentIndex + 1);
+        }
       });
     })();
   </script>
