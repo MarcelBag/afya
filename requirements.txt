@@ -12,6 +12,7 @@ requests
 numpy>=1.26.0
 pillow
 opencv-python-headless
+google-generativeai
 
 # ultralytics
 

@@ -280,14 +280,19 @@ app.post('/api/upload-image', authMiddleware, upload.single('image'), async (req
     });
 
     const { prediction, confidence, analysisType } = response.data;
+    const imagePath = '/' + req.file.path; // Ensure leading slash for static serving
     await new AnalysisHistory({
       userId: req.user.userId,
-      imagePath: req.file.path.replace(path.join(__dirname, '..'), ''),
+      imagePath,
       prediction, confidence, analysisType
     }).save();
 
-    res.json({ prediction, confidence, analysisType });
+    res.json({ prediction, confidence, analysisType, imagePath });
   } catch (error) {
+    if (error.response && error.response.data && error.response.data.message) {
+      console.error('Upload-image error (Flask):', error.response.data.message);
+      return res.status(error.response.status).json({ message: error.response.data.message });
+    }
     console.error('Upload-image error:', error.message);
     res.status(500).json({ message: 'Error analyzing image.' });
   }
@@ -321,6 +326,15 @@ app.get('/api/header-history', authMiddleware, async (req, res) => {
   res.json(history);
 });
 
+app.get('/api/analysis-history', authMiddleware, async (req, res) => {
+  try {
+    const history = await AnalysisHistory.find({ userId: req.user.userId }).sort({ createdAt: -1 });
+    res.json(history);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching analysis history.' });
+  }
+});
+
 app.delete('/api/header-history/:id', authMiddleware, async (req, res) => {
   const item = await HeaderHistory.findOne({ _id: req.params.id, userId: req.user.userId });
   if (!item) return res.status(404).json({ message: 'Not found' });
@@ -330,6 +344,24 @@ app.delete('/api/header-history/:id', authMiddleware, async (req, res) => {
   }
   await HeaderHistory.deleteOne({ _id: req.params.id });
   res.json({ message: 'Deleted' });
+});
+
+app.delete('/api/analysis-history/:id', authMiddleware, async (req, res) => {
+  try {
+    const item = await AnalysisHistory.findOne({ _id: req.params.id, userId: req.user.userId });
+    if (!item) return res.status(404).json({ message: 'Analysis not found' });
+    
+    // Clean up file if it exists
+    if (item.imagePath) {
+      const fpath = path.join(__dirname, '..', item.imagePath);
+      if (fs.existsSync(fpath)) fs.unlinkSync(fpath);
+    }
+    
+    await AnalysisHistory.deleteOne({ _id: req.params.id });
+    res.json({ message: 'Analysis deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error deleting analysis.' });
+  }
 });
 
 app.get('/api/user', authMiddleware, async (req, res) => {

@@ -12,101 +12,83 @@
     href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700&display=swap"
     rel="stylesheet">
 
-
   <style>
-    *,
-    *::before,
-    *::after {
+    :root {
+      --c-blue: #2497f3;
+      --c-mid: #1771c6;
+      --c-dark: #0a1628;
+      --c-navy: #0f2044;
+      --c-ink: #0d1117;
+      --c-soft: #4a5568;
+      --c-muted: #8896ab;
+      --c-border: rgba(226, 232, 240, 0.1);
+      --c-white: #ffffff;
+    }
+
+    * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
 
-    :root {
-      --sky: #7ab8d4;
-      --sky-dark: #4a8fa8;
-      --sky-soft: #b8d8e8;
-      --sky-pale: #eaf4f9;
-      --ink: #0f1923;
-      --ink-mid: #1c2a36;
-      --text: #edf2f5;
-      --text-mid: #94a3b2;
-      --text-soft: #5a6f7e;
-      --border: rgba(122, 184, 212, 0.12);
-      --card-bg: rgba(255, 255, 255, 0.035);
-      --success: #5cb87a;
-    }
-
-    html,
-    body {
-      height: 100%;
-    }
-
     body {
       font-family: 'DM Sans', sans-serif;
-      background: var(--ink);
-      color: var(--text);
+      background: var(--c-dark);
+      color: var(--c-white);
+      height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
       overflow: hidden;
       position: relative;
     }
 
-    /* Atmospheric background */
-    body::before {
-      content: '';
+    /* Premium Background (from home.html) */
+    .bg-gradient {
       position: fixed;
       inset: 0;
-      background:
-        radial-gradient(ellipse 70% 60% at 20% 10%, rgba(74, 143, 168, 0.14) 0%, transparent 60%),
-        radial-gradient(ellipse 50% 50% at 80% 90%, rgba(122, 184, 212, 0.08) 0%, transparent 55%),
-        radial-gradient(ellipse 80% 40% at 50% 50%, rgba(15, 25, 35, 0.6) 0%, transparent 100%);
-      pointer-events: none;
-      z-index: 0;
+      background: radial-gradient(ellipse at 30% 60%, #0e2a5c 0%, #0a1628 45%, #06111f 100%);
+      z-index: -1;
     }
 
-    /* Subtle grid texture */
-    body::after {
-      content: '';
+    .bg-grid {
       position: fixed;
       inset: 0;
       background-image:
-        linear-gradient(rgba(122, 184, 212, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(122, 184, 212, 0.03) 1px, transparent 1px);
-      background-size: 48px 48px;
+        linear-gradient(rgba(36, 151, 243, 0.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(36, 151, 243, 0.055) 1px, transparent 1px);
+      background-size: 52px 52px;
+      mask-image: radial-gradient(ellipse 80% 80% at center, black 20%, transparent 72%);
       pointer-events: none;
+      z-index: -1;
+    }
+
+    #particles-js {
+      position: absolute;
+      inset: 0;
       z-index: 0;
     }
 
     .wrapper {
       position: relative;
-      z-index: 1;
+      z-index: 10;
       width: 100%;
       max-width: 440px;
-      padding: 1.5rem;
-      animation: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+      padding: 24px;
+      animation: hp-rise 0.6s ease both;
     }
 
-    @keyframes rise {
-      from {
-        opacity: 0;
-        transform: translateY(24px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    @keyframes hp-rise {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Brand lockup */
+    /* Brand Lockup */
     .brand-lockup {
       display: flex;
       align-items: center;
-      gap: 0.85rem;
-      margin-bottom: 2.5rem;
+      gap: 12px;
+      margin-bottom: 40px;
       justify-content: center;
     }
 
@@ -115,226 +97,119 @@
       height: 44px;
       border-radius: 12px;
       object-fit: cover;
-      border: 1px solid rgba(122, 184, 212, 0.25);
-      box-shadow: 0 0 0 4px rgba(122, 184, 212, 0.06);
+      box-shadow: 0 0 20px rgba(36, 151, 243, 0.2);
     }
 
     .brand-name {
-      font-family: 'Syne', sans-serif;
+      font-family: 'Sora', sans-serif;
       font-size: 1.5rem;
       font-weight: 800;
-      color: var(--text);
       letter-spacing: -0.02em;
     }
 
     .brand-name span {
-      color: var(--sky);
+      background: linear-gradient(100deg, #7dcfff 0%, #2497f3 45%, #aee0ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
-    /* Card */
+    /* Auth Card */
     .auth-card {
-      background: rgba(28, 42, 54, 0.8);
-      border: 1px solid rgba(122, 184, 212, 0.1);
-      border-radius: 20px;
-      padding: 2.5rem;
+      background: rgba(13, 17, 23, 0.7);
       backdrop-filter: blur(20px);
-      box-shadow:
-        0 0 0 1px rgba(255, 255, 255, 0.03) inset,
-        0 24px 48px rgba(0, 0, 0, 0.4),
-        0 4px 16px rgba(0, 0, 0, 0.2);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
     }
 
-    /* Step indicator */
-    .step-row {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 1.75rem;
-    }
-
-    .step-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--text-soft);
-    }
-
-    .step-dot.done {
-      background: var(--sky);
-      box-shadow: 0 0 0 3px rgba(122, 184, 212, 0.15);
-    }
-
-    .step-line {
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-
-    .step-label {
-      font-size: 0.7rem;
-      color: var(--text-soft);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      font-weight: 600;
-    }
-
-    /* Heading */
     .card-heading {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.6rem;
+      font-family: 'Sora', sans-serif;
+      font-size: 1.75rem;
       font-weight: 700;
-      color: var(--text);
-      letter-spacing: -0.02em;
-      margin-bottom: 0.6rem;
-      line-height: 1.2;
+      margin-bottom: 8px;
     }
 
     .card-sub {
-      font-size: 0.875rem;
-      color: var(--text-mid);
+      color: var(--c-muted);
+      font-size: 0.95rem;
       line-height: 1.6;
-      margin-bottom: 2rem;
+      margin-bottom: 32px;
     }
 
     .card-sub strong {
-      color: var(--sky-soft);
-      font-weight: 500;
+      color: var(--c-blue);
     }
 
-    /* Code input row */
-    .code-field-wrap {
-      position: relative;
-      margin-bottom: 0.75rem;
-    }
-
-    .code-label {
-      display: block;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--text-mid);
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      margin-bottom: 0.65rem;
-    }
-
+    /* Code Input */
     .code-input {
       width: 100%;
-      background: rgba(15, 25, 35, 0.6);
-      border: 1.5px solid rgba(122, 184, 212, 0.15);
-      border-radius: 14px;
-      padding: 1.1rem 1.25rem;
+      background: rgba(0, 0, 0, 0.3);
+      border: 2px solid rgba(36, 151, 243, 0.15);
+      border-radius: 16px;
+      padding: 18px;
       text-align: center;
-      font-size: 2rem;
-      font-family: 'Syne', sans-serif;
+      font-size: 2.5rem;
+      font-family: 'Sora', sans-serif;
       font-weight: 700;
-      letter-spacing: 0.55em;
-      color: var(--text);
-      outline: none;
-      transition: all 0.2s;
-      caret-color: var(--sky);
-    }
-
-    .code-input::placeholder {
-      color: rgba(90, 111, 126, 0.5);
       letter-spacing: 0.4em;
-      font-size: 1.5rem;
+      color: #fff;
+      outline: none;
+      transition: all 0.3s;
+      margin-bottom: 24px;
     }
 
     .code-input:focus {
-      border-color: var(--sky);
-      background: rgba(15, 25, 35, 0.8);
-      box-shadow: 0 0 0 4px rgba(122, 184, 212, 0.08), 0 0 20px rgba(122, 184, 212, 0.05);
+      border-color: var(--c-blue);
+      box-shadow: 0 0 20px rgba(36, 151, 243, 0.2);
     }
 
-    .code-input.filled {
-      border-color: rgba(92, 184, 122, 0.4);
-      color: var(--success);
-    }
-
-    /* Expiry bar */
-    .expiry-bar-wrap {
-      margin-bottom: 2rem;
-    }
-
+    /* Expiry Progress */
     .expiry-meta {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.4rem;
+      font-size: 0.75rem;
+      margin-bottom: 6px;
+      color: var(--c-muted);
     }
 
-    .expiry-text {
-      font-size: 0.72rem;
-      color: var(--text-soft);
-    }
-
-    .expiry-timer {
-      font-size: 0.72rem;
-      color: var(--sky);
-      font-weight: 600;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .expiry-bar {
-      height: 2px;
-      background: rgba(122, 184, 212, 0.08);
-      border-radius: 4px;
+    .expiry-track {
+      height: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      margin-bottom: 32px;
       overflow: hidden;
     }
 
     .expiry-fill {
       height: 100%;
+      background: linear-gradient(90deg, var(--c-blue), #63b3ed);
       width: 100%;
-      background: linear-gradient(90deg, var(--sky-dark), var(--sky));
-      border-radius: 4px;
-      transform-origin: left;
-      animation: drain 300s linear forwards;
+      transition: width 1s linear;
     }
 
-    @keyframes drain {
-      from {
-        transform: scaleX(1);
-      }
-
-      to {
-        transform: scaleX(0);
-      }
-    }
-
-    /* Submit button */
+    /* Button */
     .submit-btn {
       width: 100%;
-      padding: 1rem;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--c-blue), var(--c-mid));
+      color: #fff;
       border: none;
-      border-radius: 12px;
-      background: linear-gradient(135deg, var(--sky-dark) 0%, #3b7d98 100%);
-      color: white;
-      font-family: 'Syne', sans-serif;
-      font-size: 0.95rem;
+      border-radius: 14px;
+      font-family: 'Sora', sans-serif;
       font-weight: 700;
-      letter-spacing: 0.02em;
+      font-size: 1rem;
       cursor: pointer;
-      transition: all 0.22s;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 4px 16px rgba(74, 143, 168, 0.3), 0 1px 3px rgba(0, 0, 0, 0.3);
-    }
-
-    .submit-btn::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, transparent 100%);
-      pointer-events: none;
+      box-shadow: 0 8px 25px rgba(36, 151, 243, 0.35);
+      transition: all 0.3s;
+      margin-bottom: 24px;
     }
 
     .submit-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(74, 143, 168, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3);
-    }
-
-    .submit-btn:active {
-      transform: translateY(0);
+      box-shadow: 0 12px 35px rgba(36, 151, 243, 0.5);
     }
 
     .submit-btn:disabled {
@@ -343,125 +218,82 @@
       transform: none;
     }
 
-    /* Footer link */
     .card-footer {
       text-align: center;
-      margin-top: 1.5rem;
-      font-size: 0.82rem;
-      color: var(--text-soft);
+      font-size: 0.85rem;
+      color: var(--c-muted);
     }
 
     .card-footer a {
-      color: var(--sky);
+      color: var(--c-blue);
       text-decoration: none;
-      font-weight: 500;
-      transition: color 0.2s;
+      font-weight: 600;
     }
 
     .card-footer a:hover {
-      color: var(--sky-soft);
+      text-decoration: underline;
     }
 
-    /* Security note */
     .security-note {
       display: flex;
       align-items: center;
-      gap: 0.6rem;
-      margin-top: 1.5rem;
-      padding: 0.75rem 1rem;
-      background: rgba(122, 184, 212, 0.04);
-      border: 1px solid rgba(122, 184, 212, 0.08);
-      border-radius: 10px;
-    }
-
-    .security-icon {
-      font-size: 0.9rem;
-      flex-shrink: 0;
-    }
-
-    .security-text {
-      font-size: 0.72rem;
-      color: var(--text-soft);
-      line-height: 1.5;
-    }
-
-    /* Bottom system tag */
-    .system-tag {
-      text-align: center;
-      margin-top: 1.75rem;
-      font-size: 0.67rem;
-      color: var(--text-soft);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      opacity: 0.5;
+      gap: 10px;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      font-size: 0.75rem;
+      color: var(--c-muted);
+      margin-top: 24px;
     }
   </style>
 </head>
 
-<body>
-  <div class="wrapper">
+<body class="hero">
+  <div class="bg-gradient"></div>
+  <div class="bg-grid"></div>
 
+  <div class="wrapper">
     <div class="brand-lockup">
       <img src="/assets/tuungane.jpeg" alt="Afya" class="brand-img">
       <div class="brand-name">Afya <span>eHealth</span></div>
     </div>
 
     <div class="auth-card">
-
-      <!-- Step progress -->
-      <div class="step-row">
-        <div class="step-dot done"></div>
-        <div class="step-line"></div>
-        <div class="step-dot done"></div>
-        <div class="step-line"></div>
-        <div class="step-dot" style="background:var(--sky); box-shadow:0 0 0 3px rgba(122,184,212,0.15);"></div>
-        <span class="step-label" style="margin-left:0.25rem;">Step 3 of 3</span>
-      </div>
-
-      <h2 class="card-heading">Verify your email</h2>
+      <h2 class="card-heading">Security Code</h2>
       <p class="card-sub">
-        We've sent a 6-digit code to<br>
-        <strong id="user-email">your email address</strong>.
+        We've sent a 6-digit verification code to
+        <strong id="user-email">your email</strong>.
       </p>
 
       <form id="verify-2fa-form">
-        <div class="code-field-wrap">
-          <label for="code" class="code-label">Verification Code</label>
-          <input type="text" id="code" name="code" class="code-input" placeholder="——————" maxlength="6"
-            inputmode="numeric" autocomplete="one-time-code" required autofocus>
-        </div>
+        <input type="text" id="code" name="code" class="code-input" placeholder="000000" maxlength="6"
+          inputmode="numeric" required autofocus>
 
-        <div class="expiry-bar-wrap">
-          <div class="expiry-meta">
-            <span class="expiry-text">Code expires in</span>
-            <span class="expiry-timer" id="countdown">5:00</span>
-          </div>
-          <div class="expiry-bar">
-            <div class="expiry-fill"></div>
-          </div>
+        <div class="expiry-meta">
+          <span>Code expires in</span>
+          <span id="countdown">5:00</span>
+        </div>
+        <div class="expiry-track">
+          <div class="expiry-fill" id="expiry-bar"></div>
         </div>
 
         <button type="submit" class="submit-btn" id="submit-btn">
-          Verify &amp; Sign In →
+          Verify Identity →
         </button>
       </form>
 
-      <div class="security-note">
-        <span class="security-icon">🔒</span>
-        <span class="security-text">This code is single-use and expires after 5 minutes. Never share it with
-          anyone.</span>
+      <div class="card-footer">
+        Didn't get the code? <a href="/signin">Return to Sign In</a>
       </div>
 
+      <div class="security-note">
+        <span>🔒</span>
+        <span>Expires in 5 minutes. Use once only.</span>
+      </div>
     </div>
-
-    <p class="card-footer">
-      Didn't receive a code? <a href="/signin">Try signing in again</a>
-    </p>
-
-    <div class="system-tag">Afya eHealth · Secure Authentication</div>
-
   </div>
 
+  <script src="/js/particles-hero.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const email = localStorage.getItem('pending_email');
@@ -471,31 +303,27 @@
       }
       document.getElementById('user-email').textContent = email;
 
-      // Countdown timer (5 min)
+      // Countdown (300s)
       let seconds = 300;
       const countdown = document.getElementById('countdown');
+      const bar = document.getElementById('expiry-bar');
+      
       const timer = setInterval(() => {
         seconds--;
         const m = Math.floor(seconds / 60);
         const s = seconds % 60;
         countdown.textContent = `${m}:${s.toString().padStart(2, '0')}`;
-        if (seconds <= 60) countdown.style.color = '#c07a5a';
+        
+        // Progress bar
+        const perc = (seconds / 300) * 100;
+        bar.style.width = `${perc}%`;
+
         if (seconds <= 0) {
           clearInterval(timer);
           countdown.textContent = 'Expired';
           document.getElementById('submit-btn').disabled = true;
         }
       }, 1000);
-
-      // Code input auto-style
-      const codeInput = document.getElementById('code');
-      codeInput.addEventListener('input', () => {
-        if (codeInput.value.length === 6) {
-          codeInput.classList.add('filled');
-        } else {
-          codeInput.classList.remove('filled');
-        }
-      });
 
       const form = document.getElementById('verify-2fa-form');
       form.addEventListener('submit', async (e) => {
@@ -520,18 +348,16 @@
           } else {
             alert(data.message);
             btn.disabled = false;
-            btn.textContent = 'Verify & Sign In →';
+            btn.textContent = 'Verify Identity →';
           }
         } catch (error) {
-          console.error('Error verifying code:', error);
-          alert('An error occurred. Please try again.');
+          console.error('Error:', error);
           btn.disabled = false;
-          btn.textContent = 'Verify & Sign In →';
+          btn.textContent = 'Verify Identity →';
         }
       });
     });
   </script>
-  <script type="module" src="/js/layout.js"></script>
 </body>
 
 </html>

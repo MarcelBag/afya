@@ -960,6 +960,236 @@
         padding-top: 32px;
       }
     }
+
+    /* ── Image Analysis Results ── */
+    .analysis-card {
+      padding: 0;
+      margin-top: 20px;
+      animation: hp-rise 0.5s ease both;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 15px;
+    }
+
+    .status-benign {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-malignant {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .status-notice {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .progress-track {
+      height: 10px;
+      background: #edf2f7;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 15px 0 10px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--c-blue);
+      border-radius: 10px;
+      transition: width 1s ease-out;
+    }
+
+    .disclaimer-text {
+      font-size: 0.75rem;
+      color: var(--c-muted);
+      background: rgba(36, 151, 243, 0.03);
+      padding: 12px 18px;
+      border-radius: 10px;
+      margin-top: 20px;
+      border-left: 3px solid var(--c-blue);
+      line-height: 1.6;
+    }
+
+    .result-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      font-size: 0.85rem;
+      color: var(--c-soft);
+    }
+
+    /* ── Confirmation Modal ── */
+    #confirm-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(6, 17, 31, 0.8);
+      backdrop-filter: blur(8px);
+    }
+
+    .confirm-panel {
+      background: #fff;
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      animation: hp-lb-pop 0.3s ease both;
+    }
+
+    .confirm-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--c-ink);
+      margin-bottom: 12px;
+    }
+
+    .confirm-text {
+      font-size: 0.95rem;
+      color: var(--c-soft);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .confirm-btns {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .btn-cancel {
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: 1px solid var(--c-border);
+      background: #fff;
+      color: var(--c-soft);
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-delete {
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: none;
+      background: #ef4444;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    /* ── Analysis Loader ── */
+    #analysis-loading {
+      padding: 30px;
+      text-align: center;
+      background: #fff;
+      border-radius: 20px;
+      border: 1px solid var(--c-border);
+      margin-top: 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+    }
+
+    .loader-steps {
+      font-size: 0.9rem;
+      color: var(--c-soft);
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+
+    .live-progress-track {
+      height: 6px;
+      background: #edf2f7;
+      border-radius: 10px;
+      overflow: hidden;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+
+    .live-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--c-blue), #63b3ed);
+      width: 0%;
+      border-radius: 10px;
+      transition: width 0.3s ease;
+      position: relative;
+    }
+
+    /* ── History Sidebar ── */
+    .history-thumb {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid var(--c-border);
+      background: #f7fafc;
+    }
+    .history-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      border-bottom: 1px solid var(--c-border);
+    }
+    .history-item:last-child {
+      border-bottom: none;
+    }
+    .history-item:hover {
+      background: rgba(36, 151, 243, 0.03);
+    }
+    .history-info {
+        flex: 1;
+        min-width: 0;
+    }
+    .delete-history-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border: none;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .history-item:hover .delete-history-btn {
+      opacity: 1;
+    }
+
+    @keyframes progress-shine {
+      0% {
+        transform: translateX(-100%);
+      }
+
+      100% {
+        transform: translateX(100%);
+      }
+    }
   </style>
 </head>
 
@@ -1106,19 +1336,58 @@
             </ul>
           </section>
 
-          <section id="upload-section" class="card">
-            <h3>Upload Image for Analysis</h3>
-            <form id="upload-form">
-              <label for="image">Upload Image:</label>
-              <input type="file" id="image" name="image" accept="image/*" required>
-              <button type="submit" class="cta-btn">Submit Image</button>
-            </form>
-          </section>
 
-          <section id="results-section" class="hidden card">
-            <h2>Analysis Results</h2>
-            <div id="results"></div>
-          </section>
+          <div class="generator-layout">
+            <aside class="history-sidebar">
+              <div class="sidebar-header">
+                <h3>Analysis History</h3>
+                <button id="refresh-analysis-history" title="Refresh history">🔄</button>
+              </div>
+              <div id="analysis-history-list" class="history-list">
+                <p class="empty-state">No history yet.</p>
+              </div>
+            </aside>
+
+            <main class="generator-main">
+              <section id="upload-section" class="card">
+                <h3>Upload Image for Analysis</h3>
+                <form id="upload-form">
+                  <label for="image">Upload Image:</label>
+                  <input type="file" id="image" name="image" accept="image/*" required>
+                  <button type="submit" class="cta-btn">Submit Image</button>
+                </form>
+
+                <div class="disclaimer-text">
+                  <strong>Disclaimer:</strong> This tool uses AI technology and is intended for <strong>research
+                    purposes only</strong>. We are continuously learning and improving. The results are predictions and
+                  should not replace professional medical advice. Always consult a qualified healthcare provider.
+                </div>
+              </section>
+
+              <section id="analysis-loading" class="hidden">
+                <div class="loader-steps" id="loading-status">Initializing AI analysis...</div>
+                <div class="live-progress-track">
+                  <div class="live-progress-fill" id="loading-progress"></div>
+                </div>
+                <p style="margin-top: 15px; font-size: 0.75rem; color: var(--c-muted);">Afya AI is scanning pixels for
+                  clinical patterns.</p>
+              </section>
+
+              <section id="results-section" class="hidden">
+                <div id="results"></div>
+              </section>
+            </main>
+          </div>
+          <div id="confirm-modal" class="hidden">
+            <div class="confirm-panel">
+              <h3 class="confirm-title">Delete Record?</h3>
+              <p class="confirm-text">This action cannot be undone. This analysis data will be permanently removed.</p>
+              <div class="confirm-btns">
+                <button id="cancel-delete" class="btn-cancel">Cancel</button>
+                <button id="confirm-delete-btn" class="btn-delete">Delete</button>
+              </div>
+            </div>
+          </div>
         </div><!-- /#image-analysis-view -->
 
         <!-- ─── Blog Header Generator view ─── -->
@@ -1189,6 +1458,7 @@
   <script type="module" src="/js/layout.js"></script>
   <script type="module" src="/js/script.js"></script>
   <script type="module" src="/js/upload.js"></script>
+  <script type="module" src="/js/analysis_history.js"></script>
   <script type="module" src="/js/header_generator.js"></script>
 
   <!-- ══ Lightbox logic (delegated works with dynamically added cards) ══ -->

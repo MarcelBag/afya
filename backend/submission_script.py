@@ -1,19 +1,25 @@
+# AI Generation Layer: Enforces visual coherence via a shared design template.
+# This script separates brand identity (style) from content (topic) to ensure 
+# every generated asset is ready for professional clinical use.
 import os
 import uuid
 import requests
 from openai import OpenAI
 from dotenv import load_dotenv
 
-# Here we load our secret things from the .env file
+# Load secure environment variables
 load_dotenv()
 
-# This is the secret key for OpenAI, without this one the thing cannot work at all
+# OpenAI API Configuration
 api_key = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=api_key) if api_key else None
 
-# This is the big secret here! We tell the AI to use only one style
-# "Coherence" means all pictures look like they are brothers, not just random things
-STYLE_TEMPLATE = "soft pastel colors, minimalist medical illustration, female health theme, modern digital health branding, soft gradients, clean background, professional blog header style"
+# Strategic Style Template: Defines the visual DNA for Endo Health brand coherence
+STYLE_TEMPLATE = (
+    "soft pastel colors, minimalist medical illustration, female health theme, "
+    "modern digital health branding, soft gradients, clean background, "
+    "professional blog header style"
+)
 
 def generate_header(title, output_dir="uploads/generated_headers/"):
     """
