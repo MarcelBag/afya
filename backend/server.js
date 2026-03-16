@@ -83,8 +83,8 @@ const transporter = nodemailer.createTransport({
 
 // Multer Setup
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, 'uploads/'),
-  filename: (req, file, cb) => cb(null, file.originalname)
+  destination: (req, file, cb) => cb(null, path.join(__dirname, '../uploads/')),
+  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
 });
 const upload = multer({ storage });
 
@@ -280,7 +280,7 @@ app.post('/api/upload-image', authMiddleware, upload.single('image'), async (req
     });
 
     const { prediction, confidence, analysisType } = response.data;
-    const imagePath = '/' + req.file.path; // Ensure leading slash for static serving
+    const imagePath = '/uploads/' + req.file.filename; 
     await new AnalysisHistory({
       userId: req.user.userId,
       imagePath,

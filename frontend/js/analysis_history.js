@@ -91,6 +91,9 @@ function displayAnalysisResult(data) {
     const confidence = data.confidence || 0;
     
     resultsContainer.innerHTML = `
+        <div style="margin-bottom: 25px; border-radius: 12px; overflow: hidden; border: 1px solid var(--c-border);">
+            <img src="${data.imagePath}" alt="Analyzed Skin" style="width: 100%; height: 200px; object-fit: cover; display: block;">
+        </div>
         <div class="status-badge ${badgeClass}">${prediction}</div>
         <h3 style="margin-bottom: 5px;">Analysis Result</h3>
         <p style="color: #718096; font-size: 0.9rem;">Cached analysis from ${new Date(data.createdAt).toLocaleDateString()}.</p>
