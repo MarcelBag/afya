@@ -967,12 +967,15 @@
       cursor: zoom-in;
       overflow: hidden;
     }
+
     .hp-img-wrap img {
       transition: transform 0.35s ease;
     }
+
     .hp-img-wrap:hover img {
       transform: scale(1.04);
     }
+
     .hp-img-wrap::after {
       content: '⤢';
       position: absolute;
@@ -992,6 +995,7 @@
       transition: opacity 0.22s;
       pointer-events: none;
     }
+
     .hp-img-wrap:hover::after {
       opacity: 1;
     }
@@ -1173,6 +1177,7 @@
       border: 1px solid var(--c-border);
       background: #f7fafc;
     }
+
     .history-item {
       display: flex;
       align-items: flex-start;
@@ -1184,16 +1189,20 @@
       position: relative;
       border-bottom: 1px solid var(--c-border);
     }
+
     .history-item:last-child {
       border-bottom: none;
     }
+
     .history-item:hover {
       background: rgba(36, 151, 243, 0.03);
     }
+
     .history-info {
-        flex: 1;
-        min-width: 0;
+      flex: 1;
+      min-width: 0;
     }
+
     .delete-history-btn {
       position: absolute;
       top: 8px;
@@ -1211,6 +1220,7 @@
       opacity: 0;
       transition: opacity 0.2s;
     }
+
     .history-item:hover .delete-history-btn {
       opacity: 1;
     }
@@ -1364,9 +1374,12 @@
           <section class="guidelines card">
             <h2>Image Analysis Guidelines</h2>
             <ul>
-              <li>Ensure the image is clear and relevant for the analysis.</li>
-              <li>Upload the image for skin cancer detection (benign / malignant).</li>
-              <li>Click the upload button and submit your image for processing.</li>
+              <li><strong>High-Quality Capture</strong>: Ensure the image is a clear, close-up for precise Afya AI
+                processing.</li>
+              <li><strong>Multi-Condition Analysis</strong>: Afya evaluates for Malignant/Benign lesions, Acne, Eczema,
+                Psoriasis, and more.</li>
+              <li><strong>Instant Assessment</strong>: Click upload to receive a detailed clinical classification and
+                confidence report.</li>
             </ul>
           </section>
 
@@ -1511,17 +1524,17 @@
       let currentIndex = 0;
       let isGalleryView = false;
 
-      window.openLightbox = function(src, title) {
-          lbImg.src = src;
-          lbTitle.textContent = title || '';
-          lbCounter.textContent = '';
-          lbPrev.style.display = 'none';
-          lbNext.style.display = 'none';
-          
-          lightbox.classList.add('open');
-          document.body.style.overflow = 'hidden';
-          lbClose.focus();
-          isGalleryView = false;
+      window.openLightbox = function (src, title) {
+        lbImg.src = src;
+        lbTitle.textContent = title || '';
+        lbCounter.textContent = '';
+        lbPrev.style.display = 'none';
+        lbNext.style.display = 'none';
+
+        lightbox.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        lbClose.focus();
+        isGalleryView = false;
       };
 
       const observer = new MutationObserver(() => {
@@ -1588,8 +1601,8 @@
         if (!lightbox.classList.contains('open')) return;
         if (e.key === 'Escape') close();
         if (isGalleryView) {
-            if (e.key === 'ArrowLeft') openAt(currentIndex - 1);
-            if (e.key === 'ArrowRight') openAt(currentIndex + 1);
+          if (e.key === 'ArrowLeft') openAt(currentIndex - 1);
+          if (e.key === 'ArrowRight') openAt(currentIndex + 1);
         }
       });
     })();
