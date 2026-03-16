@@ -54,7 +54,7 @@ def predict(image_path):
     2) Gemini API for both person detection and classification.
     """
     if not GEMINI_INTEGRATION:
-        return "Invalid", "Image analysis is currently unavailable (Gemini Integration missing)."
+        return "Invalid", "Image analysis is currently unavailable (Afya Integration missing)."
 
     # Step 1: Local HSV check for skin content (avoid API calls for obviously bad images).
     if not is_skin_color_image(image_path, skin_threshold=0.12):
@@ -64,7 +64,7 @@ def predict(image_path):
     result = analyze_image_gemini(image_path)
     
     if not result:
-        return "Invalid", "Error communicating with Gemini. Please try again."
+        return "Invalid", "Error communicating with Afya. Please try again."
 
     if result.get("person_detected"):
         return "Invalid", "Please post a skin close-up (person or face detected)."
