@@ -7,6 +7,9 @@ The project is not yet complete and open to new ideas.
 A modern AI-powered web application for **skin lesion analysis and skin cancer risk prediction**.  
 Being built to assist clinicians and researchers with fast, accessible, and reliable image-based diagnostics predictions
 
+Locally run and configured on 
+#http://localhost:4006
+
 ---
 [text](Users/marcelbag/Documents/projects/skin_lesions/backend/models/skin_lesion_model.keras)
 

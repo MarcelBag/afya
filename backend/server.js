@@ -46,7 +46,7 @@ const corsOptions = {
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Monitoring-Token'],
   credentials: true
 };
 
@@ -110,6 +110,35 @@ const isAdmin = (req, res, next) => {
   }
 };
 
+const getMonitoringTokenFromRequest = (req) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader?.startsWith('Bearer ')) {
+    return authHeader.slice('Bearer '.length).trim();
+  }
+
+  const headerToken = req.headers['x-monitoring-token'];
+  return typeof headerToken === 'string' ? headerToken.trim() : '';
+};
+
+const monitoringAuthMiddleware = (req, res, next) => {
+  const configuredToken = process.env.MONITORING_SHARED_TOKEN?.trim();
+
+  if (!configuredToken) {
+    return res.status(503).json({ message: 'Monitoring token is not configured.' });
+  }
+
+  const providedToken = getMonitoringTokenFromRequest(req);
+  if (!providedToken) {
+    return res.status(401).json({ message: 'Monitoring token required.' });
+  }
+
+  if (providedToken !== configuredToken) {
+    return res.status(403).json({ message: 'Invalid monitoring token.' });
+  }
+
+  next();
+};
+
 const isSuperuser = (req, res, next) => {
   if (req.user && req.user.role === 'superuser') {
     next();
@@ -126,6 +155,10 @@ const VERSION = "1.1.4"; // Diagnostic ping bump
 app.get('/api/ping', (req, res) => {
   console.log(`[DEBUG v${VERSION}] Ping received from ${req.ip}`);
   res.json({ status: 'ok', version: VERSION, message: 'Gateway is running' });
+});
+
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', service: 'afya' });
 });
 
 app.post('/api/signup', async (req, res) => {
