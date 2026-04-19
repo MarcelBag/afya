@@ -17,6 +17,12 @@ const AuditLogSchema = new mongoose.Schema({
   details: {
     type: String
   },
+  metadata: {
+    resourceType: { type: String },
+    resourceId: { type: String },
+    ipAddress: { type: String },
+    userAgent: { type: String }
+  },
   timestamp: {
     type: Date,
     default: Date.now

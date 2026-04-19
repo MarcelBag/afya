@@ -6,10 +6,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
+    const permissionsByRole = {
+        user: [],
+        admin: ['view_dashboard', 'manage_users', 'manage_recycle_bin', 'view_analytics', 'view_audit_logs'],
+        superuser: ['view_dashboard', 'manage_users', 'manage_recycle_bin', 'view_analytics', 'view_audit_logs', 'access_django_admin']
+    };
+
     // Role check (simple frontend guard)
     const payload = JSON.parse(atob(token.split('.')[1]));
-    if (payload.role !== 'admin' && payload.role !== 'superuser') {
-        alert('Access denied. Admin privileges required.');
+    let currentUser = {
+        email: payload.email,
+        role: payload.role,
+        permissions: permissionsByRole[payload.role] || []
+    };
+
+    try {
+        const res = await fetch('/api/user', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+            currentUser = await res.json();
+        }
+    } catch (err) {
+        console.warn('Unable to refresh current user details:', err);
+    }
+
+    if (!currentUser.permissions?.includes('view_dashboard')) {
+        alert('Access denied. Dashboard privileges required.');
         window.location.href = '/home';
         return;
     }
@@ -17,8 +40,35 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Set Admin Name in sidebar
     const adminNameEl = document.getElementById('admin-name');
     const adminInitialsEl = document.getElementById('admin-initials');
-    if (adminNameEl) adminNameEl.textContent = payload.email.split('@')[0];
-    if (adminInitialsEl) adminInitialsEl.textContent = payload.email[0].toUpperCase();
+    const displayName = currentUser.name || currentUser.email?.split('@')[0] || 'Admin';
+    if (adminNameEl) adminNameEl.textContent = displayName;
+    if (adminInitialsEl) adminInitialsEl.textContent = displayName[0].toUpperCase();
+
+    document.querySelectorAll('[data-permission]').forEach(item => {
+        if (!currentUser.permissions?.includes(item.dataset.permission)) {
+            item.closest('li')?.remove();
+            if (!item.closest('li')) item.remove();
+        }
+    });
+
+    const djangoAdminLink = document.getElementById('django-admin-link');
+    if (djangoAdminLink && currentUser.permissions?.includes('access_django_admin')) {
+        try {
+            const res = await fetch('/api/admin/django-admin-link', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                djangoAdminLink.href = data.url;
+            }
+        } catch (err) {
+            console.warn('Unable to load Django Admin URL:', err);
+        }
+    }
+
+    if (currentUser.role !== 'superuser') {
+        document.querySelector('#modal-role option[value="superuser"]')?.remove();
+    }
 
 
     let allUsers = [];
@@ -26,7 +76,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Modal Elements
     const addUserModal = document.getElementById('add-user-modal');
     const addUserForm = document.getElementById('add-user-form');
-    const openModalBtn = document.querySelector('.btn-primary'); // "+ Add User"
+    const openModalBtn = document.getElementById('open-add-user');
     const closeModalBtn = document.getElementById('close-modal');
 
     if (openModalBtn) {
@@ -116,7 +166,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             case 'users':
                 await loadUsers();
                 break;
-            case 'history':
+            case 'recycle':
+                await loadRecycleBin();
+                break;
+            case 'analytics':
                 await loadGlobalHistory();
                 break;
             case 'audit':
@@ -134,8 +187,34 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('stat-users').textContent = stats.totalUsers;
             document.getElementById('stat-active').textContent = stats.activeUsers;
             document.getElementById('stat-history').textContent = stats.totalGenerations;
+            document.getElementById('stat-audit').textContent = stats.auditEvents;
+            await loadRecentActivity();
         } catch (err) {
             console.error('Stats error:', err);
+        }
+    }
+
+    async function loadRecentActivity() {
+        try {
+            if (!currentUser.permissions?.includes('view_audit_logs')) return;
+            const res = await fetch('/api/admin/audit', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const logs = await res.json();
+            const tbody = document.getElementById('recent-activity-body');
+            const recent = logs.slice(0, 3);
+
+            if (recent.length === 0) return;
+
+            tbody.innerHTML = recent.map(log => `
+                <tr>
+                    <td><strong>${log.action}</strong><br><small>${log.details || ''}</small></td>
+                    <td>${log.performedBy?.email || 'System'}</td>
+                    <td>${new Date(log.timestamp).toLocaleString()}</td>
+                </tr>
+            `).join('');
+        } catch (err) {
+            console.error('Recent activity error:', err);
         }
     }
 
@@ -177,7 +256,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <button class="action-btn" onclick="toggleUserStatus('${user._id}', '${user.status}')">
                         ${user.status === 'active' ? 'Deactivate' : 'Activate'}
                     </button>
-                    ${payload.role === 'superuser' ? `
+                    ${currentUser.role === 'superuser' ? `
                         <button class="action-btn" onclick="promoteUser('${user._id}', '${user.role}')">
                             Promote
                         </button>
@@ -194,6 +273,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
             const history = await res.json();
             const tbody = document.getElementById('history-table-body');
+            document.getElementById('history-count').textContent = `${history.length} records`;
             
             if (history.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No AI generation records found.</td></tr>';
@@ -228,6 +308,53 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    async function loadRecycleBin() {
+        try {
+            const res = await fetch('/api/admin/recycle-bin', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            const inactiveUsers = data.inactiveUsers || [];
+            const tbody = document.getElementById('recycle-table-body');
+            const count = inactiveUsers.length + (data.generatedItems?.length || 0);
+            document.getElementById('recycle-count').textContent = `${count} items`;
+
+            if (count === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4">
+                            <div class="empty-state">
+                                <div class="icon">♻</div>
+                                <h4>No recycled items</h4>
+                                <p>Inactive accounts and recoverable records will appear here.</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = inactiveUsers.map(user => `
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <div class="t-avatar">${user.name?.[0] || '?'}</div>
+                            <div>
+                                <div class="cell-name">${user.name || 'Unknown user'}</div>
+                                <div class="cell-sub">${user.email || ''}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="badge admin">User Account</span></td>
+                    <td><span class="badge ${user.status}">${user.status}</span></td>
+                    <td>${new Date(user.createdAt).toLocaleString()}</td>
+                </tr>
+            `).join('');
+        } catch (err) {
+            console.error('Recycle bin error:', err);
+        }
+    }
+
     async function loadAuditLogs() {
         try {
             const res = await fetch('/api/admin/audit', {
@@ -235,6 +362,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
             const logs = await res.json();
             const tbody = document.getElementById('audit-table-body');
+            document.getElementById('audit-count').textContent = `${logs.length} logs`;
             tbody.innerHTML = logs.map(log => `
                 <tr>
                     <td><strong>${log.action}</strong></td>

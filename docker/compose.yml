@@ -1,4 +1,28 @@
 services:
+  django-app:
+    container_name: afya-django
+    profiles:
+      - django
+    build:
+      context: ..
+      dockerfile: docker/django.Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - ${ENV_FILE:-../.env}
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-afya}
+      POSTGRES_USER: ${POSTGRES_USER:-afya}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-afya}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+    volumes:
+      - ../backend:/app
+      - ../frontend:/frontend
+      - ../uploads:/uploads
+    depends_on:
+      - postgres
+
   flask-backend:
     container_name: afya-backend
     build:
@@ -38,5 +62,20 @@ services:
     volumes:
       - mongodb_data:/data/db
 
+  postgres:
+    container_name: afya-postgres
+    profiles:
+      - django
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-afya}
+      POSTGRES_USER: ${POSTGRES_USER:-afya}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-afya}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
 volumes:
   mongodb_data:
+  postgres_data:

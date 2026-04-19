@@ -1,58 +1,194 @@
 SHELL := /bin/bash
+.DEFAULT_GOAL := help
 
-# Determine which compose files to use
-COMPOSE_FILES := -f docker/compose.yml
+PROJECT_NAME := afya
+COMPOSE_FILE := docker/compose.yml
 
-DC := docker compose $(COMPOSE_FILES)
+DEV_COMPOSE := docker compose -p $(PROJECT_NAME) --env-file .env -f $(COMPOSE_FILE)
+PROD_COMPOSE := ENV_FILE=$(CURDIR)/.env.prod docker compose -p $(PROJECT_NAME) --env-file .env.prod -f $(COMPOSE_FILE)
+LOGS_COMPOSE := $(if $(wildcard .env),$(DEV_COMPOSE),$(if $(wildcard .env.prod),$(PROD_COMPOSE),$(DEV_COMPOSE)))
 
-.PHONY: dev build up down logs restart shell-backend shell-gateway ps pull prod stop
+DJANGO_DEV_COMPOSE := docker compose -p $(PROJECT_NAME)-django --profile django --env-file .env -f $(COMPOSE_FILE)
+DJANGO_PROD_COMPOSE := ENV_FILE=$(CURDIR)/.env.prod docker compose -p $(PROJECT_NAME)-django --profile django --env-file .env.prod -f $(COMPOSE_FILE)
+
+.PHONY: help \
+	dev dev-reset build up down restart stop logs dev-logs prod prod-logs prod-down ps pull \
+	shell-backend shell-gateway shell-django \
+	django-build django-up django-down django-logs django-makemigrations django-migrate django-createsuperuser django-shell django-check django-test \
+	makemigrations migrate createsuperuser shell test check \
+	clean clean-cache
 
 # ----------------------------
-# Environments
+# Current Stack
 # ----------------------------
-dev: build up
+dev:
+	$(DEV_COMPOSE) up -d --build
+
+dev-reset:
+	$(DEV_COMPOSE) down
+	$(DEV_COMPOSE) up -d --build
 
 build:
-	$(DC) build
+	$(DEV_COMPOSE) build
 
 up:
-	$(DC) up -d
+	$(DEV_COMPOSE) up -d
 
 down:
-	$(DC) down
+	$(DEV_COMPOSE) down
 
 restart:
-	$(DC) restart
+	$(DEV_COMPOSE) restart
+
+stop: down
 
 logs:
-	$(DC) logs -f
+	$(LOGS_COMPOSE) logs -f
+
+dev-logs:
+	$(DEV_COMPOSE) logs -f
 
 ps:
-	$(DC) ps
+	$(DEV_COMPOSE) ps
 
 pull:
 	git pull origin main
 
+# ----------------------------
+# Production Current Stack
+# ----------------------------
 prod:
-	# Ensure production environment variables are used
-	ENV_FILE=../.env.prod $(DC) build
-	ENV_FILE=../.env.prod $(DC) up -d
+	$(PROD_COMPOSE) up -d --build
 
-stop: down
+prod-logs:
+	$(PROD_COMPOSE) logs -f
+
+prod-down:
+	$(PROD_COMPOSE) down
 
 # ----------------------------
 # Interactive Shells
 # ----------------------------
 shell-backend:
-	$(DC) exec flask-backend /bin/bash
+	$(DEV_COMPOSE) exec flask-backend /bin/bash
 
 shell-gateway:
-	$(DC) exec express-gateway /bin/bash
+	$(DEV_COMPOSE) exec express-gateway /bin/bash
+
+shell-django:
+	$(DJANGO_DEV_COMPOSE) exec django-app /bin/bash
+
+# ----------------------------
+# Django Migration Stack
+# ----------------------------
+django-build:
+	$(DJANGO_DEV_COMPOSE) build django-app
+
+django-up:
+	$(DJANGO_DEV_COMPOSE) up -d postgres django-app
+
+django-down:
+	$(DJANGO_DEV_COMPOSE) stop django-app postgres
+
+django-logs:
+	$(DJANGO_DEV_COMPOSE) logs -f django-app postgres
+
+django-makemigrations:
+	$(DJANGO_DEV_COMPOSE) exec django-app python manage.py makemigrations
+
+django-migrate:
+	$(DJANGO_DEV_COMPOSE) exec django-app python manage.py migrate
+
+django-createsuperuser:
+	$(DJANGO_DEV_COMPOSE) exec django-app python manage.py createsuperuser
+
+django-shell:
+	$(DJANGO_DEV_COMPOSE) exec django-app python manage.py shell
+
+django-check:
+	$(DJANGO_DEV_COMPOSE) exec django-app python manage.py check
+
+django-test:
+	$(DJANGO_DEV_COMPOSE) exec django-app python manage.py test
+
+# Articles-style aliases for the Django migration stack.
+makemigrations: django-makemigrations
+migrate: django-migrate
+createsuperuser: django-createsuperuser
+shell: django-shell
+test: django-test
+
+# ----------------------------
+# Checks
+# ----------------------------
+check:
+	node --check backend/server.js
+	node --check frontend/js/admin.js
+	python backend/manage.py check
 
 # ----------------------------
 # Cleanup
 # ----------------------------
 clean:
-	$(DC) down --rmi all --volumes --remove-orphans
+	$(DEV_COMPOSE) down --rmi all --volumes --remove-orphans
+	$(DJANGO_DEV_COMPOSE) down --rmi all --volumes --remove-orphans
 	find . -type d -name "__pycache__" -exec rm -rf {} +
 	find . -type f -name "*.pyc" -delete
+
+clean-cache:
+	find . -type d -name "__pycache__" -exec rm -rf {} +
+	find . -type f -name "*.pyc" -delete
+
+# ============================
+# Help
+# ============================
+help:
+	@echo "╔════════════════════════════════════════════════════════════════╗"
+	@echo "║              Afya Platform - Make Command Reference           ║"
+	@echo "╚════════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@echo "🚀 ENVIRONMENTS"
+	@echo "  make dev              - Start current dev stack: Express + Flask + Mongo"
+	@echo "  make prod             - Start current production stack with .env.prod"
+	@echo "  make dev-reset        - Hard reset current dev stack and rebuild images"
+	@echo ""
+	@echo "🐳 CURRENT STACK CONTAINERS"
+	@echo "  make build            - Build current stack images"
+	@echo "  make up               - Start current stack containers"
+	@echo "  make down             - Stop and remove current stack containers"
+	@echo "  make restart          - Restart current stack containers"
+	@echo "  make ps               - Show current stack container status"
+	@echo "  make logs             - View available stack logs (auto-select env)"
+	@echo "  make dev-logs         - View current dev stack logs"
+	@echo "  make prod-logs        - View current production stack logs"
+	@echo "  make shell-backend    - Open shell in Flask ML container"
+	@echo "  make shell-gateway    - Open shell in Express gateway container"
+	@echo ""
+	@echo "🧭 DJANGO MIGRATION STACK"
+	@echo "  make django-build     - Build opt-in Django image"
+	@echo "  make django-up        - Start Django + Postgres sidecar services"
+	@echo "  make django-down      - Stop Django + Postgres sidecar services"
+	@echo "  make django-logs      - View Django + Postgres logs"
+	@echo "  make shell-django     - Open bash shell in Django container"
+	@echo ""
+	@echo "🗄️  DJANGO DATABASE & MANAGEMENT"
+	@echo "  make migrate          - Apply Django migrations (alias)"
+	@echo "  make makemigrations   - Create Django migrations (alias)"
+	@echo "  make createsuperuser  - Create Django superuser (alias)"
+	@echo "  make shell            - Open Django shell (alias)"
+	@echo "  make test             - Run Django tests (alias)"
+	@echo "  make django-check     - Run Django system checks in container"
+	@echo ""
+	@echo "🛠️  MAINTENANCE"
+	@echo "  make check            - Run local Node syntax + Django checks"
+	@echo "  make pull             - Pull latest main branch"
+	@echo "  make clean            - Remove containers, images, volumes, pycache"
+	@echo "  make clean-cache      - Remove Python cache files only"
+	@echo ""
+	@echo "📝 SAFE DJANGO MIGRATION START"
+	@echo "  make check"
+	@echo "  make django-build"
+	@echo "  make django-up"
+	@echo "  make migrate"
+	@echo "  make createsuperuser"
+	@echo ""

@@ -1,5 +1,5 @@
 /**
- * particles-hero.js
+ * js/particles-hero.js
  * drawing a canvas particle-constellation (floating dots + connecting lines)
  */
 

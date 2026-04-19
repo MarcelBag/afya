@@ -14,6 +14,20 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 
 const User = require('./models/User');
+const {
+  ROLES,
+  PERMISSIONS,
+  ROLE_LABELS,
+  getRolePermissions,
+  canManageTargetUser,
+} = require('./authentication/roles');
+const {
+  authMiddleware,
+  requireDashboardAccess,
+  requirePermission,
+  requireSuperuser,
+} = require('./authentication/middleware');
+const { logAudit } = require('./authentication/audit');
 
 const FLASK_BACKEND_URL = process.env.FLASK_BACKEND_URL || 'http://afya-backend:5002';
 const HeaderHistory = require('./models/HeaderHistory');
@@ -21,6 +35,7 @@ const AnalysisHistory = require('./models/AnalysisHistory');
 const AuditLog = require('./models/AuditLog');
 
 const app = express();
+const USER_STATUSES = ['active', 'inactive', 'suspended'];
 
 // ----------------------------
 // 1. Basic Middleware & Config
@@ -88,28 +103,6 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// ----------------------------
-// 2. Auth & Role Middlewares
-// ----------------------------
-const authMiddleware = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) return res.status(401).json({ message: 'No token, unauthorized.' });
-  
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) return res.status(403).json({ message: 'Invalid or expired token.' });
-    req.user = decoded; // { userId, email, role }
-    next();
-  });
-};
-
-const isAdmin = (req, res, next) => {
-  if (req.user && (req.user.role === 'admin' || req.user.role === 'superuser')) {
-    next();
-  } else {
-    res.status(403).json({ message: 'Access denied: Requires Admin privileges' });
-  }
-};
-
 const getMonitoringTokenFromRequest = (req) => {
   const authHeader = req.headers.authorization;
   if (authHeader?.startsWith('Bearer ')) {
@@ -137,14 +130,6 @@ const monitoringAuthMiddleware = (req, res, next) => {
   }
 
   next();
-};
-
-const isSuperuser = (req, res, next) => {
-  if (req.user && req.user.role === 'superuser') {
-    next();
-  } else {
-    res.status(403).json({ message: 'Access denied: Requires Superuser privileges' });
-  }
 };
 
 const VERSION = "1.1.4"; // Diagnostic ping bump
@@ -237,13 +222,24 @@ app.post('/api/verify-2fa', async (req, res) => {
 
     user.twoFactorCode = undefined;
     user.twoFactorExpires = undefined;
-    if (user.email === process.env.EMAIL_HOST_USER && user.role !== 'superuser') {
-      user.role = 'superuser';
+    if (user.email === process.env.EMAIL_HOST_USER && user.role !== ROLES.SUPERUSER) {
+      user.role = ROLES.SUPERUSER;
     }
     await user.save();
 
     const token = jwt.sign({ userId: user._id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '12h' });
-    res.json({ message: 'Successful!', token, role: user.role });
+    req.currentUser = user;
+    await logAudit(req, 'LOGIN', {
+      resourceType: 'User',
+      resourceId: String(user._id),
+      details: `User signed in: ${user.email}`,
+    });
+    res.json({
+      message: 'Successful!',
+      token,
+      role: user.role,
+      permissions: getRolePermissions(user.role),
+    });
   } catch (err) {
     res.status(500).json({ message: 'Server error during verification.' });
   }
@@ -314,12 +310,17 @@ app.post('/api/upload-image', authMiddleware, upload.single('image'), async (req
 
     const { prediction, confidence, analysisType } = response.data;
     const imagePath = '/uploads/' + req.file.filename; 
-    await new AnalysisHistory({
+    const history = await new AnalysisHistory({
       userId: req.user.userId,
       imagePath,
       prediction, confidence, analysisType
     }).save();
 
+    await logAudit(req, 'ANALYSIS_CREATE', {
+      resourceType: 'AnalysisHistory',
+      resourceId: String(history._id),
+      details: `Created ${analysisType} analysis result.`,
+    });
     res.json({ prediction, confidence, analysisType, imagePath });
   } catch (error) {
     if (error.response && error.response.data && error.response.data.message) {
@@ -342,7 +343,14 @@ app.post('/api/generate-headers', authMiddleware, async (req, res, next) => {
       const successful = data.results.filter(r => !r.error).map(r => ({
         userId: req.user.userId, title: r.title, imageUrl: r.image
       }));
-      if (successful.length > 0) await HeaderHistory.insertMany(successful);
+      if (successful.length > 0) {
+        const inserted = await HeaderHistory.insertMany(successful);
+        await logAudit(req, 'HEADER_GENERATION_CREATE', {
+          resourceType: 'HeaderHistory',
+          resourceId: inserted.map((item) => String(item._id)).join(','),
+          details: `Generated ${inserted.length} header image(s).`,
+        });
+      }
     }
     res.json(data);
   } catch (error) {
@@ -376,6 +384,11 @@ app.delete('/api/header-history/:id', authMiddleware, async (req, res) => {
     if (fs.existsSync(fpath)) fs.unlinkSync(fpath);
   }
   await HeaderHistory.deleteOne({ _id: req.params.id });
+  await logAudit(req, 'HEADER_HISTORY_DELETE', {
+    resourceType: 'HeaderHistory',
+    resourceId: String(item._id),
+    details: `Deleted generated header history: ${item.title}`,
+  });
   res.json({ message: 'Deleted' });
 });
 
@@ -391,6 +404,11 @@ app.delete('/api/analysis-history/:id', authMiddleware, async (req, res) => {
     }
     
     await AnalysisHistory.deleteOne({ _id: req.params.id });
+    await logAudit(req, 'ANALYSIS_HISTORY_DELETE', {
+      resourceType: 'AnalysisHistory',
+      resourceId: String(item._id),
+      details: `Deleted analysis history: ${item.analysisType}`,
+    });
     res.json({ message: 'Analysis deleted successfully' });
   } catch (err) {
     res.status(500).json({ message: 'Error deleting analysis.' });
@@ -399,7 +417,11 @@ app.delete('/api/analysis-history/:id', authMiddleware, async (req, res) => {
 
 app.get('/api/user', authMiddleware, async (req, res) => {
   const user = await User.findById(req.user.userId, 'name email role status');
-  res.json(user);
+  res.json({
+    ...user.toObject(),
+    roleLabel: ROLE_LABELS[user.role],
+    permissions: getRolePermissions(user.role),
+  });
 });
 
 app.patch('/api/user/profile', authMiddleware, async (req, res) => {
@@ -409,6 +431,11 @@ app.patch('/api/user/profile', authMiddleware, async (req, res) => {
     if (name) user.name = name;
     if (password) user.password = await bcrypt.hash(password, 10);
     await user.save();
+    await logAudit(req, 'PROFILE_UPDATE', {
+      resourceType: 'User',
+      resourceId: String(user._id),
+      details: `Updated profile for ${user.email}`,
+    });
     res.json({ message: 'Updated', name: user.name });
   } catch (e) { res.status(500).json({ message: 'Error' }); }
 });
@@ -417,21 +444,70 @@ app.patch('/api/user/profile', authMiddleware, async (req, res) => {
 // 5. Admin API Routes
 // ----------------------------
 
-app.get('/api/admin/stats', authMiddleware, isAdmin, async (req, res) => {
+app.get('/api/admin/stats', authMiddleware, requireDashboardAccess, async (req, res) => {
   const stats = {
     totalUsers: await User.countDocuments(),
     totalGenerations: await HeaderHistory.countDocuments() + await AnalysisHistory.countDocuments(),
-    activeUsers: await User.countDocuments({ status: 'active' })
+    activeUsers: await User.countDocuments({ status: 'active' }),
+    inactiveUsers: await User.countDocuments({ status: { $ne: 'active' } }),
+    auditEvents: await AuditLog.countDocuments(),
   };
   res.json(stats);
 });
 
-app.get('/api/admin/users', authMiddleware, isAdmin, async (req, res) => {
-  const users = await User.find({}, '-password -twoFactorCode');
+app.get('/api/admin/users', authMiddleware, requirePermission(PERMISSIONS.MANAGE_USERS), async (req, res) => {
+  const users = await User.find({}, '-password -twoFactorCode').sort({ createdAt: -1 });
   res.json(users);
 });
 
-app.get('/api/admin/history', authMiddleware, isAdmin, async (req, res) => {
+app.post('/api/admin/users', authMiddleware, requirePermission(PERMISSIONS.MANAGE_USERS), async (req, res) => {
+  try {
+    const { name, email, password, role = ROLES.USER } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: 'Name, email, and password are required.' });
+    }
+
+    if (!Object.values(ROLES).includes(role)) {
+      return res.status(400).json({ message: 'Invalid role.' });
+    }
+
+    if (role === ROLES.SUPERUSER && req.currentUser.role !== ROLES.SUPERUSER) {
+      return res.status(403).json({ message: 'Only superusers can create superuser accounts.' });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) return res.status(400).json({ message: 'User already exists.' });
+
+    const user = await User.create({
+      name,
+      email,
+      password: await bcrypt.hash(password, 12),
+      role,
+      status: 'active',
+    });
+
+    await logAudit(req, 'USER_CREATE', {
+      targetUser: user._id,
+      resourceType: 'User',
+      resourceId: String(user._id),
+      details: `Created user ${email} with ${role} role.`,
+    });
+
+    res.status(201).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      status: user.status,
+      createdAt: user.createdAt,
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error creating user.' });
+  }
+});
+
+app.get('/api/admin/history', authMiddleware, requirePermission(PERMISSIONS.VIEW_ANALYTICS), async (req, res) => {
   const hset = await HeaderHistory.find().populate('userId', 'name email').sort({ createdAt: -1 });
   const aset = await AnalysisHistory.find().populate('userId', 'name email').sort({ createdAt: -1 });
   const joint = [...hset.map(h => ({ ...h._doc, type: 'Blog Header' })), 
@@ -440,13 +516,65 @@ app.get('/api/admin/history', authMiddleware, isAdmin, async (req, res) => {
   res.json(joint);
 });
 
-app.patch('/api/admin/users/:id', authMiddleware, isSuperuser, async (req, res) => {
+app.get('/api/admin/recycle-bin', authMiddleware, requirePermission(PERMISSIONS.MANAGE_RECYCLE_BIN), async (req, res) => {
+  const inactiveUsers = await User.find({ status: { $ne: 'active' } }, '-password -twoFactorCode').sort({ createdAt: -1 });
+  res.json({
+    inactiveUsers,
+    generatedItems: [],
+  });
+});
+
+app.get('/api/admin/audit', authMiddleware, requirePermission(PERMISSIONS.VIEW_AUDIT_LOGS), async (req, res) => {
+  const logs = await AuditLog.find()
+    .populate('performedBy', 'name email role')
+    .populate('targetUser', 'name email role')
+    .sort({ timestamp: -1 })
+    .limit(200);
+  res.json(logs);
+});
+
+app.get('/api/admin/permissions', authMiddleware, requireDashboardAccess, async (req, res) => {
+  res.json({
+    role: req.currentUser.role,
+    roleLabel: ROLE_LABELS[req.currentUser.role],
+    permissions: getRolePermissions(req.currentUser.role),
+  });
+});
+
+app.get('/api/admin/django-admin-link', authMiddleware, requireSuperuser, async (req, res) => {
+  res.json({ url: process.env.DJANGO_ADMIN_URL || '/django-admin/' });
+});
+
+app.patch('/api/admin/users/:id', authMiddleware, requireSuperuser, async (req, res) => {
   const { role, status } = req.body;
   const user = await User.findById(req.params.id);
   if (!user) return res.status(404).json({ message: 'User not found' });
+
+  if (role && !Object.values(ROLES).includes(role)) {
+    return res.status(400).json({ message: 'Invalid role.' });
+  }
+
+  if (status && !USER_STATUSES.includes(status)) {
+    return res.status(400).json({ message: 'Invalid status.' });
+  }
+
+  if (!canManageTargetUser(req.currentUser, user, role)) {
+    return res.status(403).json({ message: 'This user change is not allowed.' });
+  }
+
+  const previousRole = user.role;
+  const previousStatus = user.status;
   if (role) user.role = role;
   if (status) user.status = status;
   await user.save();
+
+  await logAudit(req, 'USER_UPDATE', {
+    targetUser: user._id,
+    resourceType: 'User',
+    resourceId: String(user._id),
+    details: `Updated user ${user.email}: role ${previousRole} -> ${user.role}, status ${previousStatus} -> ${user.status}.`,
+  });
+
   res.json(user);
 });
 

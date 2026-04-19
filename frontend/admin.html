@@ -1142,7 +1142,7 @@
       <p class="nav-section-label">Overview</p>
       <ul class="nav-links">
         <li>
-          <a class="nav-item active" data-tab="dashboard">
+          <a class="nav-item active" data-tab="dashboard" data-permission="view_dashboard">
             <span class="nav-icon">⊡</span> Dashboard
           </a>
         </li>
@@ -1150,17 +1150,22 @@
         <p class="nav-section-label" style="margin-top:1rem">Management</p>
 
         <li>
-          <a class="nav-item" data-tab="users">
+          <a class="nav-item" data-tab="users" data-permission="manage_users">
             <span class="nav-icon">◎</span> Users
           </a>
         </li>
         <li>
-          <a class="nav-item" data-tab="history">
-            <span class="nav-icon">◈</span> AI History
+          <a class="nav-item" data-tab="recycle" data-permission="manage_recycle_bin">
+            <span class="nav-icon">♻</span> Recycle Bin
           </a>
         </li>
         <li>
-          <a class="nav-item" data-tab="audit">
+          <a class="nav-item" data-tab="analytics" data-permission="view_analytics">
+            <span class="nav-icon">◈</span> Analytics
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-tab="audit" data-permission="view_audit_logs">
             <span class="nav-icon">◉</span> Audit Logs
           </a>
         </li>
@@ -1168,8 +1173,14 @@
         <div class="nav-divider"></div>
 
         <li>
+          <a href="/django-admin/" class="nav-item" id="django-admin-link" data-permission="access_django_admin" target="_blank" rel="noopener noreferrer">
+            <span class="nav-icon">↗</span> Django Admin
+          </a>
+        </li>
+
+        <li>
           <a href="/home" class="nav-item">
-            <span class="nav-icon">←</span> Back to App
+            <span class="nav-icon">←</span> View Site
           </a>
         </li>
       </ul>
@@ -1237,11 +1248,19 @@
           </div>
           <div class="stat-card">
             <div class="card-top">
-              <span class="stat-label">AI Artwork Generated</span>
+              <span class="stat-label">AI Results Generated</span>
               <div class="card-icon">🖼</div>
             </div>
             <div class="stat-value" id="stat-history">--</div>
             <div class="trend">↑ +28% this month</div>
+          </div>
+          <div class="stat-card">
+            <div class="card-top">
+              <span class="stat-label">Audit Events</span>
+              <div class="card-icon">◎</div>
+            </div>
+            <div class="stat-value" id="stat-audit">--</div>
+            <div class="trend">Tracked by role scope</div>
           </div>
         </div>
 
@@ -1319,10 +1338,41 @@
         </div>
       </div>
 
-      <!-- AI HISTORY -->
-      <div id="history" class="tab-content hidden">
+      <!-- RECYCLE BIN -->
+      <div id="recycle" class="tab-content hidden">
         <div class="section-header">
-          <span class="section-title">Global AI Artwork History</span>
+          <span class="section-title">Recycle Bin</span>
+          <span class="section-count" id="recycle-count">0 items</span>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="recycle-table-body">
+              <tr>
+                <td colspan="4">
+                  <div class="empty-state">
+                    <div class="icon">♻</div>
+                    <h4>No recycled items</h4>
+                    <p>Inactive accounts and recoverable records will appear here.</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ANALYTICS -->
+      <div id="analytics" class="tab-content hidden">
+        <div class="section-header">
+          <span class="section-title">Analytics</span>
           <button class="btn-primary">Export CSV</button>
         </div>
         <div class="table-card">
@@ -1423,7 +1473,7 @@
           <label>Role</label>
           <select id="modal-role" class="form-input">
             <option value="user">Standard User</option>
-            <option value="admin">Administrator</option>
+            <option value="admin">Operations Admin</option>
             <option value="superuser">Superuser</option>
           </select>
         </div>
@@ -1476,8 +1526,9 @@
     const tabMeta = {
       dashboard: { title: 'Dashboard', sub: 'Overview' },
       users: { title: 'User Management', sub: 'Management' },
-      history: { title: 'AI History', sub: 'Management' },
-      audit: { title: 'Audit Logs', sub: 'Management' },
+      recycle: { title: 'Recycle Bin', sub: 'Management' },
+      analytics: { title: 'Analytics', sub: 'Insights' },
+      audit: { title: 'Audit Logs', sub: 'Security' },
     };
 
     document.querySelectorAll('.nav-item[data-tab]').forEach(item => {

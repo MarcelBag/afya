@@ -1,0 +1,26 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Afya Admin{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'cs/styles.css' %}">
+</head>
+<body class="admin-template">
+  <aside class="admin-sidebar">
+    <a href="{% url 'authentication:dashboard' %}" class="admin-nav-item">Dashboard</a>
+    <a href="{% url 'authentication:users' %}" class="admin-nav-item">Users</a>
+    <a href="{% url 'authentication:recycle_bin' %}" class="admin-nav-item">Recycle Bin</a>
+    <a href="{% url 'authentication:analytics' %}" class="admin-nav-item">Analytics</a>
+    <a href="{% url 'authentication:audit_logs' %}" class="admin-nav-item">Audit Logs</a>
+    {% if request.user.is_superuser %}
+      <a href="{% url 'admin:index' %}" class="admin-nav-item">Django Admin</a>
+    {% endif %}
+    <a href="/" class="admin-nav-item">View Site</a>
+  </aside>
+  <main class="admin-main">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

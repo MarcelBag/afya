@@ -153,6 +153,29 @@ python flask_api.py
 
 Visit: [http://localhost:5000](http://localhost:5000)
 
+## Monitoring
+
+Afya is monitored as a single-platform system.
+
+- Health endpoint: `GET /health`
+- Local Docker URL: `http://localhost:4006/health`
+- Production URL: `https://afya.tuunganes.com/health`
+- Response:
+
+```json
+{
+  "status": "ok",
+  "service": "afya"
+}
+```
+
+Shared-token monitoring auth follows the same pattern as Masomos for any protected monitoring routes:
+
+- `X-Monitoring-Token: <MONITORING_SHARED_TOKEN>`
+- `Authorization: Bearer <MONITORING_SHARED_TOKEN>`
+
+Set `MONITORING_SHARED_TOKEN` in both `.env` and `.env.prod`.
+
 ### Key files
 
 ``` backend/flask_api.py ``` [Python] Flask API for ML predictions
@@ -234,7 +257,6 @@ This visualization helps you understand how well the model is learning and gener
 
 <img width="1328" height="833" alt="image" src="https://github.com/user-attachments/assets/5ded0f79-f8cd-4e9a-ae99-df80af7fdef7" />
 <img width="1139" height="757" alt="image" src="https://github.com/user-attachments/assets/46848743-c9e1-4309-8380-607f74c3801c" />
-
 
 
 
