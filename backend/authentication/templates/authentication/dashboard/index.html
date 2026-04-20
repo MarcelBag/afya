@@ -1,8 +1,87 @@
 {% extends "authentication/dashboard/base.html" %}
 
 {% block title %}Afya Dashboard{% endblock %}
+{% block heading %}Dashboard{% endblock %}
+{% block subheading %}Overview{% endblock %}
 
 {% block content %}
-  <h1>Dashboard</h1>
-  <p>Afya operational overview.</p>
+  <section class="stats-grid">
+    <div class="stat-card">
+      <div class="card-top">
+        <span class="stat-label">Total Users</span>
+        <div class="card-icon">◎</div>
+      </div>
+      <div class="stat-value">{{ stats.total_users }}</div>
+      <div class="trend">Django sidecar accounts</div>
+    </div>
+    <div class="stat-card">
+      <div class="card-top">
+        <span class="stat-label">Active Accounts</span>
+        <div class="card-icon">✓</div>
+      </div>
+      <div class="stat-value">{{ stats.active_users }}</div>
+      <div class="trend">Can authenticate</div>
+    </div>
+    <div class="stat-card">
+      <div class="card-top">
+        <span class="stat-label">Staff Users</span>
+        <div class="card-icon">↗</div>
+      </div>
+      <div class="stat-value">{{ stats.staff_users }}</div>
+      <div class="trend">Admin-capable</div>
+    </div>
+    <div class="stat-card">
+      <div class="card-top">
+        <span class="stat-label">Audit Events</span>
+        <div class="card-icon">◉</div>
+      </div>
+      <div class="stat-value">{{ stats.audit_events }}</div>
+      <div class="trend">Tracked by role scope</div>
+    </div>
+  </section>
+
+  <section class="welcome-strip">
+    <div>
+      <h3>Welcome back, {{ request.user.get_username }}</h3>
+      <p>This Django dashboard is running beside the current Afya app while migration work continues.</p>
+    </div>
+    <span class="uptime-chip">{{ role_label }}</span>
+  </section>
+
+  <div class="section-header">
+    <span class="section-title">Recent Activity</span>
+    <span class="section-count">Latest 5</span>
+  </div>
+  <section class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Action</th>
+          <th>User</th>
+          <th>Resource</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for event in recent_events %}
+          <tr>
+            <td>{{ event.action }}</td>
+            <td>{{ event.user|default:"System" }}</td>
+            <td>{{ event.resource_type }} {{ event.resource_id }}</td>
+            <td>{{ event.created_at }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="4">
+              <div class="empty-state">
+                <div class="icon">◉</div>
+                <h4>No recent activity</h4>
+                <p>Events will appear here as Django-side admin actions are added.</p>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
 {% endblock %}

@@ -4,23 +4,891 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Afya Admin{% endblock %}</title>
-  <link rel="stylesheet" href="{% static 'cs/styles.css' %}">
+  <title>{% block title %}Afya Admin Suite{% endblock %}</title>
+  <link rel="icon" href="{% static 'assets/tuungane.jpeg' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --sky: #7ab8d4;
+      --sky-dark: #4a8fa8;
+      --sky-soft: #b8d8e8;
+      --sky-pale: #eaf4f9;
+      --ink: #0d1720;
+      --ink-border: rgba(255, 255, 255, 0.055);
+      --stone-50: #f5f8fa;
+      --stone-100: #edf2f6;
+      --stone-200: #d8e3eb;
+      --stone-400: #7a92a4;
+      --text: #1a2530;
+      --text-mid: #374d5c;
+      --text-soft: #6b828f;
+      --green: #5cb87a;
+      --white: #ffffff;
+      --sidebar-w: 256px;
+      --topbar-h: 62px;
+      --radius: 14px;
+      --radius-sm: 9px;
+      --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.09);
+    }
+    html, body { height: 100%; }
+    body {
+      background: var(--stone-50);
+      color: var(--text);
+      font-family: "DM Sans", sans-serif;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      background: var(--ink);
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--ink-border);
+      position: relative;
+      overflow: hidden;
+    }
+    .sidebar::before {
+      content: "";
+      position: absolute;
+      top: -80px;
+      left: -60px;
+      width: 260px;
+      height: 260px;
+      background: radial-gradient(circle, rgba(74, 143, 168, 0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .sidebar-inner {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      padding: 1.5rem 1rem 1.25rem;
+      position: relative;
+      z-index: 1;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.25rem 0.5rem 1.5rem;
+      border-bottom: 1px solid var(--ink-border);
+      margin-bottom: 1.5rem;
+    }
+    .brand img {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      object-fit: cover;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .brand-text h2 {
+      font-family: "Syne", sans-serif;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--white);
+      line-height: 1.1;
+    }
+    .brand-text span {
+      font-size: 0.62rem;
+      color: var(--sky-soft);
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      opacity: 0.55;
+      font-weight: 500;
+    }
+    .nav-section-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--stone-400);
+      font-weight: 600;
+      padding: 0 0.6rem;
+      margin: 0.85rem 0 0.35rem;
+      opacity: 0.7;
+    }
+    .nav-links { list-style: none; display: flex; flex-direction: column; gap: 0.1rem; flex-grow: 1; }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0.7rem;
+      border-radius: var(--radius-sm);
+      color: var(--stone-400);
+      text-decoration: none;
+      font-size: 0.855rem;
+      font-weight: 400;
+      transition: all 0.16s;
+      border: 1px solid transparent;
+      position: relative;
+    }
+    .nav-icon {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 7px;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.04);
+      transition: all 0.16s;
+    }
+    .nav-item:hover { background: rgba(255, 255, 255, 0.04); color: rgba(255, 255, 255, 0.75); }
+    .nav-item:hover .nav-icon { background: rgba(122, 184, 212, 0.1); }
+    .nav-item.active {
+      background: rgba(122, 184, 212, 0.09);
+      color: var(--sky-soft);
+      border-color: rgba(122, 184, 212, 0.13);
+      font-weight: 500;
+    }
+    .nav-item.active .nav-icon { background: rgba(122, 184, 212, 0.15); color: var(--sky); }
+    .nav-item.active::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 20%;
+      bottom: 20%;
+      width: 2.5px;
+      background: var(--sky);
+      border-radius: 0 2px 2px 0;
+    }
+    .nav-divider { height: 1px; background: var(--ink-border); margin: 0.6rem 0.4rem; }
+    .sidebar-footer {
+      padding: 1rem 1rem 1.25rem;
+      border-top: 1px solid var(--ink-border);
+      position: relative;
+      z-index: 1;
+    }
+    .content-area { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+    .top-bar {
+      height: var(--topbar-h);
+      background: var(--white);
+      border-bottom: 1px solid var(--stone-200);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.75rem;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 10;
+    }
+    .page-title {
+      font-family: "Syne", sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .breadcrumb { font-size: 0.7rem; color: var(--text-soft); margin-top: 0.1rem; }
+    .top-bar-right { display: flex; align-items: center; gap: 0.75rem; }
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: #f0fdf4;
+      color: #15803d;
+      padding: 0.3rem 0.85rem;
+      border-radius: 50px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      border: 1px solid #dcfce7;
+      letter-spacing: 0.02em;
+    }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      background: #22c55e;
+      border-radius: 50%;
+      box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+    }
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--stone-50);
+      border: 1px solid var(--stone-200);
+      border-radius: 50px;
+      padding: 0.22rem 0.9rem 0.22rem 0.22rem;
+      border: 1px solid var(--stone-200);
+      cursor: pointer;
+      position: relative;
+      font-family: inherit;
+    }
+    .user-chip:hover { background: var(--stone-100); border-color: #c0cdd6; }
+    .user-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--sky-dark), var(--sky));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Syne", sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: white;
+      flex-shrink: 0;
+    }
+    .user-name { font-size: 0.8rem; font-weight: 500; color: var(--text-mid); }
+    .user-menu {
+      position: absolute;
+      right: 1.75rem;
+      top: calc(100% + 8px);
+      background: var(--white);
+      border-radius: var(--radius);
+      min-width: 190px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05);
+      display: none;
+      flex-direction: column;
+      z-index: 1000;
+      padding: 0.4rem;
+    }
+    .user-menu.open { display: flex; }
+    .menu-item {
+      background: none;
+      border: none;
+      color: var(--text-mid);
+      padding: 0.55rem 0.8rem;
+      text-align: left;
+      font-size: 0.825rem;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      width: 100%;
+      font-family: inherit;
+      text-decoration: none;
+    }
+    .menu-item:hover { background: var(--stone-50); color: var(--sky-dark); }
+    .menu-icon {
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 5px;
+      background: var(--stone-50);
+      font-size: 0.75rem;
+    }
+    .menu-divider { height: 1px; background: var(--stone-100); margin: 0.3rem 0.4rem; }
+    .menu-item.danger { color: #9b3030; }
+    .menu-item.danger:hover { background: #fff5f5; color: #9b3030; }
+    .main-scroll {
+      padding: 1.75rem 2rem;
+      overflow-y: auto;
+      flex-grow: 1;
+      scrollbar-width: thin;
+      scrollbar-color: var(--stone-200) transparent;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.1rem;
+      margin-bottom: 1.75rem;
+    }
+    .stat-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 1.4rem 1.5rem;
+      border: 1px solid var(--stone-200);
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 80px;
+      height: 80px;
+      background: radial-gradient(circle at top right, rgba(122, 184, 212, 0.07), transparent 70%);
+      pointer-events: none;
+    }
+    .stat-card:hover { box-shadow: var(--shadow-md); }
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.1rem;
+    }
+    .stat-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-soft);
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+    .card-icon {
+      width: 34px;
+      height: 34px;
+      background: var(--sky-pale);
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      border: 1px solid rgba(122, 184, 212, 0.18);
+    }
+    .stat-value {
+      font-family: "Syne", sans-serif;
+      font-size: 2.1rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 0.4rem;
+    }
+    .trend {
+      font-size: 0.72rem;
+      color: var(--green);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .welcome-strip {
+      background: var(--white);
+      border: 1px solid var(--stone-200);
+      border-radius: var(--radius);
+      padding: 1.4rem 1.75rem;
+      margin-bottom: 1.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+    }
+    .welcome-strip::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3.5px;
+      background: linear-gradient(180deg, var(--sky), var(--sky-dark));
+    }
+    .welcome-strip h3 {
+      font-family: "Syne", sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.2rem;
+    }
+    .welcome-strip p { font-size: 0.82rem; color: var(--text-soft); }
+    .uptime-chip {
+      background: #f0f9ff;
+      color: #0369a1;
+      border: 1px solid #bae6fd;
+      padding: 0.3rem 1rem;
+      border-radius: 50px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      white-space: nowrap;
+      letter-spacing: 0.02em;
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .section-title {
+      font-family: "Syne", sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .section-count {
+      background: var(--stone-100);
+      color: var(--text-soft);
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 0.22rem 0.75rem;
+      border-radius: 20px;
+      border: 1px solid var(--stone-200);
+    }
+    .table-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      border: 1px solid var(--stone-200);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      margin-bottom: 1.75rem;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      text-align: left;
+      padding: 0.8rem 1rem;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-soft);
+      background: var(--stone-50);
+      border-bottom: 1px solid var(--stone-200);
+      font-weight: 700;
+    }
+    td {
+      padding: 0.9rem 1rem;
+      border-bottom: 1px solid var(--stone-100);
+      font-size: 0.84rem;
+      color: var(--text-mid);
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: 0; }
+    .empty-state {
+      padding: 2rem;
+      text-align: center;
+      color: var(--text-soft);
+    }
+    .empty-state .icon { font-size: 1.8rem; margin-bottom: 0.5rem; }
+    .empty-state h4 {
+      font-family: "Syne", sans-serif;
+      color: var(--text);
+      font-size: 0.95rem;
+      margin-bottom: 0.2rem;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.22rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      background: var(--sky-pale);
+      color: #0369a1;
+      border: 1px solid rgba(122, 184, 212, 0.24);
+      text-transform: capitalize;
+    }
+    .message-list {
+      display: grid;
+      gap: 0.6rem;
+      margin-bottom: 1rem;
+    }
+    .message {
+      background: #f0f9ff;
+      color: #0369a1;
+      border: 1px solid #bae6fd;
+      border-radius: 9px;
+      padding: 0.75rem 1rem;
+      font-size: 0.84rem;
+      font-weight: 600;
+    }
+    .message.error {
+      background: #fff5f5;
+      color: #9b3030;
+      border-color: #fecaca;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.9rem;
+    }
+    .form-field label {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-soft);
+      margin-bottom: 0.35rem;
+    }
+    .form-field input,
+    .form-field select,
+    .filter-input,
+    .filter-select {
+      width: 100%;
+      border: 1px solid var(--stone-200);
+      border-radius: 9px;
+      padding: 0.65rem 0.75rem;
+      font: inherit;
+      color: var(--text-mid);
+      background: #fff;
+    }
+    .table-toolbar {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) repeat(3, minmax(140px, 180px)) auto;
+      gap: 0.75rem;
+      align-items: end;
+      padding: 1rem;
+      border-bottom: 1px solid var(--stone-200);
+      background: var(--stone-50);
+    }
+    .filter-field label {
+      display: block;
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-soft);
+      margin-bottom: 0.35rem;
+    }
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem;
+      border-top: 1px solid var(--stone-200);
+      background: var(--stone-50);
+      color: var(--text-soft);
+      font-size: 0.82rem;
+    }
+    .pagination-links {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+    .page-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 34px;
+      height: 34px;
+      padding: 0 0.65rem;
+      border-radius: 8px;
+      border: 1px solid var(--stone-200);
+      background: #fff;
+      color: var(--text-mid);
+      text-decoration: none;
+      font-weight: 700;
+    }
+    .page-link.active {
+      background: var(--sky-pale);
+      border-color: rgba(122, 184, 212, 0.35);
+      color: #0369a1;
+    }
+    .event-details {
+      max-width: 420px;
+      color: var(--text-mid);
+      line-height: 1.4;
+    }
+    .event-meta {
+      color: var(--text-soft);
+      font-size: 0.74rem;
+      margin-top: 0.25rem;
+      word-break: break-word;
+    }
+    .form-field.checkbox {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding-top: 1.35rem;
+    }
+    .form-field.checkbox input { width: auto; }
+    .form-field.checkbox label { margin: 0; text-transform: none; letter-spacing: 0; font-size: 0.84rem; }
+    .field-errors {
+      color: #9b3030;
+      font-size: 0.76rem;
+      margin-top: 0.3rem;
+    }
+    .btn-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .btn-primary,
+    .btn-ghost,
+    .action-btn {
+      border: 1px solid transparent;
+      border-radius: 9px;
+      padding: 0.55rem 0.8rem;
+      font: inherit;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-primary {
+      color: #fff;
+      background: linear-gradient(135deg, var(--sky-dark), var(--sky));
+      box-shadow: 0 4px 14px rgba(74, 143, 168, 0.25);
+    }
+    .btn-ghost,
+    .action-btn {
+      color: var(--text-mid);
+      background: var(--stone-50);
+      border-color: var(--stone-200);
+    }
+    .action-btn.danger {
+      color: #9b3030;
+      background: #fff5f5;
+      border-color: #fecaca;
+    }
+    .inline-form { display: inline; }
+    .logout-form { margin: 0; }
+    .logout-form .nav-item { width: 100%; background: none; cursor: pointer; font-family: inherit; }
+    .settings-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(13, 23, 32, 0.42);
+      padding: 1rem;
+    }
+    .settings-modal.open { display: flex; }
+    .settings-card {
+      width: min(520px, 100%);
+      max-height: min(760px, 92vh);
+      overflow: auto;
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22);
+      border: 1px solid var(--stone-200);
+    }
+    .settings-top {
+      position: relative;
+      padding: 2rem 1.5rem 1.35rem;
+      text-align: center;
+      background: linear-gradient(180deg, var(--sky-pale), #fff);
+      border-bottom: 1px solid var(--stone-100);
+    }
+    .settings-close-x {
+      position: absolute;
+      right: 1rem;
+      top: 0.8rem;
+      border: 0;
+      background: transparent;
+      color: var(--text-soft);
+      cursor: pointer;
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+    .settings-avatar {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 0.75rem;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--sky-dark), var(--sky));
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Syne", sans-serif;
+      font-weight: 800;
+      font-size: 1.35rem;
+    }
+    .settings-username {
+      font-family: "Syne", sans-serif;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .settings-email-display {
+      color: var(--text-soft);
+      font-size: 0.82rem;
+      margin-top: 0.2rem;
+    }
+    .settings-body { padding: 1.35rem 1.5rem 1.5rem; }
+    .settings-section-label {
+      color: var(--text-soft);
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.9rem;
+    }
+    .settings-divider {
+      border: 0;
+      border-top: 1px solid var(--stone-100);
+      margin: 1.35rem 0;
+    }
+    @media (max-width: 840px) {
+      body { display: block; overflow: auto; height: auto; }
+      .sidebar { width: 100%; min-height: auto; }
+      .content-area { min-height: 100vh; }
+      .top-bar { height: auto; padding: 1rem; align-items: flex-start; }
+      .main-scroll { padding: 1rem; }
+      .table-toolbar { grid-template-columns: 1fr; }
+      .pagination { align-items: flex-start; flex-direction: column; }
+    }
+  </style>
 </head>
-<body class="admin-template">
-  <aside class="admin-sidebar">
-    <a href="{% url 'authentication:dashboard' %}" class="admin-nav-item">Dashboard</a>
-    <a href="{% url 'authentication:users' %}" class="admin-nav-item">Users</a>
-    <a href="{% url 'authentication:recycle_bin' %}" class="admin-nav-item">Recycle Bin</a>
-    <a href="{% url 'authentication:analytics' %}" class="admin-nav-item">Analytics</a>
-    <a href="{% url 'authentication:audit_logs' %}" class="admin-nav-item">Audit Logs</a>
-    {% if request.user.is_superuser %}
-      <a href="{% url 'admin:index' %}" class="admin-nav-item">Django Admin</a>
-    {% endif %}
-    <a href="/" class="admin-nav-item">View Site</a>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="brand">
+        <img src="{% static 'assets/tuungane.jpeg' %}" alt="Afya">
+        <div class="brand-text">
+          <h2>Afya</h2>
+          <span>Admin Suite</span>
+        </div>
+      </div>
+
+      <p class="nav-section-label">Overview</p>
+      <ul class="nav-links">
+        {% for item in nav_items %}
+          {% if item.key == "users" %}
+            <p class="nav-section-label" style="margin-top:1rem">Management</p>
+          {% endif %}
+          {% if item.key == "django_admin" %}
+            <div class="nav-divider"></div>
+          {% endif %}
+          <li>
+            <a href="{% url item.url_name %}" class="nav-item{% if section == item.key %} active{% endif %}">
+              <span class="nav-icon">
+                {% if item.key == "dashboard" %}⊡{% elif item.key == "users" %}◎{% elif item.key == "recycle_bin" %}♻{% elif item.key == "analytics" %}◈{% elif item.key == "audit_logs" %}◉{% else %}↗{% endif %}
+              </span>
+              {{ item.label }}
+            </a>
+          </li>
+        {% endfor %}
+        <li>
+          <a href="/" class="nav-item">
+            <span class="nav-icon">←</span> View Site
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div class="sidebar-footer">
+      <form method="post" action="{% url 'authentication:logout' %}" class="logout-form">
+        {% csrf_token %}
+        <button type="submit" class="nav-item">
+        <span class="nav-icon">⏻</span> Sign Out
+        </button>
+      </form>
+    </div>
   </aside>
-  <main class="admin-main">
-    {% block content %}{% endblock %}
-  </main>
+
+  <div class="content-area">
+    <header class="top-bar">
+      <div class="page-title-wrap">
+        <div class="page-title">{% block heading %}Dashboard{% endblock %}</div>
+        <div class="breadcrumb">Afya Admin &rsaquo; <span>{% block subheading %}Overview{% endblock %}</span></div>
+      </div>
+      <div class="top-bar-right">
+        <div class="status-pill">
+          <span class="status-dot"></span> Django Sidecar
+        </div>
+        <button class="user-chip" id="user-chip" type="button">
+          <div class="user-avatar">{{ request.user.get_username|first|upper }}</div>
+          <span class="user-name">{{ request.user.get_username }} · {{ role_label }}</span>
+        </button>
+        <div class="user-menu" id="user-menu">
+          <button class="menu-item" id="open-settings" type="button">
+            <span class="menu-icon">⚙</span> Profile Settings
+          </button>
+          <a class="menu-item" href="{% url 'authentication:profile' %}">
+            <span class="menu-icon">↗</span> Open Profile Page
+          </a>
+          <div class="menu-divider"></div>
+          <form method="post" action="{% url 'authentication:logout' %}">
+            {% csrf_token %}
+            <button class="menu-item danger" type="submit">
+              <span class="menu-icon">⏻</span> Sign Out
+            </button>
+          </form>
+        </div>
+      </div>
+    </header>
+    <main class="main-scroll">
+      {% if messages %}
+        <div class="message-list">
+          {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <div id="settings-modal" class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <div class="settings-card">
+      <div class="settings-top">
+        <button class="settings-close-x" id="close-settings" type="button">&times;</button>
+        <div class="settings-avatar">{{ request.user.get_username|first|upper }}</div>
+        <div class="settings-username" id="settings-title">{{ request.user.get_username }}</div>
+        <div class="settings-email-display">{{ request.user.email|default:"No email set" }}</div>
+      </div>
+      <div class="settings-body">
+        <form method="post" action="{% url 'authentication:profile' %}">
+          {% csrf_token %}
+          <input type="hidden" name="form_name" value="profile">
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <p class="settings-section-label">Profile</p>
+          <div class="form-grid">
+            {% for field in profile_form %}
+              <div class="form-field">
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.errors %}<div class="field-errors">{{ field.errors|join:", " }}</div>{% endif %}
+              </div>
+            {% endfor %}
+          </div>
+          <div class="btn-row" style="margin-top: 1rem;">
+            <button class="btn-primary" type="submit">Save Profile</button>
+          </div>
+        </form>
+
+        <hr class="settings-divider">
+
+        <form method="post" action="{% url 'authentication:profile' %}">
+          {% csrf_token %}
+          <input type="hidden" name="form_name" value="password">
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <p class="settings-section-label">Update Password</p>
+          <div class="form-grid">
+            {% for field in password_form %}
+              <div class="form-field">
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.errors %}<div class="field-errors">{{ field.errors|join:", " }}</div>{% endif %}
+              </div>
+            {% endfor %}
+          </div>
+          <div class="btn-row" style="margin-top: 1rem;">
+            <button class="btn-primary" type="submit">Update Password</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script>
+    const userChip = document.getElementById('user-chip');
+    const userMenu = document.getElementById('user-menu');
+    const settingsModal = document.getElementById('settings-modal');
+    const openSettings = document.getElementById('open-settings');
+    const closeSettings = document.getElementById('close-settings');
+
+    if (userChip && userMenu) {
+      userChip.addEventListener('click', (event) => {
+        event.stopPropagation();
+        userMenu.classList.toggle('open');
+      });
+      userMenu.addEventListener('click', (event) => event.stopPropagation());
+      document.addEventListener('click', () => userMenu.classList.remove('open'));
+    }
+    if (openSettings && settingsModal) {
+      openSettings.addEventListener('click', () => {
+        userMenu?.classList.remove('open');
+        settingsModal.classList.add('open');
+      });
+    }
+    if (closeSettings && settingsModal) {
+      closeSettings.addEventListener('click', () => settingsModal.classList.remove('open'));
+      settingsModal.addEventListener('click', (event) => {
+        if (event.target === settingsModal) settingsModal.classList.remove('open');
+      });
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') settingsModal.classList.remove('open');
+      });
+    }
+  </script>
 </body>
 </html>

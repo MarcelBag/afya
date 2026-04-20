@@ -1,34 +1,442 @@
-from django.shortcuts import render
+from django.contrib.auth import get_user_model
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth import login as auth_login
+from django.contrib.auth import logout as auth_logout
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib import messages
+from django.core.exceptions import PermissionDenied
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.http import require_POST
+from django.utils import timezone
 
+from .forms import (
+    DashboardPasswordChangeForm,
+    DashboardProfileForm,
+    DashboardUserCreateForm,
+    DashboardUserUpdateForm,
+)
+from .audit_utils import audit_metadata
 from .permissions import (
+    PERMISSION_ACCESS_DJANGO_ADMIN,
+    PERMISSION_MANAGE_RECYCLE_BIN,
+    PERMISSION_MANAGE_USERS,
+    PERMISSION_VIEW_ANALYTICS,
+    PERMISSION_VIEW_AUDIT_LOGS,
+    PERMISSION_VIEW_DASHBOARD,
     analytics_required,
     audit_logs_required,
     dashboard_required,
+    get_user_permissions,
     manage_recycle_bin_required,
     manage_users_required,
+    user_has_permission,
 )
+from .models import AuditEvent
+
+
+User = get_user_model()
+
+
+DASHBOARD_NAV = (
+    {
+        "key": "dashboard",
+        "label": "Dashboard",
+        "url_name": "authentication:dashboard",
+        "permission": PERMISSION_VIEW_DASHBOARD,
+    },
+    {
+        "key": "users",
+        "label": "Users",
+        "url_name": "authentication:users",
+        "permission": PERMISSION_MANAGE_USERS,
+    },
+    {
+        "key": "recycle_bin",
+        "label": "Recycle Bin",
+        "url_name": "authentication:recycle_bin",
+        "permission": PERMISSION_MANAGE_RECYCLE_BIN,
+    },
+    {
+        "key": "analytics",
+        "label": "Analytics",
+        "url_name": "authentication:analytics",
+        "permission": PERMISSION_VIEW_ANALYTICS,
+    },
+    {
+        "key": "audit_logs",
+        "label": "Audit Logs",
+        "url_name": "authentication:audit_logs",
+        "permission": PERMISSION_VIEW_AUDIT_LOGS,
+    },
+    {
+        "key": "django_admin",
+        "label": "Django Admin",
+        "url_name": "admin:index",
+        "permission": PERMISSION_ACCESS_DJANGO_ADMIN,
+        "external": True,
+    },
+)
+
+
+def dashboard_context(request, section):
+    permissions = get_user_permissions(request.user)
+    nav_items = [item for item in DASHBOARD_NAV if item["permission"] in permissions]
+    return {
+        "section": section,
+        "nav_items": nav_items,
+        "role_label": getattr(request.user, "role_label", "User"),
+        "profile_form": DashboardProfileForm(instance=request.user),
+        "password_form": DashboardPasswordChangeForm(request.user),
+    }
+
+
+def querystring_without_page(request):
+    params = request.GET.copy()
+    params.pop("page", None)
+    return params.urlencode()
+
+
+def log_audit(request, action, resource_type="", resource_id="", details="", target_user=None):
+    AuditEvent.objects.create(
+        user=request.user if request.user.is_authenticated else None,
+        action=action,
+        resource_type=resource_type,
+        resource_id=str(resource_id or ""),
+        details=details,
+        **audit_metadata(request),
+    )
+
+
+def safe_next_url(request, fallback="authentication:dashboard"):
+    next_url = request.POST.get("next") or request.GET.get("next")
+    if next_url and url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return next_url
+    return reverse(fallback)
+
+
+def dashboard_login(request):
+    if request.user.is_authenticated:
+        return redirect("authentication:dashboard")
+
+    if request.method == "POST":
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            auth_login(request, user)
+
+            if not user_has_permission(user, PERMISSION_VIEW_DASHBOARD):
+                log_audit(
+                    request,
+                    "LOGIN_DENIED",
+                    resource_type="User",
+                    resource_id=user.pk,
+                    details=f"Dashboard login denied for {user.username}: missing dashboard permission.",
+                )
+                auth_logout(request)
+                messages.error(request, "This account does not have dashboard access.")
+                return redirect("authentication:login")
+
+            log_audit(
+                request,
+                "LOGIN",
+                resource_type="User",
+                resource_id=user.pk,
+                details=f"Dashboard login for {user.username}.",
+            )
+            return redirect(safe_next_url(request))
+
+        username = request.POST.get("username", "").strip()
+        AuditEvent.objects.create(
+            user=None,
+            action="LOGIN_FAILED",
+            resource_type="User",
+            resource_id=username,
+            details=f"Failed dashboard login attempt for {username or 'unknown user'}.",
+            **audit_metadata(request),
+        )
+        messages.error(request, "Invalid username or password.")
+    else:
+        form = AuthenticationForm(request)
+
+    return render(
+        request,
+        "authentication/dashboard/login.html",
+        {
+            "form": form,
+            "next": request.GET.get("next", ""),
+        },
+    )
+
+
+@require_POST
+def dashboard_logout(request):
+    if request.user.is_authenticated:
+        username = request.user.get_username()
+        user_id = request.user.pk
+        log_audit(
+            request,
+            "LOGOUT",
+            resource_type="User",
+            resource_id=user_id,
+            details=f"Dashboard logout for {username}.",
+        )
+    auth_logout(request)
+    messages.success(request, "You have been signed out.")
+    return redirect("authentication:login")
+
+
+def can_modify_user(actor, target_user, form_data=None):
+    if actor.is_superuser:
+        if actor.pk == target_user.pk and form_data:
+            if not form_data.get("is_active", True):
+                return False
+            if not form_data.get("is_staff", True):
+                return False
+        return True
+    if target_user.is_superuser:
+        return False
+    return True
+
+
+def user_change_summary(before, after):
+    changes = []
+    for field in ("email", "first_name", "last_name", "role", "is_staff", "is_active"):
+        if before.get(field) != getattr(after, field):
+            changes.append(f"{field}: {before.get(field)} -> {getattr(after, field)}")
+    return "; ".join(changes) or "No field changes"
 
 
 @dashboard_required
 def dashboard(request):
-    return render(request, "authentication/dashboard/index.html", {"section": "dashboard"})
+    context = dashboard_context(request, "dashboard")
+    context["stats"] = {
+        "total_users": User.objects.count(),
+        "active_users": User.objects.filter(is_active=True).count(),
+        "staff_users": User.objects.filter(is_staff=True).count(),
+        "audit_events": AuditEvent.objects.count(),
+    }
+    context["recent_events"] = AuditEvent.objects.select_related("user")[:5]
+    return render(request, "authentication/dashboard/index.html", context)
+
+
+@dashboard_required
+def profile(request):
+    profile_form = DashboardProfileForm(instance=request.user)
+    password_form = DashboardPasswordChangeForm(request.user)
+
+    if request.method == "POST":
+        if request.POST.get("form_name") == "profile":
+            before = {
+                "email": request.user.email,
+                "first_name": request.user.first_name,
+                "last_name": request.user.last_name,
+            }
+            profile_form = DashboardProfileForm(request.POST, instance=request.user)
+            if profile_form.is_valid():
+                user = profile_form.save()
+                changes = []
+                for field in ("email", "first_name", "last_name"):
+                    if before[field] != getattr(user, field):
+                        changes.append(f"{field}: {before[field]} -> {getattr(user, field)}")
+                log_audit(
+                    request,
+                    "PROFILE_UPDATE",
+                    resource_type="User",
+                    resource_id=user.pk,
+                    details="; ".join(changes) or "No profile field changes",
+                )
+                messages.success(request, "Profile updated.")
+                return redirect(safe_next_url(request, fallback="authentication:profile"))
+            messages.error(request, "Profile could not be updated. Check the form fields.")
+        elif request.POST.get("form_name") == "password":
+            password_form = DashboardPasswordChangeForm(request.user, request.POST)
+            if password_form.is_valid():
+                user = password_form.save()
+                update_session_auth_hash(request, user)
+                log_audit(
+                    request,
+                    "PASSWORD_CHANGE",
+                    resource_type="User",
+                    resource_id=user.pk,
+                    details=f"Dashboard password changed for {user.username}.",
+                )
+                messages.success(request, "Password updated.")
+                return redirect(safe_next_url(request, fallback="authentication:profile"))
+            messages.error(request, "Password could not be updated. Check the form fields.")
+
+    context = dashboard_context(request, "profile")
+    context["profile_form"] = profile_form
+    context["password_form"] = password_form
+    return render(request, "authentication/dashboard/profile.html", context)
 
 
 @manage_users_required
 def users(request):
-    return render(request, "authentication/dashboard/index.html", {"section": "users"})
+    context = dashboard_context(request, "users")
+    context["users"] = User.objects.order_by("-date_joined")[:100]
+    context["create_form"] = DashboardUserCreateForm()
+    return render(request, "authentication/dashboard/users.html", context)
+
+
+@manage_users_required
+def user_create(request):
+    if request.method != "POST":
+        return redirect("authentication:users")
+
+    form = DashboardUserCreateForm(request.POST)
+    if not form.is_valid():
+        context = dashboard_context(request, "users")
+        context["users"] = User.objects.order_by("-date_joined")[:100]
+        context["create_form"] = form
+        messages.error(request, "User could not be created. Check the form fields.")
+        return render(request, "authentication/dashboard/users.html", context, status=400)
+
+    user = form.save()
+    log_audit(
+        request,
+        "USER_CREATE",
+        resource_type="User",
+        resource_id=user.pk,
+        details=f"Created Django user {user.username} with role {user.role_label}.",
+    )
+    messages.success(request, f"Created user {user.username}.")
+    return redirect("authentication:users")
+
+
+@manage_users_required
+def user_edit(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    if not can_modify_user(request.user, user):
+        raise PermissionDenied
+
+    if request.method == "POST":
+        before = {
+            "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "role": user.role,
+            "is_staff": user.is_staff,
+            "is_active": user.is_active,
+        }
+        form = DashboardUserUpdateForm(request.POST, instance=user)
+        if form.is_valid():
+            candidate = form.save(commit=False)
+            if not can_modify_user(request.user, user, form.cleaned_data):
+                raise PermissionDenied
+            candidate.save()
+            log_audit(
+                request,
+                "USER_UPDATE",
+                resource_type="User",
+                resource_id=user.pk,
+                details=f"Updated Django user {user.username}. {user_change_summary(before, candidate)}",
+            )
+            messages.success(request, f"Updated user {user.username}.")
+            return redirect("authentication:users")
+        messages.error(request, "User could not be updated. Check the form fields.")
+    else:
+        form = DashboardUserUpdateForm(instance=user)
+
+    context = dashboard_context(request, "users")
+    context["target_user"] = user
+    context["form"] = form
+    return render(request, "authentication/dashboard/user_form.html", context)
+
+
+@require_POST
+@manage_users_required
+def user_toggle_active(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    if not can_modify_user(request.user, user):
+        raise PermissionDenied
+    if request.user.pk == user.pk and user.is_active:
+        messages.error(request, "You cannot deactivate your own account.")
+        return redirect("authentication:users")
+
+    user.is_active = not user.is_active
+    user.save(update_fields=["is_active"])
+    log_audit(
+        request,
+        "USER_STATUS_TOGGLE",
+        resource_type="User",
+        resource_id=user.pk,
+        details=f"Set Django user {user.username} active={user.is_active}.",
+    )
+    messages.success(request, f"{'Activated' if user.is_active else 'Deactivated'} user {user.username}.")
+    return redirect("authentication:users")
 
 
 @manage_recycle_bin_required
 def recycle_bin(request):
-    return render(request, "authentication/dashboard/index.html", {"section": "recycle_bin"})
+    context = dashboard_context(request, "recycle_bin")
+    context["inactive_users"] = User.objects.filter(is_active=False).order_by("-date_joined")[:100]
+    return render(request, "authentication/dashboard/recycle_bin.html", context)
 
 
 @analytics_required
 def analytics(request):
-    return render(request, "authentication/dashboard/index.html", {"section": "analytics"})
+    context = dashboard_context(request, "analytics")
+    context["stats"] = {
+        "total_users": User.objects.count(),
+        "active_users": User.objects.filter(is_active=True).count(),
+        "new_users_today": User.objects.filter(date_joined__date=timezone.localdate()).count(),
+        "audit_events": AuditEvent.objects.count(),
+    }
+    return render(request, "authentication/dashboard/analytics.html", context)
 
 
 @audit_logs_required
 def audit_logs(request):
-    return render(request, "authentication/dashboard/index.html", {"section": "audit_logs"})
+    context = dashboard_context(request, "audit_logs")
+    events = AuditEvent.objects.select_related("user")
+    query = request.GET.get("q", "").strip()
+    action = request.GET.get("action", "").strip()
+    start = request.GET.get("start", "").strip()
+    end = request.GET.get("end", "").strip()
+
+    if query:
+        events = events.filter(
+            Q(action__icontains=query)
+            | Q(user__username__icontains=query)
+            | Q(user__email__icontains=query)
+            | Q(resource_type__icontains=query)
+            | Q(resource_id__icontains=query)
+            | Q(details__icontains=query)
+            | Q(ip_address__icontains=query)
+            | Q(city__icontains=query)
+            | Q(country__icontains=query)
+            | Q(region__icontains=query)
+            | Q(isp__icontains=query)
+            | Q(location__icontains=query)
+            | Q(user_agent__icontains=query)
+        )
+    if action:
+        events = events.filter(action=action)
+    if start:
+        events = events.filter(created_at__date__gte=start)
+    if end:
+        events = events.filter(created_at__date__lte=end)
+
+    paginator = Paginator(events, 25)
+    page_obj = paginator.get_page(request.GET.get("page"))
+
+    context["events"] = page_obj
+    context["page_obj"] = page_obj
+    context["total_events"] = paginator.count
+    context["audit_actions"] = AuditEvent.objects.order_by("action").values_list("action", flat=True).distinct()
+    context["filters"] = {
+        "q": query,
+        "action": action,
+        "start": start,
+        "end": end,
+    }
+    context["querystring"] = querystring_without_page(request)
+    return render(request, "authentication/dashboard/audit_logs.html", context)

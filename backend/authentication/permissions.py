@@ -38,6 +38,8 @@ ROLE_PERMISSIONS = {
 def get_user_role(user):
     if getattr(user, "is_superuser", False):
         return ROLE_SUPERUSER
+    if getattr(user, "is_staff", False):
+        return ROLE_ADMIN
     return getattr(user, "role", ROLE_USER)
 
 
@@ -47,6 +49,10 @@ def user_has_permission(user, permission):
     if not getattr(user, "is_active", False):
         return False
     return permission in ROLE_PERMISSIONS.get(get_user_role(user), set())
+
+
+def get_user_permissions(user):
+    return ROLE_PERMISSIONS.get(get_user_role(user), set())
 
 
 def permission_required(permission):

@@ -14,7 +14,7 @@ DJANGO_PROD_COMPOSE := ENV_FILE=$(CURDIR)/.env.prod docker compose -p $(DJANGO_P
 .PHONY: help \
 	dev dev-reset build up down restart stop logs dev-logs prod prod-logs prod-down ps pull \
 	shell-backend shell-gateway shell-django \
-	django-build django-up django-down django-logs django-makemigrations django-migrate django-createsuperuser django-shell django-check django-test \
+	django-build django-up django-down django-logs django-reset-db django-makemigrations django-migrate django-createsuperuser django-shell django-check django-test \
 	makemigrations migrate createsuperuser shell test check \
 	clean clean-cache
 
@@ -93,6 +93,10 @@ django-down:
 django-logs:
 	$(DJANGO_DEV_COMPOSE) logs -f django-app postgres
 
+django-reset-db:
+	$(DJANGO_DEV_COMPOSE) down -v
+	$(DJANGO_DEV_COMPOSE) up -d postgres django-app
+
 django-makemigrations:
 	$(DJANGO_DEV_COMPOSE) exec django-app python manage.py makemigrations
 
@@ -169,6 +173,7 @@ help:
 	@echo "  make django-up        - Start Django + Postgres sidecar services"
 	@echo "  make django-down      - Stop Django + Postgres sidecar services"
 	@echo "  make django-logs      - View Django + Postgres logs"
+	@echo "  make django-reset-db  - Reset only Django sidecar DB volume"
 	@echo "  make shell-django     - Open bash shell in Django container"
 	@echo ""
 	@echo "🗄️  DJANGO DATABASE & MANAGEMENT"

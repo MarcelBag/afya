@@ -1,0 +1,117 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In | Afya eHealth</title>
+  <link rel="stylesheet" href="{% static 'cs/styles.css' %}">
+  <link rel="icon" href="{% static 'assets/tuungane.jpeg' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="{% static 'js/particles-hero.js' %}"></script>
+  <style>
+    .auth-message-list {
+      display: grid;
+      gap: 0.65rem;
+      margin-bottom: 1.1rem;
+      text-align: left;
+    }
+
+    .auth-message,
+    .auth-error {
+      border-radius: 10px;
+      padding: 0.8rem 0.9rem;
+      font-size: 0.88rem;
+      line-height: 1.4;
+    }
+
+    .auth-message {
+      color: #d8ecff;
+      background: rgba(36, 151, 243, 0.16);
+      border: 1px solid rgba(36, 151, 243, 0.32);
+    }
+
+    .auth-message.error,
+    .auth-error {
+      color: #ffd9d9;
+      background: rgba(229, 62, 62, 0.13);
+      border: 1px solid rgba(229, 62, 62, 0.28);
+    }
+
+    .auth-form .errorlist {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="auth-main hero">
+    <section class="auth-card">
+      <div style="margin-bottom: 1.5rem;">
+        <img src="{% static 'assets/tuungane.jpeg' %}" alt="Afya" style="width:60px;height:60px;border-radius:14px;object-fit:cover;">
+      </div>
+      <h2 class="auth-title">Welcome Back</h2>
+      <p style="color: rgba(255,255,255,0.6); margin-bottom: 2rem;">Sign in to continue your healthcare analysis.</p>
+
+      {% if messages %}
+        <div class="auth-message-list">
+          {% for message in messages %}
+            <div class="auth-message {{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <form class="auth-form" method="post" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+
+        <div class="form-group">
+          <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
+          <input
+            type="text"
+            id="{{ form.username.id_for_label }}"
+            name="{{ form.username.html_name }}"
+            class="form-input"
+            placeholder="admin"
+            value="{{ form.username.value|default_if_none:'' }}"
+            autocomplete="username"
+            required
+          >
+          {% if form.username.errors %}
+            <div class="auth-error">{{ form.username.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.password.id_for_label }}" class="form-label">Password</label>
+          <input
+            type="password"
+            id="{{ form.password.id_for_label }}"
+            name="{{ form.password.html_name }}"
+            class="form-input"
+            placeholder="••••••••"
+            autocomplete="current-password"
+            required
+          >
+          {% if form.password.errors %}
+            <div class="auth-error">{{ form.password.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+
+        {% if form.non_field_errors %}
+          <div class="auth-error">{{ form.non_field_errors|join:", " }}</div>
+        {% endif %}
+
+        <div style="text-align: right; margin-top: -0.5rem; margin-bottom: 1rem;">
+          <a href="{% url 'authentication:password_reset' %}" style="color: #2497f3; font-size: 0.85rem; text-decoration: none;">Forgot Password?</a>
+        </div>
+        <button type="submit" class="cta-btn auth-btn">Login</button>
+      </form>
+      <p class="signup-link">Don't have an account? <a href="/signup">Sign up</a></p>
+    </section>
+  </main>
+</body>
+
+</html>

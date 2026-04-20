@@ -1,0 +1,36 @@
+{% extends "authentication/dashboard/base.html" %}
+
+{% block title %}Edit {{ target_user.get_username }}{% endblock %}
+{% block heading %}Edit User{% endblock %}
+{% block subheading %}Management{% endblock %}
+
+{% block content %}
+  <div class="section-header">
+    <span class="section-title">{{ target_user.get_username }}</span>
+    <span class="section-count">{{ target_user.role_label }}</span>
+  </div>
+  <section class="table-card" style="padding: 1rem;">
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-grid">
+        {% for field in form %}
+          <div class="form-field{% if field.field.widget.input_type == 'checkbox' %} checkbox{% endif %}">
+            {% if field.field.widget.input_type == 'checkbox' %}
+              {{ field }} {{ field.label_tag }}
+            {% else %}
+              {{ field.label_tag }} {{ field }}
+            {% endif %}
+            {% if field.errors %}<div class="field-errors">{{ field.errors|join:", " }}</div>{% endif %}
+          </div>
+        {% endfor %}
+      </div>
+      {% if form.non_field_errors %}
+        <div class="field-errors">{{ form.non_field_errors|join:", " }}</div>
+      {% endif %}
+      <div class="btn-row" style="margin-top: 1rem;">
+        <button class="btn-primary" type="submit">Save Changes</button>
+        <a class="btn-ghost" href="{% url 'authentication:users' %}">Cancel</a>
+      </div>
+    </form>
+  </section>
+{% endblock %}

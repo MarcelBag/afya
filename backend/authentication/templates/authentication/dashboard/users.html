@@ -1,0 +1,88 @@
+{% extends "authentication/dashboard/base.html" %}
+
+{% block title %}Afya Users{% endblock %}
+{% block heading %}Users{% endblock %}
+{% block subheading %}Management{% endblock %}
+
+{% block content %}
+  <div class="section-header">
+    <span class="section-title">Create User</span>
+    <span class="section-count">Django sidecar</span>
+  </div>
+  <section class="table-card" style="padding: 1rem;">
+    <form method="post" action="{% url 'authentication:user_create' %}">
+      {% csrf_token %}
+      <div class="form-grid">
+        {% for field in create_form %}
+          <div class="form-field{% if field.field.widget.input_type == 'checkbox' %} checkbox{% endif %}">
+            {% if field.field.widget.input_type == 'checkbox' %}
+              {{ field }} {{ field.label_tag }}
+            {% else %}
+              {{ field.label_tag }} {{ field }}
+            {% endif %}
+            {% if field.errors %}<div class="field-errors">{{ field.errors|join:", " }}</div>{% endif %}
+          </div>
+        {% endfor %}
+      </div>
+      {% if create_form.non_field_errors %}
+        <div class="field-errors">{{ create_form.non_field_errors|join:", " }}</div>
+      {% endif %}
+      <div class="btn-row" style="margin-top: 1rem;">
+        <button class="btn-primary" type="submit">Create User</button>
+      </div>
+    </form>
+  </section>
+
+  <div class="section-header">
+    <span class="section-title">User Management</span>
+    <span class="section-count">{{ users|length }} users</span>
+  </div>
+  <section class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Staff</th>
+          <th>Active</th>
+          <th>Joined</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+          <tr>
+            <td>{{ user.get_username }}</td>
+            <td>{{ user.email|default:"-" }}</td>
+            <td><span class="badge">{{ user.role_label }}</span></td>
+            <td>{{ user.is_staff|yesno:"Yes,No" }}</td>
+            <td>{{ user.is_active|yesno:"Active,Inactive" }}</td>
+            <td>{{ user.date_joined }}</td>
+            <td>
+              <div class="btn-row">
+                <a class="action-btn" href="{% url 'authentication:user_edit' user.id %}">Edit</a>
+                <form class="inline-form" method="post" action="{% url 'authentication:user_toggle_active' user.id %}">
+                  {% csrf_token %}
+                  <button class="action-btn{% if user.is_active %} danger{% endif %}" type="submit">
+                    {% if user.is_active %}Deactivate{% else %}Activate{% endif %}
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7">
+              <div class="empty-state">
+                <div class="icon">◎</div>
+                <h4>No Django users yet</h4>
+                <p>Create a superuser or invite accounts as the migration progresses.</p>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endblock %}

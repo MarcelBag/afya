@@ -1,0 +1,30 @@
+{% extends "authentication/dashboard/base.html" %}
+
+{% block title %}Afya Analytics{% endblock %}
+{% block heading %}Analytics{% endblock %}
+{% block subheading %}Insights{% endblock %}
+
+{% block content %}
+  <section class="stats-grid">
+    <div class="stat-card">
+      <div class="card-top"><span class="stat-label">Total Users</span><div class="card-icon">◎</div></div>
+      <div class="stat-value">{{ stats.total_users }}</div>
+      <div class="trend">Django sidecar</div>
+    </div>
+    <div class="stat-card">
+      <div class="card-top"><span class="stat-label">Active Users</span><div class="card-icon">✓</div></div>
+      <div class="stat-value">{{ stats.active_users }}</div>
+      <div class="trend">Available accounts</div>
+    </div>
+    <div class="stat-card">
+      <div class="card-top"><span class="stat-label">New Today</span><div class="card-icon">+</div></div>
+      <div class="stat-value">{{ stats.new_users_today }}</div>
+      <div class="trend">Created today</div>
+    </div>
+    <div class="stat-card">
+      <div class="card-top"><span class="stat-label">Audit Events</span><div class="card-icon">◉</div></div>
+      <div class="stat-value">{{ stats.audit_events }}</div>
+      <div class="trend">Security trail</div>
+    </div>
+  </section>
+{% endblock %}

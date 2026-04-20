@@ -1,0 +1,67 @@
+{% extends "authentication/dashboard/base.html" %}
+
+{% block title %}Afya Profile{% endblock %}
+{% block heading %}Profile Settings{% endblock %}
+{% block subheading %}Account{% endblock %}
+
+{% block content %}
+  <section class="welcome-strip">
+    <div>
+      <h3>{{ request.user.get_username }}</h3>
+      <p>{{ request.user.email|default:"No email set" }}</p>
+    </div>
+    <span class="uptime-chip">{{ role_label }}</span>
+  </section>
+
+  <div class="section-header">
+    <span class="section-title">Profile</span>
+    <span class="section-count">Personal details</span>
+  </div>
+  <section class="table-card" style="padding: 1rem;">
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="form_name" value="profile">
+      <div class="form-grid">
+        {% for field in profile_form %}
+          <div class="form-field">
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.errors %}<div class="field-errors">{{ field.errors|join:", " }}</div>{% endif %}
+          </div>
+        {% endfor %}
+      </div>
+      {% if profile_form.non_field_errors %}
+        <div class="field-errors">{{ profile_form.non_field_errors|join:", " }}</div>
+      {% endif %}
+      <div class="btn-row" style="margin-top: 1rem;">
+        <button class="btn-primary" type="submit">Save Profile</button>
+      </div>
+    </form>
+  </section>
+
+  <div class="section-header">
+    <span class="section-title">Update Password</span>
+    <span class="section-count">Security</span>
+  </div>
+  <section class="table-card" style="padding: 1rem;">
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="form_name" value="password">
+      <div class="form-grid">
+        {% for field in password_form %}
+          <div class="form-field">
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.errors %}<div class="field-errors">{{ field.errors|join:", " }}</div>{% endif %}
+          </div>
+        {% endfor %}
+      </div>
+      {% if password_form.non_field_errors %}
+        <div class="field-errors">{{ password_form.non_field_errors|join:", " }}</div>
+      {% endif %}
+      <div class="btn-row" style="margin-top: 1rem;">
+        <button class="btn-primary" type="submit">Update Password</button>
+      </div>
+    </form>
+  </section>
+{% endblock %}

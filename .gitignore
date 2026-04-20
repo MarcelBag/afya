@@ -47,6 +47,8 @@ torch/
 
 # Database files
 /backend/models/tafuta.db
+/backend/db.sqlite3
+/backend/staticfiles/
 
 # Secrets or config files
 config.json

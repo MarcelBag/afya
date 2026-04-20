@@ -1,0 +1,106 @@
+{% extends "authentication/dashboard/base.html" %}
+
+{% block title %}Afya Audit Logs{% endblock %}
+{% block heading %}Audit Logs{% endblock %}
+{% block subheading %}Security{% endblock %}
+
+{% block content %}
+  <div class="section-header">
+    <span class="section-title">Audit Logs</span>
+    <span class="section-count">{{ total_events }} logs</span>
+  </div>
+  <section class="table-card">
+    <form method="get" class="table-toolbar">
+      <div class="filter-field">
+        <label for="audit-q">Search</label>
+        <input id="audit-q" class="filter-input" type="search" name="q" value="{{ filters.q }}" placeholder="Action, user, resource, details, IP, location">
+      </div>
+      <div class="filter-field">
+        <label for="audit-action">Action</label>
+        <select id="audit-action" class="filter-select" name="action">
+          <option value="">All actions</option>
+          {% for action in audit_actions %}
+            <option value="{{ action }}" {% if filters.action == action %}selected{% endif %}>{{ action }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="filter-field">
+        <label for="audit-start">Start</label>
+        <input id="audit-start" class="filter-input" type="date" name="start" value="{{ filters.start }}">
+      </div>
+      <div class="filter-field">
+        <label for="audit-end">End</label>
+        <input id="audit-end" class="filter-input" type="date" name="end" value="{{ filters.end }}">
+      </div>
+      <div class="btn-row">
+        <button class="btn-primary" type="submit">Filter</button>
+        <a class="btn-ghost" href="{% url 'authentication:audit_logs' %}">Reset</a>
+      </div>
+    </form>
+    <table>
+      <thead>
+        <tr>
+          <th>Action</th>
+          <th>User</th>
+          <th>Resource</th>
+          <th>Details</th>
+          <th>Request</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for event in events %}
+          <tr>
+            <td><span class="badge">{{ event.action }}</span></td>
+            <td>
+              {{ event.user|default:"System" }}
+              {% if event.user and event.user.email %}
+                <div class="event-meta">{{ event.user.email }}</div>
+              {% endif %}
+            </td>
+            <td>
+              {{ event.resource_type|default:"-" }}
+              {% if event.resource_id %}<div class="event-meta">ID {{ event.resource_id }}</div>{% endif %}
+            </td>
+            <td>
+              <div class="event-details">{{ event.details|default:"-" }}</div>
+            </td>
+            <td>
+              {{ event.ip_address|default:"-" }}
+              {% if event.location %}<div class="event-meta">{{ event.location }}</div>{% endif %}
+              {% if event.isp %}<div class="event-meta">{{ event.isp }}</div>{% endif %}
+              {% if event.user_agent %}<div class="event-meta">{{ event.user_agent|truncatechars:96 }}</div>{% endif %}
+            </td>
+            <td>{{ event.created_at }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6">
+              <div class="empty-state">
+                <div class="icon">◉</div>
+                <h4>No audit logs yet</h4>
+                <p>Django-side admin actions will be tracked here.</p>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% if page_obj.paginator.num_pages > 1 %}
+      <div class="pagination">
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        <div class="pagination-links">
+          {% if page_obj.has_previous %}
+            <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page=1">First</a>
+            <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">Prev</a>
+          {% endif %}
+          <span class="page-link active">{{ page_obj.number }}</span>
+          {% if page_obj.has_next %}
+            <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>
+            <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.paginator.num_pages }}">Last</a>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  </section>
+{% endblock %}

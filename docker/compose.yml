@@ -7,7 +7,7 @@ services:
       context: ..
       dockerfile: docker/django.Dockerfile
     ports:
-      - "8000:8000"
+      - "${DJANGO_PORT:-4007}:8000"
     env_file:
       - ${ENV_FILE:-../.env}
     environment:
@@ -67,8 +67,6 @@ services:
     profiles:
       - django
     image: postgres:16-alpine
-    ports:
-      - "5432:5432"
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-afya}
       POSTGRES_USER: ${POSTGRES_USER:-afya}
