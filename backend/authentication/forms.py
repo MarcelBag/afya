@@ -1,9 +1,21 @@
 from django import forms
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import PasswordChangeForm, UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, UserCreationForm
 
 
 User = get_user_model()
+
+
+class DashboardAuthenticationForm(AuthenticationForm):
+    username = forms.CharField(label="Username or email")
+
+    def clean(self):
+        username = self.cleaned_data.get("username", "").strip()
+        if username and "@" in username:
+            matches = User.objects.filter(email__iexact=username, is_active=True).order_by("id")
+            if matches.count() == 1:
+                self.cleaned_data["username"] = matches.first().get_username()
+        return super().clean()
 
 
 class DashboardUserCreateForm(UserCreationForm):

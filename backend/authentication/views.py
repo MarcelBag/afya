@@ -2,7 +2,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
-from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
@@ -14,6 +13,7 @@ from django.views.decorators.http import require_POST
 from django.utils import timezone
 
 from .forms import (
+    DashboardAuthenticationForm,
     DashboardPasswordChangeForm,
     DashboardProfileForm,
     DashboardUserCreateForm,
@@ -127,7 +127,7 @@ def dashboard_login(request):
         return redirect("authentication:dashboard")
 
     if request.method == "POST":
-        form = AuthenticationForm(request, data=request.POST)
+        form = DashboardAuthenticationForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
             auth_login(request, user)
@@ -162,9 +162,9 @@ def dashboard_login(request):
             details=f"Failed dashboard login attempt for {username or 'unknown user'}.",
             **audit_metadata(request),
         )
-        messages.error(request, "Invalid username or password.")
+        messages.error(request, "Invalid username/email or password.")
     else:
-        form = AuthenticationForm(request)
+        form = DashboardAuthenticationForm(request)
 
     return render(
         request,
