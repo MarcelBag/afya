@@ -12,20 +12,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         superuser: ['view_dashboard', 'manage_users', 'manage_recycle_bin', 'view_analytics', 'view_audit_logs', 'access_django_admin']
     };
 
+    const normalizeRole = (role) => {
+        if (role === 'superuser' || role === 'super_user' || role === 'super user') return 'superuser';
+        if (role === 'admin' || role === 'administrator') return 'admin';
+        return 'user';
+    };
+
+    const withRolePermissions = (user) => {
+        const role = normalizeRole(user?.role);
+        return {
+            ...user,
+            role,
+            permissions: Array.isArray(user?.permissions) && user.permissions.length
+                ? user.permissions
+                : permissionsByRole[role]
+        };
+    };
+
     // Role check (simple frontend guard)
     const payload = JSON.parse(atob(token.split('.')[1]));
-    let currentUser = {
+    let currentUser = withRolePermissions({
         email: payload.email,
-        role: payload.role,
-        permissions: permissionsByRole[payload.role] || []
-    };
+        role: payload.role
+    });
 
     try {
         const res = await fetch('/api/user', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
-            currentUser = await res.json();
+            currentUser = withRolePermissions(await res.json());
         }
     } catch (err) {
         console.warn('Unable to refresh current user details:', err);
