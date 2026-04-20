@@ -1,15 +1,15 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
-PROJECT_NAME := afya
 COMPOSE_FILE := docker/compose.yml
 
-DEV_COMPOSE := docker compose -p $(PROJECT_NAME) --env-file .env -f $(COMPOSE_FILE)
-PROD_COMPOSE := ENV_FILE=$(CURDIR)/.env.prod docker compose -p $(PROJECT_NAME) --env-file .env.prod -f $(COMPOSE_FILE)
+DEV_COMPOSE := docker compose --env-file .env -f $(COMPOSE_FILE)
+PROD_COMPOSE := ENV_FILE=$(CURDIR)/.env.prod docker compose --env-file .env.prod -f $(COMPOSE_FILE)
 LOGS_COMPOSE := $(if $(wildcard .env),$(DEV_COMPOSE),$(if $(wildcard .env.prod),$(PROD_COMPOSE),$(DEV_COMPOSE)))
 
-DJANGO_DEV_COMPOSE := docker compose -p $(PROJECT_NAME)-django --profile django --env-file .env -f $(COMPOSE_FILE)
-DJANGO_PROD_COMPOSE := ENV_FILE=$(CURDIR)/.env.prod docker compose -p $(PROJECT_NAME)-django --profile django --env-file .env.prod -f $(COMPOSE_FILE)
+DJANGO_PROJECT_NAME := afya-django
+DJANGO_DEV_COMPOSE := docker compose -p $(DJANGO_PROJECT_NAME) --profile django --env-file .env -f $(COMPOSE_FILE)
+DJANGO_PROD_COMPOSE := ENV_FILE=$(CURDIR)/.env.prod docker compose -p $(DJANGO_PROJECT_NAME) --profile django --env-file .env.prod -f $(COMPOSE_FILE)
 
 .PHONY: help \
 	dev dev-reset build up down restart stop logs dev-logs prod prod-logs prod-down ps pull \
