@@ -1,5 +1,6 @@
 import { showNotification } from './notifications.js';
 import { fetchAnalysisHistory } from './analysis_history.js';
+import { authHeaders, hasAppAuth } from './auth_fetch.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     function showErrorModal(message) {
@@ -102,8 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
       formData.append('image', image);
     
       try {
-        const token = localStorage.getItem('token');
-        if (!token) {
+        if (!hasAppAuth()) {
             stopLoading(false);
             showNotification('Please sign in to use AI tools.', 'warning');
             window.location.href = '/signin';
@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const res = await fetch('/api/upload-image', {
           method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + token },
+          headers: authHeaders(),
           body: formData
         });
     

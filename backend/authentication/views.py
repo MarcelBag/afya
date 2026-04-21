@@ -15,6 +15,9 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 import json
+import mimetypes
+import os
+import uuid
 
 from .forms import (
     DashboardAuthenticationForm,
@@ -39,10 +42,47 @@ from .permissions import (
     manage_users_required,
     user_has_permission,
 )
-from .models import AuditEvent
+from .models import AnalysisHistory, AuditEvent, HeaderHistory
+import requests
+from django.core.files.storage import default_storage
 
 
 User = get_user_model()
+
+
+def json_login_required(view_func):
+    def wrapped(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return JsonResponse({"message": "Authentication required."}, status=401)
+        if not request.user.is_active:
+            return JsonResponse({"message": "Account deactivated."}, status=403)
+        return view_func(request, *args, **kwargs)
+
+    return wrapped
+
+
+def flask_backend_url():
+    return getattr(settings, "FLASK_BACKEND_URL", "http://localhost:5002").rstrip("/")
+
+
+def analysis_history_payload(item):
+    return {
+        "_id": str(item.pk),
+        "imagePath": item.image_path,
+        "prediction": item.prediction,
+        "confidence": item.confidence,
+        "analysisType": item.analysis_type or item.prediction,
+        "createdAt": item.created_at.isoformat(),
+    }
+
+
+def header_history_payload(item):
+    return {
+        "_id": str(item.pk),
+        "title": item.title,
+        "imageUrl": item.image_url,
+        "createdAt": item.created_at.isoformat(),
+    }
 
 
 @require_POST
@@ -77,6 +117,198 @@ def contact_api(request):
         return JsonResponse({"message": "Failed to send message."}, status=500)
 
     return JsonResponse({"message": "Message sent!"})
+
+
+@require_POST
+@json_login_required
+def upload_image_api(request):
+    image = request.FILES.get("image")
+    if not image:
+        return JsonResponse({"message": "No image uploaded."}, status=400)
+
+    extension = os.path.splitext(image.name)[1].lower()
+    if extension not in (".png", ".jpg", ".jpeg", ".webp"):
+        return JsonResponse({"message": "Invalid file format"}, status=400)
+
+    filename = f"{uuid.uuid4().hex}{extension}"
+    storage_path = default_storage.save(f"analysis_uploads/{filename}", image)
+    image_path = f"{settings.MEDIA_URL}{storage_path}"
+
+    try:
+        with default_storage.open(storage_path, "rb") as file_obj:
+            content_type = image.content_type or mimetypes.guess_type(image.name)[0] or "application/octet-stream"
+            response = requests.post(
+                f"{flask_backend_url()}/api/predict",
+                files={"image": (image.name, file_obj, content_type)},
+                timeout=90,
+            )
+    except requests.RequestException as exc:
+        return JsonResponse({"message": f"Image analysis service unavailable: {exc}"}, status=502)
+
+    try:
+        data = response.json()
+    except ValueError:
+        return JsonResponse({"message": "Image analysis service returned an invalid response."}, status=502)
+
+    if not response.ok:
+        return JsonResponse(data, status=response.status_code)
+
+    item = AnalysisHistory.objects.create(
+        user=request.user,
+        image_path=image_path,
+        prediction=data.get("prediction", "Unknown"),
+        confidence=float(data.get("confidence") or 0),
+        analysis_type=data.get("analysisType") or data.get("prediction", ""),
+    )
+    log_audit(
+        request,
+        "ANALYSIS_CREATE",
+        resource_type="AnalysisHistory",
+        resource_id=item.pk,
+        details=f"Created {item.analysis_type or item.prediction} analysis result.",
+    )
+
+    payload = analysis_history_payload(item)
+    payload.update(data)
+    payload["imagePath"] = image_path
+    return JsonResponse(payload)
+
+
+@json_login_required
+def analysis_history_api(request):
+    if request.method != "GET":
+        return JsonResponse({"message": "Method not allowed."}, status=405)
+    items = AnalysisHistory.objects.filter(user=request.user)
+    return JsonResponse([analysis_history_payload(item) for item in items], safe=False)
+
+
+@json_login_required
+def analysis_history_detail_api(request, history_id):
+    item = get_object_or_404(AnalysisHistory, pk=history_id, user=request.user)
+    if request.method != "DELETE":
+        return JsonResponse({"message": "Method not allowed."}, status=405)
+    item.delete()
+    log_audit(
+        request,
+        "ANALYSIS_HISTORY_DELETE",
+        resource_type="AnalysisHistory",
+        resource_id=history_id,
+        details="Deleted analysis history item.",
+    )
+    return JsonResponse({"message": "Analysis deleted successfully"})
+
+
+@require_POST
+@json_login_required
+def generate_headers_api(request):
+    try:
+        payload = json.loads(request.body.decode("utf-8") or "{}")
+    except json.JSONDecodeError:
+        return JsonResponse({"message": "Invalid request payload."}, status=400)
+
+    titles = payload.get("titles")
+    if not isinstance(titles, list) or not titles:
+        return JsonResponse({"message": "No titles provided"}, status=400)
+
+    try:
+        response = requests.post(
+            f"{flask_backend_url()}/api/generate-headers",
+            json={"titles": titles},
+            timeout=180,
+        )
+    except requests.RequestException as exc:
+        return JsonResponse({"message": f"Header generation service unavailable: {exc}"}, status=502)
+
+    try:
+        data = response.json()
+    except ValueError:
+        return JsonResponse({"message": "Header generation service returned an invalid response."}, status=502)
+
+    if not response.ok:
+        return JsonResponse(data, status=response.status_code)
+
+    successful_items = []
+    for result in data.get("results", []):
+        if result.get("image") and not result.get("error"):
+            successful_items.append(
+                HeaderHistory.objects.create(
+                    user=request.user,
+                    title=result.get("title", "Generated header"),
+                    image_url=result["image"],
+                )
+            )
+
+    if successful_items:
+        log_audit(
+            request,
+            "HEADER_GENERATION_CREATE",
+            resource_type="HeaderHistory",
+            resource_id=",".join(str(item.pk) for item in successful_items),
+            details=f"Generated {len(successful_items)} header image(s).",
+        )
+
+    return JsonResponse(data)
+
+
+@json_login_required
+def header_history_api(request):
+    if request.method != "GET":
+        return JsonResponse({"message": "Method not allowed."}, status=405)
+    items = HeaderHistory.objects.filter(user=request.user)
+    return JsonResponse([header_history_payload(item) for item in items], safe=False)
+
+
+@json_login_required
+def header_history_detail_api(request, history_id):
+    item = get_object_or_404(HeaderHistory, pk=history_id, user=request.user)
+    if request.method != "DELETE":
+        return JsonResponse({"message": "Method not allowed."}, status=405)
+    item.delete()
+    log_audit(
+        request,
+        "HEADER_HISTORY_DELETE",
+        resource_type="HeaderHistory",
+        resource_id=history_id,
+        details="Deleted generated header history item.",
+    )
+    return JsonResponse({"message": "Deleted"})
+
+
+@json_login_required
+def user_profile_api(request):
+    if request.method != "PATCH":
+        return JsonResponse({"message": "Method not allowed."}, status=405)
+
+    try:
+        payload = json.loads(request.body.decode("utf-8") or "{}")
+    except json.JSONDecodeError:
+        return JsonResponse({"message": "Invalid request payload."}, status=400)
+
+    name = str(payload.get("name", "")).strip()
+    password = str(payload.get("password", "")).strip()
+    user = request.user
+
+    if name:
+        parts = name.split(" ", 1)
+        user.first_name = parts[0]
+        user.last_name = parts[1] if len(parts) > 1 else ""
+    if password:
+        user.set_password(password)
+    if not name and not password:
+        return JsonResponse({"message": "No changes provided."}, status=400)
+
+    user.save()
+    if password:
+        update_session_auth_hash(request, user)
+    log_audit(
+        request,
+        "PROFILE_UPDATE",
+        resource_type="User",
+        resource_id=user.pk,
+        details=f"Updated profile for {user.username}.",
+    )
+    display_name = user.get_full_name() or user.get_username()
+    return JsonResponse({"message": "Updated", "name": display_name})
 
 
 DASHBOARD_NAV = (

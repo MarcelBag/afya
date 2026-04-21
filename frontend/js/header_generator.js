@@ -1,4 +1,5 @@
 import { showNotification } from './notifications.js';
+import { authHeaders, hasAppAuth } from './auth_fetch.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const titlesTextarea = document.getElementById('blog-titles');
@@ -37,8 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const progressInterval = startProgress();
 
         try {
-            const token = localStorage.getItem('token');
-            if (!token) {
+            if (!hasAppAuth()) {
                 showNotification('Please sign in to use AI tools.', 'warning');
                 window.location.href = '/signin';
                 return;
@@ -46,10 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const response = await fetch('/api/generate-headers', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
+                headers: authHeaders({ 'Content-Type': 'application/json' }),
                 body: JSON.stringify({ titles })
             });
 
@@ -110,11 +107,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadHistory() {
         try {
-            const token = localStorage.getItem('token');
-            if (!token) return;
+            if (!hasAppAuth()) return;
 
             const res = await fetch('/api/header-history', {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: authHeaders()
             });
             const data = await res.json();
 
@@ -155,10 +151,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!confirm('Are you sure you want to delete this history item?')) return;
 
         try {
-            const token = localStorage.getItem('token');
             const res = await fetch(`/api/header-history/${id}`, {
                 method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: authHeaders()
             });
 
             if (res.ok) {

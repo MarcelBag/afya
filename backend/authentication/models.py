@@ -54,3 +54,35 @@ class AuditEvent(models.Model):
 
     def __str__(self):
         return f"{self.created_at} - {self.action}"
+
+
+class AnalysisHistory(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="analysis_history")
+    image_path = models.CharField(max_length=500)
+    prediction = models.CharField(max_length=100)
+    confidence = models.FloatField(default=0)
+    analysis_type = models.CharField(max_length=100, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Analysis History"
+        verbose_name_plural = "Analysis History"
+
+    def __str__(self):
+        return f"{self.user} - {self.prediction}"
+
+
+class HeaderHistory(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="header_history")
+    title = models.CharField(max_length=255)
+    image_url = models.CharField(max_length=500)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Header History"
+        verbose_name_plural = "Header History"
+
+    def __str__(self):
+        return self.title

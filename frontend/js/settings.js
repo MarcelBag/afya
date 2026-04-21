@@ -3,6 +3,7 @@
  * Handles UI injection and logic for Profile Settings
  */
 import { showNotification } from './notifications.js';
+import { authHeaders, isDjangoAuthenticated } from './auth_fetch.js';
 
 export function initSettings(token, options = {}) {
     // ─── Guard ────────────────────────────────────────────────────────────────
@@ -14,10 +15,17 @@ export function initSettings(token, options = {}) {
     const { onUpdateSuccess } = options;
 
     let payload = {};
-    try {
-        payload = JSON.parse(atob(token.split('.')[1]));
-    } catch (e) {
-        console.error('Failed to parse token in settings:', e);
+    if (token) {
+        try {
+            payload = JSON.parse(atob(token.split('.')[1]));
+        } catch (e) {
+            console.error('Failed to parse token in settings:', e);
+        }
+    } else if (isDjangoAuthenticated()) {
+        payload = {
+            name: document.body.dataset.djangoUsername || '',
+            role: document.body.dataset.djangoRole || 'user'
+        };
     }
 
     // ── 1. Inject Modal HTML ──────────────────────────────────────────────────
@@ -104,10 +112,7 @@ export function initSettings(token, options = {}) {
             try {
                 const res = await fetch('/api/user/profile', {
                     method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
+                    headers: authHeaders({ 'Content-Type': 'application/json' }),
                     body: JSON.stringify(body)
                 });
 

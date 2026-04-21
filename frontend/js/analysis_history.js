@@ -1,4 +1,5 @@
 import { showNotification } from './notifications.js';
+import { authHeaders, hasAppAuth } from './auth_fetch.js';
 
 const confirmModal = document.getElementById('confirm-modal');
 const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
@@ -44,9 +45,9 @@ async function fetchAnalysisHistory() {
     if (!list) return;
 
     try {
-        const token = localStorage.getItem('token');
+        if (!hasAppAuth()) return;
         const res = await fetch('/api/analysis-history', {
-            headers: { 'Authorization': 'Bearer ' + token }
+            headers: authHeaders()
         });
         const data = await res.json();
 
@@ -101,10 +102,9 @@ async function deleteAnalysis(id) {
     }
 
     try {
-        const token = localStorage.getItem('token');
         const res = await fetch(`/api/analysis-history/${id}`, {
             method: 'DELETE',
-            headers: { 'Authorization': 'Bearer ' + token }
+            headers: authHeaders()
         });
         if (res.ok) {
             showNotification('Analysis deleted', 'success');
