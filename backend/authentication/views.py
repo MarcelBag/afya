@@ -3,14 +3,18 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from django.contrib import messages
+from django.conf import settings
 from django.core.exceptions import PermissionDenied
+from django.core.mail import send_mail
 from django.core.paginator import Paginator
+from django.http import JsonResponse
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from django.utils import timezone
+import json
 
 from .forms import (
     DashboardAuthenticationForm,
@@ -39,6 +43,40 @@ from .models import AuditEvent
 
 
 User = get_user_model()
+
+
+@require_POST
+def contact_api(request):
+    try:
+        payload = json.loads(request.body.decode("utf-8") or "{}")
+    except json.JSONDecodeError:
+        return JsonResponse({"message": "Invalid request payload."}, status=400)
+
+    name = str(payload.get("name", "")).strip()
+    email = str(payload.get("email", "")).strip()
+    message = str(payload.get("message", "")).strip()
+
+    if not name or not email or not message:
+        return JsonResponse({"message": "Name, email, and message are required."}, status=400)
+
+    subject = f"New Contact Message from {name}"
+    body = f"Name: {name}\nEmail: {email}\n\n{message}"
+    recipient = getattr(settings, "CONTACT_EMAIL", "") or getattr(settings, "EMAIL_HOST_USER", "")
+    if not recipient:
+        return JsonResponse({"message": "Contact email is not configured."}, status=503)
+
+    try:
+        send_mail(
+            subject,
+            body,
+            settings.DEFAULT_FROM_EMAIL,
+            [recipient],
+            fail_silently=False,
+        )
+    except Exception:
+        return JsonResponse({"message": "Failed to send message."}, status=500)
+
+    return JsonResponse({"message": "Message sent!"})
 
 
 DASHBOARD_NAV = (
@@ -124,25 +162,15 @@ def safe_next_url(request, fallback="authentication:dashboard"):
 
 def dashboard_login(request):
     if request.user.is_authenticated:
-        return redirect("authentication:dashboard")
+        if user_has_permission(request.user, PERMISSION_VIEW_DASHBOARD):
+            return redirect("authentication:dashboard")
+        return redirect("site-home-app")
 
     if request.method == "POST":
         form = DashboardAuthenticationForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
             auth_login(request, user)
-
-            if not user_has_permission(user, PERMISSION_VIEW_DASHBOARD):
-                log_audit(
-                    request,
-                    "LOGIN_DENIED",
-                    resource_type="User",
-                    resource_id=user.pk,
-                    details=f"Dashboard login denied for {user.username}: missing dashboard permission.",
-                )
-                auth_logout(request)
-                messages.error(request, "This account does not have dashboard access.")
-                return redirect("authentication:login")
 
             log_audit(
                 request,
@@ -151,6 +179,8 @@ def dashboard_login(request):
                 resource_id=user.pk,
                 details=f"Dashboard login for {user.username}.",
             )
+            if not user_has_permission(user, PERMISSION_VIEW_DASHBOARD):
+                return redirect("site-home-app")
             return redirect(safe_next_url(request))
 
         username = request.POST.get("username", "").strip()

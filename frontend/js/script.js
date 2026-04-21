@@ -76,7 +76,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // ---------------------------
   if (window.location.pathname === '/home') {
     const token = localStorage.getItem('token');
-    if (!token) {
+    const djangoAuthenticated = document.body.dataset.djangoAuthenticated === 'true';
+    if (!token && !djangoAuthenticated) {
       window.location.href = '/signin';
       return;
     }

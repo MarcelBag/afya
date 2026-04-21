@@ -1071,12 +1071,16 @@
       position: fixed;
       inset: 0;
       z-index: 10000;
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
       padding: 20px;
       background: rgba(6, 17, 31, 0.8);
       backdrop-filter: blur(8px);
+    }
+
+    #confirm-modal.is-open {
+      display: flex;
     }
 
     .confirm-panel {
@@ -1237,7 +1241,12 @@
   </style>
 </head>
 
-<body class="hp-page">
+<body
+  class="hp-page"
+  data-django-authenticated="{{ request.user.is_authenticated|yesno:'true,false' }}"
+  data-django-username="{{ request.user.get_username|default:'' }}"
+  data-django-role="{{ request.user.role|default:'user' }}"
+>
 
   <!-- ══ Error Modal ══ -->
   <div id="error-modal" class="modal hidden">
@@ -1502,10 +1511,10 @@
 
   <!-- ══ Scripts all original, untouched ══ -->
   <script src="/js/particles-hero.js"></script>
-  <script type="module" src="/js/layout.js"></script>
+  <script type="module" src="/js/layout.js?v=2"></script>
   <script type="module" src="/js/script.js"></script>
   <script type="module" src="/js/upload.js"></script>
-  <script type="module" src="/js/analysis_history.js"></script>
+  <script type="module" src="/js/analysis_history.js?v=2"></script>
   <script type="module" src="/js/header_generator.js"></script>
 
   <!-- ══ Lightbox logic (delegated works with dynamically added cards) ══ -->

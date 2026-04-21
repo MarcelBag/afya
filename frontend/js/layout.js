@@ -5,11 +5,15 @@
 import { initSettings } from './settings.js';
 
 (function initLayout() {
+  const currentPath = window.location.pathname;
+  const djangoAuthenticated = document.body.dataset.djangoAuthenticated === 'true';
+  const djangoUserName = document.body.dataset.djangoUsername || '';
+  const djangoRole = document.body.dataset.djangoRole || 'user';
   const token = localStorage.getItem('token');
-  const isLoggedIn = !!token;
+  const isLoggedIn = !!token || djangoAuthenticated;
   let payload = null;
 
-  if (isLoggedIn) {
+  if (token) {
     try {
       const parts = token.split('.');
       if (parts.length !== 3) throw new Error('Invalid token format');
@@ -28,11 +32,10 @@ import { initSettings } from './settings.js';
     }
   }
 
-  const currentPath = window.location.pathname;
   const isAdmin = currentPath.startsWith('/admin');
-  const userName = payload?.name || payload?.email?.split('@')[0] || '';
+  const userName = payload?.name || payload?.email?.split('@')[0] || djangoUserName;
   const userInitial = userName ? userName[0].toUpperCase() : '?';
-  const userRole = payload?.role || 'user';
+  const userRole = payload?.role || djangoRole || 'user';
 
   // ─── Admin pages have their own sidebar layout only inject settings modal ───
   if (isAdmin) {
@@ -134,8 +137,20 @@ import { initSettings } from './settings.js';
     // Logout
     const logoutBtn = document.getElementById('layout-sign-out');
     if (logoutBtn) {
-      logoutBtn.addEventListener('click', () => {
+      logoutBtn.addEventListener('click', async () => {
         localStorage.removeItem('token');
+        if (djangoAuthenticated) {
+          const csrfToken = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('csrftoken='))
+            ?.split('=')[1];
+          await fetch('/dashboard/logout/', {
+            method: 'POST',
+            headers: csrfToken ? { 'X-CSRFToken': csrfToken } : {},
+          }).catch(() => {});
+          window.location.href = '/dashboard/login/';
+          return;
+        }
         window.location.href = '/';
       });
     }

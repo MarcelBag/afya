@@ -5,6 +5,40 @@ const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
 const cancelDeleteBtn = document.getElementById('cancel-delete');
 let analysisToDelete = null;
 
+function closeDeleteModal() {
+    if (confirmModal) {
+        confirmModal.classList.remove('is-open');
+        confirmModal.classList.add('hidden');
+    }
+    analysisToDelete = null;
+}
+
+function openDeleteModal() {
+    if (confirmModal) {
+        confirmModal.classList.remove('hidden');
+        confirmModal.classList.add('is-open');
+    }
+}
+
+function getCurrentUserRole() {
+    const djangoRole = document.body.dataset.djangoRole;
+    if (djangoRole) return djangoRole;
+
+    const token = localStorage.getItem('token');
+    if (!token) return 'user';
+
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return payload.role || 'user';
+    } catch (err) {
+        return 'user';
+    }
+}
+
+function canDeleteHistory() {
+    return ['admin', 'superuser'].includes(getCurrentUserRole());
+}
+
 async function fetchAnalysisHistory() {
     const list = document.getElementById('analysis-history-list');
     if (!list) return;
@@ -18,6 +52,8 @@ async function fetchAnalysisHistory() {
 
         if (!res.ok) throw new Error(data.message);
 
+        const showDeleteActions = canDeleteHistory();
+
         if (data.length === 0) {
             list.innerHTML = '<p class="empty-state">No history yet.</p>';
             return;
@@ -30,7 +66,7 @@ async function fetchAnalysisHistory() {
                     <span class="history-title">${item.prediction}</span>
                     <span class="history-date">${new Date(item.createdAt).toLocaleDateString()}</span>
                 </div>
-                <button class="delete-history-btn" data-id="${item._id}">×</button>
+                ${showDeleteActions ? `<button class="delete-history-btn" data-id="${item._id}" title="Delete record">×</button>` : ''}
             </div>
         `).join('');
 
@@ -48,7 +84,7 @@ async function fetchAnalysisHistory() {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 analysisToDelete = e.target.dataset.id;
-                if (confirmModal) confirmModal.classList.remove('hidden');
+                openDeleteModal();
             });
         });
 
@@ -58,6 +94,12 @@ async function fetchAnalysisHistory() {
 }
 
 async function deleteAnalysis(id) {
+    if (!canDeleteHistory()) {
+        showNotification('Only admins can delete analysis records', 'error');
+        closeDeleteModal();
+        return;
+    }
+
     try {
         const token = localStorage.getItem('token');
         const res = await fetch(`/api/analysis-history/${id}`, {
@@ -66,7 +108,7 @@ async function deleteAnalysis(id) {
         });
         if (res.ok) {
             showNotification('Analysis deleted', 'success');
-            if (confirmModal) confirmModal.classList.add('hidden');
+            closeDeleteModal();
             fetchAnalysisHistory();
         }
     } catch (err) {
@@ -115,12 +157,14 @@ function displayAnalysisResult(data) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    closeDeleteModal();
+
     fetchAnalysisHistory();
     const refreshBtn = document.getElementById('refresh-analysis-history');
     if (refreshBtn) refreshBtn.addEventListener('click', fetchAnalysisHistory);
 
     // Modal listeners
-    if (cancelDeleteBtn) cancelDeleteBtn.addEventListener('click', () => confirmModal.classList.add('hidden'));
+    if (cancelDeleteBtn) cancelDeleteBtn.addEventListener('click', closeDeleteModal);
     if (confirmDeleteBtn) {
         confirmDeleteBtn.addEventListener('click', () => {
             if (analysisToDelete) deleteAnalysis(analysisToDelete);
