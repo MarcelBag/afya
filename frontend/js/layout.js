@@ -97,7 +97,7 @@ import { initSettings } from './settings.js?v=3';
     rightSideHTML = `
       <ul class="nav-links">
         ${navHTML}
-        <li><a href="/signin" class="nav-auth-btn">Sign In</a></li>
+        <li><a href="/dashboard/login/?next=/home" class="nav-auth-btn">Sign In</a></li>
       </ul>`;
   }
 

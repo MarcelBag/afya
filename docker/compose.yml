@@ -16,27 +16,26 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-afya}
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
+      FLASK_BACKEND_URL: http://flask-backend:5002
     volumes:
       - ../backend:/app
       - ../frontend:/frontend
       - ../uploads:/uploads
     depends_on:
       - postgres
+      - flask-backend
 
   flask-backend:
-    container_name: afya-backend
     build:
       context: ..
       dockerfile: docker/flask.Dockerfile
     ports:
-      - "5002:5002"
+      - "${FLASK_PORT:-5002}:5002"
     env_file:
       - ${ENV_FILE:-../.env}
     volumes:
       - ../backend:/app
       - ../uploads:/app/uploads
-    depends_on:
-      - mongodb
 
   express-gateway:
     container_name: afya-gateway

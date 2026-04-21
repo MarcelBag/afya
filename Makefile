@@ -8,8 +8,8 @@ PROD_COMPOSE := ENV_FILE=$(CURDIR)/.env.prod docker compose --env-file .env.prod
 LOGS_COMPOSE := $(if $(wildcard .env),$(DEV_COMPOSE),$(if $(wildcard .env.prod),$(PROD_COMPOSE),$(DEV_COMPOSE)))
 
 DJANGO_PROJECT_NAME := afya-django
-DJANGO_DEV_COMPOSE := docker compose -p $(DJANGO_PROJECT_NAME) --profile django --env-file .env -f $(COMPOSE_FILE)
-DJANGO_PROD_COMPOSE := ENV_FILE=$(CURDIR)/.env.prod docker compose -p $(DJANGO_PROJECT_NAME) --profile django --env-file .env.prod -f $(COMPOSE_FILE)
+DJANGO_DEV_COMPOSE := FLASK_PORT=5003 docker compose -p $(DJANGO_PROJECT_NAME) --profile django --env-file .env -f $(COMPOSE_FILE)
+DJANGO_PROD_COMPOSE := ENV_FILE=$(CURDIR)/.env.prod FLASK_PORT=5003 docker compose -p $(DJANGO_PROJECT_NAME) --profile django --env-file .env.prod -f $(COMPOSE_FILE)
 
 .PHONY: help \
 	dev dev-reset build up down restart stop logs dev-logs prod prod-logs prod-down ps pull \
@@ -85,17 +85,17 @@ django-build:
 	$(DJANGO_DEV_COMPOSE) build django-app
 
 django-up:
-	$(DJANGO_DEV_COMPOSE) up -d postgres django-app
+	$(DJANGO_DEV_COMPOSE) up -d flask-backend postgres django-app
 
 django-down:
-	$(DJANGO_DEV_COMPOSE) stop django-app postgres
+	$(DJANGO_DEV_COMPOSE) stop django-app postgres flask-backend
 
 django-logs:
-	$(DJANGO_DEV_COMPOSE) logs -f django-app postgres
+	$(DJANGO_DEV_COMPOSE) logs -f django-app postgres flask-backend
 
 django-reset-db:
 	$(DJANGO_DEV_COMPOSE) down -v
-	$(DJANGO_DEV_COMPOSE) up -d postgres django-app
+	$(DJANGO_DEV_COMPOSE) up -d flask-backend postgres django-app
 
 django-makemigrations:
 	$(DJANGO_DEV_COMPOSE) exec django-app python manage.py makemigrations

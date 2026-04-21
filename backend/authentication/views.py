@@ -15,6 +15,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 import json
+import logging
 import mimetypes
 import os
 import uuid
@@ -48,6 +49,7 @@ from django.core.files.storage import default_storage
 
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 def json_login_required(view_func):
@@ -120,6 +122,42 @@ def contact_api(request):
 
 
 @require_POST
+def signup_api(request):
+    try:
+        payload = json.loads(request.body.decode("utf-8") or "{}")
+    except json.JSONDecodeError:
+        return JsonResponse({"message": "Invalid request payload."}, status=400)
+
+    name = str(payload.get("name", "")).strip()
+    email = str(payload.get("email", "")).strip()
+    password = str(payload.get("password", "")).strip()
+
+    if not name or not email or not password:
+        return JsonResponse({"message": "Name, email, and password are required."}, status=400)
+    if User.objects.filter(email__iexact=email).exists():
+        return JsonResponse({"message": "User already exists."}, status=400)
+
+    username_base = email.split("@", 1)[0] or "user"
+    username = username_base
+    suffix = 1
+    while User.objects.filter(username__iexact=username).exists():
+        suffix += 1
+        username = f"{username_base}{suffix}"
+
+    first_name, _, last_name = name.partition(" ")
+    User.objects.create_user(
+        username=username,
+        email=email,
+        password=password,
+        first_name=first_name,
+        last_name=last_name,
+        role=User.ROLE_USER,
+        is_active=True,
+    )
+    return JsonResponse({"message": "User created successfully!"}, status=201)
+
+
+@require_POST
 @json_login_required
 def upload_image_api(request):
     image = request.FILES.get("image")
@@ -142,13 +180,21 @@ def upload_image_api(request):
                 files={"image": (image.name, file_obj, content_type)},
                 timeout=90,
             )
-    except requests.RequestException as exc:
-        return JsonResponse({"message": f"Image analysis service unavailable: {exc}"}, status=502)
+    except requests.RequestException:
+        logger.exception("Image analysis service request failed.")
+        return JsonResponse(
+            {"message": "Image analysis is temporarily unavailable. Please try again in a few minutes."},
+            status=502,
+        )
 
     try:
         data = response.json()
     except ValueError:
-        return JsonResponse({"message": "Image analysis service returned an invalid response."}, status=502)
+        logger.exception("Image analysis service returned non-JSON response.")
+        return JsonResponse(
+            {"message": "Image analysis is temporarily unavailable. Please try again in a few minutes."},
+            status=502,
+        )
 
     if not response.ok:
         return JsonResponse(data, status=response.status_code)
@@ -216,13 +262,21 @@ def generate_headers_api(request):
             json={"titles": titles},
             timeout=180,
         )
-    except requests.RequestException as exc:
-        return JsonResponse({"message": f"Header generation service unavailable: {exc}"}, status=502)
+    except requests.RequestException:
+        logger.exception("Header generation service request failed.")
+        return JsonResponse(
+            {"message": "Header generation is temporarily unavailable. Please try again in a few minutes."},
+            status=502,
+        )
 
     try:
         data = response.json()
     except ValueError:
-        return JsonResponse({"message": "Header generation service returned an invalid response."}, status=502)
+        logger.exception("Header generation service returned non-JSON response.")
+        return JsonResponse(
+            {"message": "Header generation is temporarily unavailable. Please try again in a few minutes."},
+            status=502,
+        )
 
     if not response.ok:
         return JsonResponse(data, status=response.status_code)
@@ -394,6 +448,8 @@ def safe_next_url(request, fallback="authentication:dashboard"):
 
 def dashboard_login(request):
     if request.user.is_authenticated:
+        if request.GET.get("next"):
+            return redirect(safe_next_url(request))
         if user_has_permission(request.user, PERMISSION_VIEW_DASHBOARD):
             return redirect("authentication:dashboard")
         return redirect("site-home-app")
