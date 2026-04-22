@@ -9,8 +9,7 @@ import { initSettings } from './settings.js?v=4';
   const djangoAuthenticated = document.body.dataset.djangoAuthenticated === 'true';
   const djangoUserName = document.body.dataset.djangoUsername || '';
   const djangoRole = document.body.dataset.djangoRole || 'user';
-  const token = localStorage.getItem('token');
-  const isLoggedIn = !!token || djangoAuthenticated;
+  let token = localStorage.getItem('token');
   let payload = null;
 
   if (token) {
@@ -25,13 +24,15 @@ import { initSettings } from './settings.js?v=4';
     } catch (e) {
       console.warn('Invalid or expired token removed:', e.message);
       localStorage.removeItem('token');
-      if (currentPath === '/home' || currentPath.startsWith('/admin')) {
+      token = null;
+      if (!djangoAuthenticated && (currentPath === '/home' || currentPath.startsWith('/admin'))) {
         window.location.href = '/signin';
+        return;
       }
-      return;
     }
   }
 
+  const isLoggedIn = !!token || djangoAuthenticated;
   const isAdmin = currentPath.startsWith('/admin');
   const userName = payload?.name || payload?.email?.split('@')[0] || djangoUserName;
   const userInitial = userName ? userName[0].toUpperCase() : '?';

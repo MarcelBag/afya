@@ -15,7 +15,11 @@
   </style>
 </head>
 
-<body>
+<body
+  data-django-authenticated="{{ request.user.is_authenticated|yesno:'true,false' }}"
+  data-django-username="{{ request.user.get_username|default:'' }}"
+  data-django-role="{% if request.user.is_superuser %}superuser{% else %}{{ request.user.role|default:'user' }}{% endif %}"
+>
   <main class="auth-main hero">
     <section class="auth-card">
       <div style="margin-bottom: 1.5rem;">
@@ -43,7 +47,7 @@
       <p class="signup-link">Already have an account? <a href="/dashboard/login/?next=/home">Sign In</a></p>
     </section>
   </main>
-  <script type="module" src="/js/layout.js?v=3"></script>
+  <script type="module" src="/js/layout.js?v=5"></script>
   <script type="module" src="/js/script.js?v=3"></script>
 </body>
 

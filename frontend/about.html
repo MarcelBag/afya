@@ -15,7 +15,7 @@
 <body
   data-django-authenticated="{{ request.user.is_authenticated|yesno:'true,false' }}"
   data-django-username="{{ request.user.get_username|default:'' }}"
-  data-django-role="{{ request.user.role|default:'user' }}"
+  data-django-role="{% if request.user.is_superuser %}superuser{% else %}{{ request.user.role|default:'user' }}{% endif %}"
 >
 
   <main class="about-main">
@@ -83,7 +83,7 @@
     </section>
   </main>
 
-  <script type="module" src="/js/layout.js?v=3"></script>
+  <script type="module" src="/js/layout.js?v=5"></script>
 </body>
 
 </html>

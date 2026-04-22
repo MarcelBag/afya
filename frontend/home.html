@@ -1245,7 +1245,7 @@
   class="hp-page"
   data-django-authenticated="{{ request.user.is_authenticated|yesno:'true,false' }}"
   data-django-username="{{ request.user.get_username|default:'' }}"
-  data-django-role="{{ request.user.role|default:'user' }}"
+  data-django-role="{% if request.user.is_superuser %}superuser{% else %}{{ request.user.role|default:'user' }}{% endif %}"
 >
 
   <!-- ══ Error Modal ══ -->
@@ -1511,7 +1511,7 @@
 
   <!-- ══ Scripts all original, untouched ══ -->
   <script src="/js/particles-hero.js"></script>
-  <script type="module" src="/js/layout.js?v=4"></script>
+  <script type="module" src="/js/layout.js?v=5"></script>
   <script type="module" src="/js/script.js?v=4"></script>
   <script type="module" src="/js/upload.js?v=4"></script>
   <script type="module" src="/js/header_generator.js?v=4"></script>
