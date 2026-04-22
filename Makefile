@@ -3,8 +3,8 @@ SHELL := /bin/bash
 
 COMPOSE_FILE := docker/compose.yml
 
-DEV_COMPOSE := docker compose --env-file .env -f $(COMPOSE_FILE)
-PROD_COMPOSE := ENV_FILE=$(CURDIR)/.env.prod docker compose --env-file .env.prod -f $(COMPOSE_FILE)
+DEV_COMPOSE := docker compose --profile legacy --env-file .env -f $(COMPOSE_FILE)
+PROD_COMPOSE := ENV_FILE=$(CURDIR)/.env.prod docker compose --profile legacy --env-file .env.prod -f $(COMPOSE_FILE)
 LOGS_COMPOSE := $(if $(wildcard .env),$(DEV_COMPOSE),$(if $(wildcard .env.prod),$(PROD_COMPOSE),$(DEV_COMPOSE)))
 
 DJANGO_PROJECT_NAME := afya-django
@@ -14,7 +14,7 @@ DJANGO_PROD_COMPOSE := ENV_FILE=$(CURDIR)/.env.prod FLASK_PORT=5003 docker compo
 .PHONY: help \
 	dev dev-reset build up down restart stop logs dev-logs prod prod-logs prod-down ps pull \
 	shell-backend shell-gateway shell-django \
-	django-build django-up django-down django-logs django-reset-db django-makemigrations django-migrate django-createsuperuser django-shell django-check django-test \
+	django-build django-up django-down django-logs django-reset-db django-prod django-prod-build django-prod-up django-prod-down django-prod-logs django-prod-migrate django-prod-collectstatic django-prod-check django-makemigrations django-migrate django-createsuperuser django-shell django-check django-test \
 	makemigrations migrate createsuperuser shell test check \
 	clean clean-cache
 
@@ -115,6 +115,32 @@ django-check:
 django-test:
 	$(DJANGO_DEV_COMPOSE) exec django-app python manage.py test
 
+# ----------------------------
+# Django Production Stack
+# ----------------------------
+django-prod: django-prod-build django-prod-up django-prod-migrate django-prod-collectstatic django-prod-check
+
+django-prod-build:
+	$(DJANGO_PROD_COMPOSE) build django-app flask-backend
+
+django-prod-up:
+	$(DJANGO_PROD_COMPOSE) up -d postgres flask-backend django-app
+
+django-prod-down:
+	$(DJANGO_PROD_COMPOSE) down
+
+django-prod-logs:
+	$(DJANGO_PROD_COMPOSE) logs -f django-app postgres flask-backend
+
+django-prod-migrate:
+	$(DJANGO_PROD_COMPOSE) exec django-app python manage.py migrate --noinput
+
+django-prod-collectstatic:
+	$(DJANGO_PROD_COMPOSE) exec django-app python manage.py collectstatic --noinput
+
+django-prod-check:
+	$(DJANGO_PROD_COMPOSE) exec django-app python manage.py check --deploy
+
 # Articles-style aliases for the Django migration stack.
 makemigrations: django-makemigrations
 migrate: django-migrate
@@ -154,6 +180,7 @@ help:
 	@echo "🚀 ENVIRONMENTS"
 	@echo "  make dev              - Start current dev stack: Express + Flask + Mongo"
 	@echo "  make prod             - Start current production stack with .env.prod"
+	@echo "  make django-prod      - Build/start Django production stack and run migrations/static/checks"
 	@echo "  make dev-reset        - Hard reset current dev stack and rebuild images"
 	@echo ""
 	@echo "🐳 CURRENT STACK CONTAINERS"
@@ -173,6 +200,7 @@ help:
 	@echo "  make django-up        - Start Django + Postgres sidecar services"
 	@echo "  make django-down      - Stop Django + Postgres sidecar services"
 	@echo "  make django-logs      - View Django + Postgres logs"
+	@echo "  make django-prod-logs - View Django production stack logs"
 	@echo "  make django-reset-db  - Reset only Django sidecar DB volume"
 	@echo "  make shell-django     - Open bash shell in Django container"
 	@echo ""

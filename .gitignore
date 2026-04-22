@@ -61,5 +61,5 @@ config.json
 
 #firebase
 secrets.json
-config/
+/config/
 firebaseConfig.js
