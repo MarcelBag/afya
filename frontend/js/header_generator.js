@@ -1,5 +1,5 @@
 import { showNotification } from './notifications.js';
-import { authHeaders, hasAppAuth } from './auth_fetch.js';
+import { authHeaders, hasAppAuth } from './auth_fetch.js?v=4';
 
 document.addEventListener('DOMContentLoaded', () => {
     const titlesTextarea = document.getElementById('blog-titles');

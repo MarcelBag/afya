@@ -3,7 +3,7 @@
  * Handles UI injection and logic for Profile Settings
  */
 import { showNotification } from './notifications.js';
-import { authHeaders, isDjangoAuthenticated } from './auth_fetch.js';
+import { authHeaders, isDjangoAuthenticated } from './auth_fetch.js?v=4';
 
 export function initSettings(token, options = {}) {
     // ─── Guard ────────────────────────────────────────────────────────────────

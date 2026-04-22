@@ -1,6 +1,6 @@
 import { showNotification } from './notifications.js';
-import { fetchAnalysisHistory } from './analysis_history.js';
-import { authHeaders, hasAppAuth } from './auth_fetch.js';
+import { fetchAnalysisHistory } from './analysis_history.js?v=4';
+import { authHeaders, hasAppAuth } from './auth_fetch.js?v=4';
 
 document.addEventListener('DOMContentLoaded', () => {
   function showErrorModal(message) {

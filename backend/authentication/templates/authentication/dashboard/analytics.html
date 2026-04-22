@@ -17,9 +17,9 @@
       <div class="trend">Available accounts</div>
     </div>
     <div class="stat-card">
-      <div class="card-top"><span class="stat-label">New Today</span><div class="card-icon">+</div></div>
-      <div class="stat-value">{{ stats.new_users_today }}</div>
-      <div class="trend">Created today</div>
+      <div class="card-top"><span class="stat-label">AI Results</span><div class="card-icon">▧</div></div>
+      <div class="stat-value">{{ stats.ai_results }}</div>
+      <div class="trend">{{ stats.image_analyses }} analyses · {{ stats.header_generations }} headers</div>
     </div>
     <div class="stat-card">
       <div class="card-top"><span class="stat-label">Audit Events</span><div class="card-icon">◉</div></div>
@@ -27,4 +27,58 @@
       <div class="trend">Security trail</div>
     </div>
   </section>
+
+  <div class="section-header">
+    <span class="section-title">AI Generation History</span>
+    <span class="section-count">{{ ai_history|length }} records</span>
+  </div>
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Type</th>
+          <th>Preview</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in ai_history %}
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div class="t-avatar">{{ item.user.get_username|first|upper }}</div>
+                <div>
+                  <div class="cell-name">{{ item.user.get_full_name|default:item.user.get_username }}</div>
+                  <div class="cell-sub">{{ item.user.email|default:"No email" }}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="badge {% if item.type == 'Blog Header' %}admin{% else %}user{% endif %}">{{ item.type }}</span>
+              <div class="cell-sub">{{ item.title }}</div>
+            </td>
+            <td>
+              {% if item.url %}
+                <a href="{{ item.url }}" target="_blank" rel="noopener" class="btn-secondary">View Result</a>
+              {% else %}
+                <span class="cell-sub">No preview</span>
+              {% endif %}
+            </td>
+            <td>{{ item.created_at|date:"M j, Y H:i" }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="4">
+              <div class="empty-state">
+                <div class="icon">▧</div>
+                <h4>No AI history yet</h4>
+                <p>Image analysis and generated header records will appear here.</p>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 {% endblock %}

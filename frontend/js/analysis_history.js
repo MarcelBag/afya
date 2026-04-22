@@ -1,5 +1,5 @@
 import { showNotification } from './notifications.js';
-import { authHeaders, hasAppAuth } from './auth_fetch.js';
+import { authHeaders, hasAppAuth } from './auth_fetch.js?v=4';
 
 const confirmModal = document.getElementById('confirm-modal');
 const confirmDeleteBtn = document.getElementById('confirm-delete-btn');

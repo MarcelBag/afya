@@ -702,12 +702,41 @@ def recycle_bin(request):
 @analytics_required
 def analytics(request):
     context = dashboard_context(request, "analytics")
+    analysis_items = [
+        {
+            "user": item.user,
+            "type": "Image Analysis",
+            "title": f"{item.analysis_type or item.prediction}: {item.prediction}",
+            "url": item.image_path,
+            "created_at": item.created_at,
+        }
+        for item in AnalysisHistory.objects.select_related("user")
+    ]
+    header_items = [
+        {
+            "user": item.user,
+            "type": "Blog Header",
+            "title": item.title,
+            "url": item.image_url,
+            "created_at": item.created_at,
+        }
+        for item in HeaderHistory.objects.select_related("user")
+    ]
+    ai_history = sorted(
+        [*analysis_items, *header_items],
+        key=lambda item: item["created_at"],
+        reverse=True,
+    )
     context["stats"] = {
         "total_users": User.objects.count(),
         "active_users": User.objects.filter(is_active=True).count(),
         "new_users_today": User.objects.filter(date_joined__date=timezone.localdate()).count(),
+        "ai_results": len(ai_history),
+        "image_analyses": len(analysis_items),
+        "header_generations": len(header_items),
         "audit_events": AuditEvent.objects.count(),
     }
+    context["ai_history"] = ai_history[:200]
     return render(request, "authentication/dashboard/analytics.html", context)
 
 

@@ -2,7 +2,7 @@
  * Universal Layout Module for Afya
  * Injects header (with auth-aware nav), footer, and settings modal into every page.
  */
-import { initSettings } from './settings.js?v=3';
+import { initSettings } from './settings.js?v=4';
 
 (function initLayout() {
   const currentPath = window.location.pathname;
