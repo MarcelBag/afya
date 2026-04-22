@@ -1,15 +1,30 @@
 import os
 import uuid
 import requests
+import logging
 from openai import OpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
 
+logger = logging.getLogger(__name__)
+
 api_key = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=api_key) if api_key else None
 
 STYLE_TEMPLATE = "soft pastel colors, minimalist medical illustration, female health theme, modern digital health branding, soft gradients, clean background, professional blog header style"
+
+GENERIC_GENERATION_ERROR = "Header generation is temporarily unavailable. Please try again in a few minutes."
+
+
+def public_generation_error(error):
+    error_text = str(error).lower()
+    if "api key" in error_text or "invalid_api_key" in error_text or "401" in error_text:
+        return "Header generation is not configured correctly. Please contact support."
+    if "rate limit" in error_text or "429" in error_text:
+        return "Header generation is busy right now. Please try again in a few minutes."
+    return GENERIC_GENERATION_ERROR
+
 
 def generate_header(title, output_dir="uploads/generated_headers/"):
     """
@@ -19,7 +34,7 @@ def generate_header(title, output_dir="uploads/generated_headers/"):
     
     try:
         if not client:
-            return None, "OpenAI API key not configured."
+            return None, "Header generation is not configured correctly. Please contact support."
         response = client.images.generate(
             model="dall-e-3",
             prompt=prompt,
@@ -43,8 +58,8 @@ def generate_header(title, output_dir="uploads/generated_headers/"):
             
         return filepath, None
     except Exception as e:
-        print(f"Error generating image for title '{title}': {str(e)}")
-        return None, str(e)
+        logger.exception("Error generating image for title '%s'.", title)
+        return None, public_generation_error(e)
 
 def generate_headers_batch(titles, output_dir="uploads/generated_headers/"):
     """

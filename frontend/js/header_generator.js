@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
             if (!response.ok) {
-                throw new Error(data.message || 'Failed to generate headers');
+                throw new Error(getFriendlyError(data.message || data.error || 'Failed to generate headers'));
             }
 
             stopProgress(progressInterval);
@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             stopProgress(progressInterval, true);
             console.error('Error generating headers:', error);
-            showNotification('An error occurred: ' + error.message, 'error');
+            renderGenerationError('Header generation failed', error.message);
         } finally {
             setTimeout(() => {
                 loader.classList.add('hidden');
@@ -103,6 +103,39 @@ document.addEventListener('DOMContentLoaded', () => {
             bar.style.width = '100%';
             percent.textContent = '100%';
         }
+    }
+
+    function getFriendlyError(message) {
+        const text = String(message || '').toLowerCase();
+        if (text.includes('api key') || text.includes('invalid_api_key') || text.includes('401')) {
+            return 'Header generation is not configured correctly. Please contact support.';
+        }
+        if (text.includes('rate limit') || text.includes('429')) {
+            return 'Header generation is busy right now. Please try again in a few minutes.';
+        }
+        return message || 'Header generation is temporarily unavailable. Please try again in a few minutes.';
+    }
+
+    function escapeHTML(value) {
+        return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        }[char]));
+    }
+
+    function renderGenerationError(title, message) {
+        gallery.innerHTML = `
+            <div class="gallery-card">
+                <div style="padding: 2rem; text-align: center;">
+                    <div class="status-badge status-notice">Action Required</div>
+                    <h3 style="margin-bottom: 5px;">${escapeHTML(title)}</h3>
+                    <p style="color: #4a5568; line-height: 1.6;">${escapeHTML(getFriendlyError(message))}</p>
+                </div>
+            </div>
+        `;
     }
 
     async function loadHistory() {
@@ -186,10 +219,11 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (result.error) {
                 card.innerHTML = `
-                    <div style="padding: 2rem; color: #e53e3e; text-align: center;">
-                        <p>Error generating image for:</p>
-                        <p><strong>${result.title}</strong></p>
-                        <small>${result.error}</small>
+                    <div style="padding: 2rem; text-align: center;">
+                        <div class="status-badge status-notice">Action Required</div>
+                        <h3 style="margin-bottom: 5px;">Header Not Generated</h3>
+                        <p style="color: #4a5568; line-height: 1.6;">${escapeHTML(getFriendlyError(result.error))}</p>
+                        <p style="color: #718096; font-size: 0.88rem; margin-top: 0.75rem;"><strong>${escapeHTML(result.title)}</strong></p>
                     </div>
                 `;
             } else {

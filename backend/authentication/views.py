@@ -87,6 +87,37 @@ def header_history_payload(item):
     }
 
 
+def public_header_generation_error(message):
+    error_text = str(message or "").lower()
+    if "api key" in error_text or "invalid_api_key" in error_text or "401" in error_text:
+        return "Header generation is not configured correctly. Please contact support."
+    if "rate limit" in error_text or "429" in error_text:
+        return "Header generation is busy right now. Please try again in a few minutes."
+    return message or "Header generation is temporarily unavailable. Please try again in a few minutes."
+
+
+def sanitize_header_generation_response(data):
+    if not isinstance(data, dict):
+        return data
+
+    sanitized = data.copy()
+    if sanitized.get("message"):
+        sanitized["message"] = public_header_generation_error(sanitized["message"])
+
+    results = sanitized.get("results")
+    if isinstance(results, list):
+        sanitized["results"] = [
+            {
+                **result,
+                "error": public_header_generation_error(result.get("error")),
+            }
+            if isinstance(result, dict) and result.get("error")
+            else result
+            for result in results
+        ]
+    return sanitized
+
+
 @require_POST
 def contact_api(request):
     try:
@@ -277,6 +308,8 @@ def generate_headers_api(request):
             {"message": "Header generation is temporarily unavailable. Please try again in a few minutes."},
             status=502,
         )
+
+    data = sanitize_header_generation_response(data)
 
     if not response.ok:
         return JsonResponse(data, status=response.status_code)
